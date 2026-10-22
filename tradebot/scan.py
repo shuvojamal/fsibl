@@ -34,7 +34,7 @@ def format_scan(rows, min_score=5):
     out = [f"{'':7}{'symbol':10} {'90d volume':>12} {'score':>5} {'close':>12} {'stop':>12} {'risk':>6}  missing"]
     for sym, dv, sc, missing, plan, close in rows:
         tag = "SIGNAL" if plan else ""
-        stop = f"{plan.stop:12.4f}" if plan else " " * 12
+        stop = f"{plan.stop:12.6g}" if plan else " " * 12  # 6 significant digits: PEPE trades at 0.000005
         risk = f"{(close - plan.stop) / close:6.1%}" if plan else " " * 6
-        out.append(f"{tag:7}{sym:10} {dv / 1e9:>10.1f}bn {sc:>3}/8 {close:>12.4f} {stop} {risk}  {', '.join(missing)}")
+        out.append(f"{tag:7}{sym:10} {dv / 1e9:>10.1f}bn {sc:>3}/8 {close:>12.6g} {stop} {risk}  {', '.join(missing)}")
     return out

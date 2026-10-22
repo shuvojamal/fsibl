@@ -109,6 +109,13 @@ def main():
                     help="required together with --live")
     common(lv)
 
+    to = sub.add_parser("test-order", help="prove order routing: market-buy a small amount, then sell it back")
+    to.add_argument("symbol")
+    to.add_argument("--usdt", type=float, default=20)
+    to.add_argument("--exchange", choices=["binance", "okx"], default="okx")
+    to.add_argument("--live", action="store_true")
+    to.add_argument("--i-accept-the-risk", action="store_true")
+
     a = ap.parse_args()
     if a.cmd == "backtest":
         for sym in a.symbols:
@@ -142,6 +149,23 @@ def main():
                             dry_run=a.dry_run, engine=_engine(a))
         trader.preflight()
         trader.run_forever()
+    elif a.cmd == "test-order":
+        if a.live and not a.i_accept_the_risk:
+            ap.error("--live places real orders with real money; add --i-accept-the-risk")
+        from tradebot.binance_client import fill_summary
+        client = OKXClient(demo=not a.live) if a.exchange == "okx" else \
+            BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
+        sym = a.symbol.upper()
+        print(f"venue: {getattr(client, 'label', client.base_url)}")
+        print(f"balances before: {client.balances()}")
+        buy = client.market_order(sym, "BUY", quote_qty=a.usdt)
+        qty, avg, fee = fill_summary(buy)
+        print(f"BUY  order {buy['orderId']}: {qty} {sym} @ {avg:.4f}, fee {fee:.6f}, status {buy['status']}")
+        sell = client.market_order(sym, "SELL", qty=qty)
+        sq, sa, sf = fill_summary(sell)
+        print(f"SELL order {sell['orderId']}: {sq} {sym} @ {sa:.4f}, fee {sf:.6f}, status {sell['status']}")
+        print(f"round trip: {sq * sa - qty * avg - fee - sf:+.4f} USDT (fees + spread)")
+        print(f"balances after: {client.balances()}")
     elif a.cmd == "arb":
         ArbScanner(a.symbols, a.exchanges, a.capital, a.log_dir, a.min_net).run(a.seconds, a.poll)
 

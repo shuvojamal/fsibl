@@ -26,7 +26,7 @@ the backtest never uses future prices.
 python -m tradebot backtest BTCUSDT ETHUSDT SOLUSDT --interval 1h --candles 5000
 python -m tradebot optimize BTCUSDT --interval 1h
 python -m tradebot paper BTCUSDT ETHUSDT --capital 1000 --fast 12 --slow 26
-python -m unittest discover -s tests
+python -m unittest discover -s tests -t .
 ```
 
 ## Opportunity strategy (`--strategy opportunity`)
@@ -129,6 +129,16 @@ order id, so you can check it against the exchange's own history.
 
 On restart it reads the account: coins it finds on the exchange are adopted
 as open positions, so a crash or reboot doesn't leave anything untracked.
+
+**OKX demo trading** works the same way with `--exchange okx`. OKX's demo
+is a real exchange-run simulated account with its own order matching and
+trade history. Create a key in demo mode (Read + Trade, Spot, no IP
+restriction) and set `OKX_API_KEY`, `OKX_API_SECRET`, `OKX_PASSPHRASE`:
+
+```bash
+python -m tradebot live BTCUSDT ETHUSDT --exchange okx --dry-run
+python -m tradebot live BTCUSDT ETHUSDT --exchange okx --trade-usdt 50
+```
 
 **Going live** needs two flags, `--live --i-accept-the-risk`, and live-only
 API keys. On Binance, create a key with *Enable Spot Trading* only: no

@@ -9,6 +9,7 @@ from tradebot.exchanges import EXCHANGES
 from tradebot.binance_client import LIVE_URL, TESTNET_URL, BinanceClient
 from tradebot.engines import make_engine
 from tradebot.live import LiveTrader
+from tradebot.okx_client import OKXClient
 from tradebot.opportunity import Opportunity, OppParams
 from tradebot.paper import PaperTrader
 from tradebot.strategy import Params
@@ -99,6 +100,8 @@ def main():
                     help="risk guard: stop opening trades after losing this much in a day")
     lv.add_argument("--kill-file", default="STOP", help="create this file to block new orders")
     lv.add_argument("--state-dir", default="live_state")
+    lv.add_argument("--exchange", choices=["binance", "okx"], default="binance",
+                    help="binance: Spot Testnet / live; okx: demo trading / live")
     lv.add_argument("--dry-run", action="store_true", help="connect and decide, but place no orders")
     lv.add_argument("--live", action="store_true",
                     help="use the real exchange instead of the testnet (real money)")
@@ -130,7 +133,10 @@ def main():
         if a.live and not a.i_accept_the_risk:
             ap.error("--live places real orders with real money; add --i-accept-the-risk "
                      "if that is what you want")
-        client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
+        if a.exchange == "okx":
+            client = OKXClient(demo=not a.live)
+        else:
+            client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
         trader = LiveTrader(client, a.symbols, a.interval, _params(a), a.trade_usdt,
                             (a.max_trade_usdt, a.max_daily_loss, a.kill_file), a.state_dir,
                             dry_run=a.dry_run, engine=_engine(a))

@@ -224,8 +224,9 @@ class LiveTrader:
 
     def run_forever(self, poll_seconds=None):
         poll = poll_seconds or min(60, INTERVAL_MS[self.interval] // 1000)
-        mode = "DRY RUN" if self.dry_run else ("LIVE" if "api.binance.com" in self.client.base_url
-                                               else "TESTNET")
+        venue = getattr(self.client, "label", None) or (
+            "BINANCE LIVE" if "api.binance.com" in self.client.base_url else "BINANCE TESTNET")
+        mode = f"DRY RUN on {venue}" if self.dry_run else venue
         print(f"[{mode}] trading {', '.join(self.symbols)} on {self.interval} candles, "
               f"{self.trade_usdt:.2f} USDT per trade. Ctrl+C to stop; create "
               f"{self.guard.kill_file} to block new orders.")

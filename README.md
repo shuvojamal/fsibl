@@ -127,7 +127,14 @@ it talks to the **Spot Testnet**, which uses fake money.
    ```
 
 Every fill is appended to `live_state/live_trades.csv` with the exchange's
-order id, so you can check it against the exchange's own history.
+order id, so you can check it against the exchange's own history. For a
+one-screen status (balance, open positions with P&L and distance to stop,
+realised trades, today's score for every coin):
+
+```bash
+python -m tradebot report BTCUSDT ETHUSDT SOLUSDT --exchange okx --state-dir okx_opp
+python -m tradebot report BTCUSDT --exchange none --state-dir okx_opp   # no keys: positions + scores only
+```
 
 **Risk guard** (on by default, between the strategy and the exchange):
 

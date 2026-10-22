@@ -113,6 +113,14 @@ def main():
                     help="required together with --live")
     common(lv)
 
+    rp = sub.add_parser("report", help="one-screen status of a live/demo run")
+    rp.add_argument("symbols", nargs="+")
+    rp.add_argument("--exchange", choices=["binance", "okx", "none"], default="okx",
+                    help="none: skip the account section (no keys needed)")
+    rp.add_argument("--live", action="store_true")
+    rp.add_argument("--state-dir", default="okx_opp")
+    rp.add_argument("--interval", default="1d")
+
     to = sub.add_parser("test-order", help="prove order routing: market-buy a small amount, then sell it back")
     to.add_argument("symbol")
     to.add_argument("--usdt", type=float, default=20)
@@ -154,6 +162,15 @@ def main():
                             max_open=a.max_open)
         trader.preflight()
         trader.run_forever()
+    elif a.cmd == "report":
+        from tradebot.report import report
+        if a.exchange == "none":
+            client = None
+        elif a.exchange == "okx":
+            client = OKXClient(demo=not a.live)
+        else:
+            client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
+        print("\n".join(report(client, a.state_dir, [s.upper() for s in a.symbols], a.interval)))
     elif a.cmd == "test-order":
         if a.live and not a.i_accept_the_risk:
             ap.error("--live places real orders with real money; add --i-accept-the-risk")

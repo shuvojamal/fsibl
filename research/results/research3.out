@@ -1,0 +1,48 @@
+Daily, 10 coins, entry setting fixed (score 5, 2 ATR stop). Cells: average return across coins / coins profitable.
+
+variant                          |  from 2024-10 |  from 2025-03 |  from 2025-07 |  from 2025-12 |       full 4y | avg maxDD
+baseline (3:1 target + EMA exit) |  +0.3%  5/10 |  -1.5%  2/10 |  +1.2%  8/10 |  +1.9%  8/10 |  +5.7%  8/10 |     -7.4%
+trail 2 ATR                      |  +0.4%  5/10 |  -0.9%  4/10 |  +1.9%  7/10 |  +2.4%  8/10 |  +8.7%  7/10 |     -8.9%
+trail 3 ATR                      |  +0.4%  6/10 |  -0.8%  3/10 |  +2.2%  8/10 |  +2.5%  7/10 | +12.4%  9/10 |    -10.8%
+trail 4 ATR                      |  +0.4%  6/10 |  -1.2%  2/10 |  +2.2%  8/10 |  +2.9%  9/10 | +14.2%  9/10 |    -13.0%
+trail 3 ATR + keep 3:1 target    |  +0.8%  6/10 |  -0.9%  3/10 |  +2.3%  8/10 |  +2.3%  7/10 |  +6.9% 10/10 |     -7.4%
+vol-scaled risk (typical 2%)     |  +0.5%  7/10 |  -0.4%  3/10 |  +0.9%  8/10 |  +1.3%  9/10 |  +3.3%  9/10 |     -3.2%
+vol-scaled risk (typical 3%)     |  +0.7%  7/10 |  -0.6%  3/10 |  +1.2%  8/10 |  +1.8%  9/10 |  +4.9%  9/10 |     -4.5%
+
+Full-history detail for the trailing-stop variants (per coin):
+
+  baseline (3:1 target + EMA exit)
+    BTCUSDT    +14.6%  trades  81  win  44%  PF  1.56  maxDD  -7.3%  best trade +32.2%
+    ETHUSDT     +9.1%  trades  66  win  39%  PF  1.32  maxDD  -7.8%  best trade +30.7%
+    SOLUSDT     +9.7%  trades  60  win  40%  PF  1.34  maxDD  -9.0%  best trade +63.9%
+    XRPUSDT     +6.9%  trades  93  win  41%  PF  1.12  maxDD  -6.1%  best trade +45.1%
+    DOGEUSDT    -0.1%  trades  58  win  31%  PF  0.91  maxDD  -9.8%  best trade +45.3%
+    ADAUSDT     +5.4%  trades  51  win  35%  PF  1.06  maxDD  -6.0%  best trade +46.6%
+    LINKUSDT    +7.2%  trades  44  win  39%  PF  1.31  maxDD  -6.3%  best trade +49.9%
+    AVAXUSDT    +5.6%  trades  36  win  33%  PF  1.42  maxDD  -7.5%  best trade +50.3%
+    DOTUSDT     +2.0%  trades  41  win  41%  PF  0.90  maxDD  -5.3%  best trade +42.4%
+    LTCUSDT     -3.8%  trades  68  win  31%  PF  0.79  maxDD  -8.7%  best trade +42.6%
+
+  trail 3 ATR
+    BTCUSDT    +15.3%  trades  41  win  37%  PF  1.53  maxDD  -8.3%  best trade +54.8%
+    ETHUSDT     +6.1%  trades  36  win  36%  PF  1.33  maxDD  -9.7%  best trade +48.5%
+    SOLUSDT    +37.5%  trades  34  win  32%  PF  2.13  maxDD -13.4%  best trade +371.4%
+    XRPUSDT    +33.7%  trades  38  win  29%  PF  1.80  maxDD -15.7%  best trade +285.9%
+    DOGEUSDT   +10.8%  trades  29  win  34%  PF  1.48  maxDD  -9.5%  best trade +136.7%
+    ADAUSDT     +8.1%  trades  28  win  25%  PF  1.09  maxDD  -9.8%  best trade +108.0%
+    LINKUSDT    +5.0%  trades  32  win  31%  PF  1.14  maxDD -10.6%  best trade +77.7%
+    AVAXUSDT   +10.6%  trades  25  win  32%  PF  1.58  maxDD  -9.3%  best trade +146.8%
+    DOTUSDT     +2.8%  trades  25  win  28%  PF  0.84  maxDD -11.7%  best trade +85.2%
+    LTCUSDT     -5.9%  trades  40  win  25%  PF  0.52  maxDD -10.1%  best trade +39.0%
+
+  trail 4 ATR
+    BTCUSDT    +13.9%  trades  29  win  31%  PF  1.81  maxDD  -8.8%  best trade +58.8%
+    ETHUSDT     +8.9%  trades  27  win  30%  PF  1.50  maxDD  -8.6%  best trade +67.5%
+    SOLUSDT    +34.1%  trades  26  win  35%  PF  2.37  maxDD -15.4%  best trade +327.4%
+    XRPUSDT    +36.6%  trades  31  win  26%  PF  1.91  maxDD -20.1%  best trade +352.0%
+    DOGEUSDT   +14.3%  trades  24  win  25%  PF  1.40  maxDD -15.0%  best trade +174.8%
+    ADAUSDT    +14.6%  trades  21  win  29%  PF  1.41  maxDD -14.7%  best trade +96.0%
+    LINKUSDT   +10.1%  trades  23  win  26%  PF  1.47  maxDD -10.2%  best trade +109.2%
+    AVAXUSDT    +9.9%  trades  19  win  26%  PF  1.62  maxDD  -9.8%  best trade +120.5%
+    DOTUSDT     +3.2%  trades  22  win  23%  PF  0.91  maxDD -14.2%  best trade +68.8%
+    LTCUSDT     -3.2%  trades  28  win  21%  PF  0.55  maxDD -13.3%  best trade +45.6%

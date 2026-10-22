@@ -1,0 +1,57 @@
+# Research archive
+
+Everything behind the strategy decisions: the scripts that were run, their
+raw output, the cached price data they ran on, and the logs of the live
+experiments. The written conclusions for each round are in `../docs/`.
+
+```
+research/
+  scripts/   the exact scripts, one per round (paths made repo-relative)
+  results/   raw console output of each run (researchN.out), plus logs
+  data/      cached Binance candles the scripts read (pickle, regenerable)
+```
+
+## Rounds
+
+| Round | Script | Output | Write-up | Ran on code at | Question |
+|---|---|---|---|---|---|
+| 0a | `opp_eval.py` | (in chat) | `docs/opportunity-backtest-2026-10-22.md` | `b5c68a8` | Opportunity scorer on 1h candles, thresholds 4–7 |
+| 0b | `opp_tf.py` | `opp_tf.out` | same | `b5c68a8` | Same on 4h and daily candles, walk-forward |
+| 1 | `research1.py` | `research1.out` | `docs/research-round1-…` | `b5c68a8` | Scorer vs Donchian breakout vs RSI(2) dip-buying, per-coin vs universal tuning |
+| 2 | `research2.py` | `research2.out` | `docs/research-round2-…` | `4a7e4a0` | BTC regime filter, window stability, 4h |
+| 3 | `research3.py` | `research3.out` | `docs/research-round3-…` | `b801c95` (+ trailing-stop hook) | Trailing stops, volatility-scaled risk |
+| 4 | `research4.py` | `research4.out` | `docs/research-round4-…` | `b3881b6` | One shared account, cap on open positions |
+| 5 | `research5.py` | `research5.out` | `docs/research-round5-…` | `d15a4fb` (+ warm-up fix) | Window tests redone with warmed-up indicators |
+| 6 | `research6.py` | `research6.out` | `docs/research-round6-…` | `870bc62` | Pyramiding, drawdown throttle, second coin universe |
+| 7 | `research7.py`, `research7b.py` | `research7.out`, `research7b.out` | `docs/research-round7-…` | `591f4f1` | Ablation of the 8 checks, threshold, costs; RSI-zone verification |
+| 8 | `research8.py` | `research8.out` | `docs/research-round8-…` | `fc95fc3` | Time exits, re-entry cooldown, third coin universe |
+| 9 | `research9.py` | `research9.out` | `docs/research-round9-…` | `e744b5a` | Volume-ranked universe rule (no hindsight) |
+| 10 | `research10.py` | `research10.out` | `docs/research-round10-…` | `02d7b0b` | Partial profit-taking |
+
+Earlier experiments:
+- **Cross-exchange arbitrage** (9 exchanges, 10 coins): `results/arbitrage/`,
+  write-up `docs/arb-scan-2026-10-22.md`.
+- **Paper trading on live prices** (EMA and opportunity, 1h, 10 coins,
+  14:25–16:25 UTC, no trades): `results/paper_demo/`.
+- **OKX demo**: test order and bot runs are recorded in the conversation
+  and in `docs/`; the bot's own state lived in its session and is gone.
+
+## Re-running
+
+```bash
+python research/scripts/research9.py        # from the repo root
+```
+
+The scripts import the current `tradebot` package, so re-running one today
+uses today's defaults (for example, the RSI zone became 40–80 in round 7).
+To reproduce a round's numbers exactly, check out the commit in the "Ran on
+code at" column first:
+
+```bash
+git checkout 4a7e4a0 -- tradebot && python research/scripts/research2.py && git checkout HEAD -- tradebot
+```
+
+Rounds 7b, 8 and 10 reuse helper code from `research7.py` / `research9.py`
+in the same folder. Missing data caches are fetched from Binance's public
+API and saved to `data/` on first use. The `.pkl` files are pickled
+`tradebot.data.Candle` lists; only load caches you made yourself.

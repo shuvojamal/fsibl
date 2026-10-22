@@ -1,0 +1,13 @@
+Pool of 45 coins. Max 5 open, 1% risk, RSI 40-80. Cells: return, max DD, trades, PF.
+
+universe rule                            |                   full 4y |              from 2024-10 |              from 2025-07 |              from 2025-12
+hand-picked 20 (current demo list)       | +187.5% -30.5%  230t 1.95 |  +91.9% -30.5%  122t 2.06 |  +21.9% -18.9%   77t 1.62 |  +33.6% -14.0%   47t 2.61
+whole pool (45), no rule                 | +114.0% -35.6%  263t 1.50 |  +13.5% -35.6%  206t 1.14 |   +7.8% -23.3%  110t 1.17 |   +4.1% -23.3%   78t 1.12
+top 10 by trailing-90d volume, quarterly |  +83.7% -24.0%  227t 1.65 |  +71.7% -24.0%  172t 1.76 |  +44.2% -14.1%   90t 2.04 |  +28.5% -13.9%   60t 2.02
+top 15 by trailing-90d volume, quarterly | +136.9% -28.3%  233t 1.77 |  +59.1% -28.3%  178t 1.60 |  +36.7% -17.1%   91t 1.88 |  +24.9% -17.2%   62t 1.86
+top 20 by trailing-90d volume, quarterly | +113.1% -29.3%  243t 1.62 |  +29.3% -29.3%  189t 1.32 |  +25.9% -17.2%   99t 1.57 |  +15.3% -17.4%   69t 1.47
+top 30 by trailing-90d volume, quarterly |  +95.6% -30.0%  260t 1.49 |  +24.3% -30.0%  200t 1.25 |  +19.5% -19.9%  105t 1.40 |  +12.0% -20.1%   73t 1.35
+top 20 by volume, max 8 open             | +224.7% -37.9%  356t 1.67 |  +94.6% -37.9%  270t 1.54 |  +37.9% -25.0%  137t 1.58 |  +18.3% -25.9%   95t 1.42
+
+Who is in the top 15 by volume right now: BTC, ETH, SOL, ZEC, XRP, NEAR, SUI, BNB, DOGE, UNI, AVAX, ADA, PEPE, LINK, LTC
+Top 15 two years ago:                    BTC, ETH, DOGE, XRP, SOL, PEPE, BNB, SUI, ADA, SHIB, TRX, HBAR, XLM, AVAX, LINK

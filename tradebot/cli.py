@@ -6,6 +6,8 @@ from tradebot import backtest
 from tradebot.data import fetch_candles
 from tradebot.arb import ArbScanner
 from tradebot.exchanges import EXCHANGES
+from tradebot.binance_client import LIVE_URL, TESTNET_URL, BinanceClient
+from tradebot.live import LiveTrader
 from tradebot.paper import PaperTrader
 from tradebot.strategy import Params
 
@@ -68,6 +70,22 @@ def main():
                     help="only trade gaps above this net fraction, e.g. 0.001 = 0.1%%")
     ar.add_argument("--log-dir", default="arb_logs")
 
+    lv = sub.add_parser("live", help="trade a Binance account (testnet by default)")
+    lv.add_argument("symbols", nargs="+")
+    lv.add_argument("--trade-usdt", type=float, default=20, help="USDT spent per buy")
+    lv.add_argument("--max-trade-usdt", type=float, default=50,
+                    help="risk guard: refuse any single buy above this")
+    lv.add_argument("--max-daily-loss", type=float, default=20,
+                    help="risk guard: stop opening trades after losing this much in a day")
+    lv.add_argument("--kill-file", default="STOP", help="create this file to block new orders")
+    lv.add_argument("--state-dir", default="live_state")
+    lv.add_argument("--dry-run", action="store_true", help="connect and decide, but place no orders")
+    lv.add_argument("--live", action="store_true",
+                    help="use the real exchange instead of the testnet (real money)")
+    lv.add_argument("--i-accept-the-risk", action="store_true",
+                    help="required together with --live")
+    common(lv)
+
     a = ap.parse_args()
     if a.cmd == "backtest":
         for sym in a.symbols:
@@ -87,6 +105,16 @@ def main():
             _report("unseen data (the honest number)", test, candles[split:])
     elif a.cmd == "paper":
         PaperTrader(a.symbols, a.interval, _params(a), a.capital, a.state_dir).run_forever()
+    elif a.cmd == "live":
+        if a.live and not a.i_accept_the_risk:
+            ap.error("--live places real orders with real money; add --i-accept-the-risk "
+                     "if that is what you want")
+        client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
+        trader = LiveTrader(client, a.symbols, a.interval, _params(a), a.trade_usdt,
+                            (a.max_trade_usdt, a.max_daily_loss, a.kill_file), a.state_dir,
+                            dry_run=a.dry_run)
+        trader.preflight()
+        trader.run_forever()
     elif a.cmd == "arb":
         ArbScanner(a.symbols, a.exchanges, a.capital, a.log_dir, a.min_net).run(a.seconds, a.poll)
 

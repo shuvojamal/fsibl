@@ -53,6 +53,57 @@ fee, and the gap is gone long before the transfer lands.
 
 **What a 5-minute scan over 10 coins found:** see `docs/arb-scan-2026-10-22.md`.
 
+## Trading a real Binance account (`live`)
+
+Same strategy engine as `paper`, but orders go to the exchange. By default
+it talks to the **Spot Testnet**, which uses fake money.
+
+1. Get testnet keys: log in at https://testnet.binance.vision with GitHub,
+   click *Generate HMAC_SHA256 Key*. The account comes pre-funded with test
+   USDT.
+2. Put the keys in environment variables (never in a file in this repo):
+
+   ```bash
+   export BINANCE_API_KEY=...
+   export BINANCE_API_SECRET=...
+   ```
+3. Dry run first (connects, checks balances and symbol rules, prints what it
+   *would* do, places nothing):
+
+   ```bash
+   python -m tradebot live BTCUSDT ETHUSDT --dry-run
+   ```
+4. Then let it trade on the testnet:
+
+   ```bash
+   python -m tradebot live BTCUSDT ETHUSDT --trade-usdt 20
+   ```
+
+Every fill is appended to `live_state/live_trades.csv` with the exchange's
+order id, so you can check it against the exchange's own history.
+
+**Risk guard** (on by default, between the strategy and the exchange):
+
+| Flag | Default | What it does |
+|---|---|---|
+| `--trade-usdt` | 20 | USDT spent per buy |
+| `--max-trade-usdt` | 50 | refuses any single buy above this |
+| `--max-daily-loss` | 20 | stops opening trades after losing this much in a day (UTC) |
+| `--kill-file` | `STOP` | create this file and the bot places no more orders |
+
+On restart it reads the account: coins it finds on the exchange are adopted
+as open positions, so a crash or reboot doesn't leave anything untracked.
+
+**Going live** needs two flags, `--live --i-accept-the-risk`, and live-only
+API keys. On Binance, create a key with *Enable Spot Trading* only: no
+withdrawals, no margin, no futures, and restrict it to your IP. Start with
+`--trade-usdt` set to an amount you are fine losing entirely.
+
+Do not go live because the testnet "looks good". Run the testnet for at least
+a few weeks, compare `live_trades.csv` with the backtest for the same dates,
+and only go live if the two agree *and* the strategy is beating buy-and-hold.
+As of the scan above, it is not.
+
 ## Results so far (1h candles, Mar–Oct 2026)
 
 | | Default settings | Tuned, on unseen data |

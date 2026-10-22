@@ -3,3 +3,5 @@ __pycache__/
 data/
 paper_state/
 arb_logs/
+live_state/
+STOP

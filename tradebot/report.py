@@ -40,6 +40,8 @@ def report(client, state_dir, symbols, interval="1d", params=None, lines=None):
         out.append(f"venue: {getattr(client, 'label', client.base_url)}")
         out.append(f"free USDT: {usdt:,.2f}")
 
+    if state.get("halted"):
+        out.append(f"CIRCUIT BREAKER TRIPPED: {state['halted']}. No new entries until reset.")
     open_pos = {s: q for s, q in positions.items() if q.get("qty", 0) > 0}
     total_unreal = 0.0
     out.append(f"\nopen positions: {len(open_pos)}")

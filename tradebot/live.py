@@ -64,7 +64,7 @@ class RiskGuard:
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
                  guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
-                 capital=0.0):
+                 capital=0.0, max_drawdown=0.0):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
@@ -72,6 +72,10 @@ class LiveTrader:
         # Trade as if the account held only this much (plus the bot's own P&L),
         # whatever the exchange balance is. 0 = use the whole balance.
         self.capital = capital
+        # Hard circuit breaker, independent of the strategy: once equity falls
+        # this far below its peak, no new positions until a human resets it.
+        # Exits keep working. 0 = off.
+        self.max_drawdown = max_drawdown
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -230,7 +234,27 @@ class LiveTrader:
             spend = min(spend, max(0.0, self._bot_cash()))
         return spend
 
+    def drawdown_halted(self):
+        """Update the equity peak; latch a halt if the drawdown limit is breached."""
+        if self.state.get("halted"):
+            return True
+        if not self.max_drawdown:
+            return False
+        eq = self._equity()
+        peak = max(self.state.get("equity_peak", eq), eq)
+        self.state["equity_peak"] = peak
+        if eq < peak * (1 - self.max_drawdown):
+            self.state["halted"] = (f"{_now()}: equity {eq:,.2f} is {1 - eq / peak:.1%} below its peak "
+                                    f"{peak:,.2f} (limit {self.max_drawdown:.0%})")
+            print(f"[{_now()}] CIRCUIT BREAKER: {self.state['halted']}. New entries stopped; "
+                  f"exits continue. Reset with --reset-halt after reviewing.")
+            return True
+        return False
+
     def _open(self, sym, pos, plan, price):
+        if self.drawdown_halted():
+            print(f"[{_now()}] {sym}: BUY blocked: circuit breaker ({self.state['halted']})")
+            return
         if self.max_open:
             open_now = sum(1 for p in self.state["positions"].values() if p["qty"] > 0)
             if open_now >= self.max_open:

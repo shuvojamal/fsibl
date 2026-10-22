@@ -68,7 +68,7 @@ jobs:
             --exchange okx --strategy opportunity --interval 1d \
             --risk 0.01 --capital "$CAPITAL" --trade-usdt "$CAPITAL" --max-trade-usdt "$CAPITAL" \
             --max-daily-loss "$(python -c "print($CAPITAL * 0.03)")" \
-            --max-open 5 --no-adopt --state-dir demo_state --once | tee -a demo_state/run.log
+            --max-drawdown 0.35 --max-open 5 --no-adopt --state-dir demo_state --once | tee -a demo_state/run.log
           python -m tradebot report ${{ steps.coins.outputs.symbols }} \
             --exchange okx --state-dir demo_state | tee demo_state/report.txt
 

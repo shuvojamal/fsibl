@@ -31,6 +31,8 @@ python -m unittest discover -s tests -t .
 
 ## Opportunity strategy (`--strategy opportunity`)
 
+Full specification (rationale, assumptions, failure conditions, validation): `docs/STRATEGY.md`.
+
 Trades only when enough independent checks line up. Eight checks, one
 point each:
 

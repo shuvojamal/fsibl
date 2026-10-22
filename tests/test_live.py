@@ -258,6 +258,44 @@ class VirtualCapitalTests(unittest.TestCase):
         self.assertAlmostEqual(spent, expected, places=1)
 
 
+class CircuitBreakerTests(unittest.TestCase):
+    def _trader(self, d, fake):
+        from tradebot.engines import OpportunityEngine
+        from tradebot.opportunity import OppParams
+        return LiveTrader(client(fake), ["BTCUSDT"], "1d", Params(), trade_usdt=1000,
+                          guard_args=(1000, 1000, os.path.join(d, "STOP")), state_dir=d,
+                          engine=OpportunityEngine(OppParams(min_score=0)), capital=1000.0,
+                          max_drawdown=0.30)
+
+    def test_trips_below_limit_blocks_buys_and_stays_latched(self):
+        from tests.test_opportunity import uptrend
+        fake = FakeBinance(usdt=5000.0)
+        d = tempfile.mkdtemp()
+        t = self._trader(d, fake)
+        t.state["equity_peak"] = 1000.0
+        t.state["realised"] = -350.0                 # bot equity 650: 35% below peak
+        with mock.patch("tradebot.live.fetch_candles", return_value=uptrend()):
+            t.preflight()
+            t.step()
+        self.assertEqual(fake.orders, [])
+        self.assertIn("below its peak", t.state["halted"])
+        t.state["realised"] = 0.0                    # recovering does NOT clear it by itself
+        self.assertTrue(t.drawdown_halted())
+
+    def test_within_limit_trades_normally(self):
+        from tests.test_opportunity import uptrend
+        fake = FakeBinance(usdt=5000.0)
+        d = tempfile.mkdtemp()
+        t = self._trader(d, fake)
+        t.state["equity_peak"] = 1000.0
+        t.state["realised"] = -200.0                 # 20% below peak, limit 30%
+        with mock.patch("tradebot.live.fetch_candles", return_value=uptrend()):
+            t.preflight()
+            t.step()
+        self.assertEqual(len(fake.orders), 1)
+        self.assertNotIn("halted", t.state)
+
+
 class SlotPriorityTests(unittest.TestCase):
     def test_highest_score_gets_the_last_free_slot(self):
         from tradebot.opportunity import Plan

@@ -28,6 +28,7 @@ research/
 | 9 | `research9.py` | `research9.out` | `docs/research-round9-…` | `e744b5a` | Volume-ranked universe rule (no hindsight) |
 | 10 | `research10.py` | `research10.out` | `docs/research-round10-…` | `02d7b0b` | Partial profit-taking |
 | 11 | `research11.py` | `research11.out` | `docs/research-round11-…` | `c2f1495` | Which signal gets a free slot; cost of checking stops once a day |
+| 12 | `research12.py`, `research12b.py` | `research12.out`, `research12b.out` | `docs/research-round12-…` | `196a899` | 9-year stress test (2017–2026), Sharpe/expectancy/regimes, Monte Carlo; ADX filter and top-10 checked on each half |
 
 Earlier experiments:
 - **Cross-exchange arbitrage** (9 exchanges, 10 coins): `results/arbitrage/`,

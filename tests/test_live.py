@@ -236,6 +236,28 @@ class RiskSizedLiveTests(unittest.TestCase):
         self.assertEqual(float(fake.orders[0]["quoteOrderQty"]), 30.0)
 
 
+class VirtualCapitalTests(unittest.TestCase):
+    def test_sizes_from_capital_not_from_a_huge_demo_balance(self):
+        from tradebot.engines import OpportunityEngine
+        from tradebot.opportunity import OppParams
+        from tests.test_opportunity import uptrend
+        fake = FakeBinance(usdt=90000.0)          # demo balance far above what we'd really trade
+        d = tempfile.mkdtemp()
+        engine = OpportunityEngine(OppParams(min_score=0, risk_frac=0.01))
+        t = LiveTrader(client(fake), ["BTCUSDT"], "1d", Params(), trade_usdt=100000,
+                       guard_args=(100000, 1000, os.path.join(d, "STOP")), state_dir=d,
+                       engine=engine, capital=1000.0)
+        candles = uptrend()
+        plan = engine.decide(candles, in_position=False)[1]
+        price = candles[-1].close
+        with mock.patch("tradebot.live.fetch_candles", return_value=candles):
+            t.preflight()
+            t.step()
+        spent = float(fake.orders[0]["quoteOrderQty"])
+        expected = min(1000.0 * 0.01 / (price - plan.stop) * price, 1000.0)  # 1% of 1,000, never above 1,000
+        self.assertAlmostEqual(spent, expected, places=1)
+
+
 class SlotPriorityTests(unittest.TestCase):
     def test_highest_score_gets_the_last_free_slot(self):
         from tradebot.opportunity import Plan

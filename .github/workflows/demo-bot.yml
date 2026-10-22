@@ -4,6 +4,8 @@
 #   1. Settings > Secrets and variables > Actions > Secrets:
 #        OKX_API_KEY, OKX_API_SECRET, OKX_PASSPHRASE   (demo-trading key)
 #   2. Same page > Variables: TRADEBOT_ENABLED = true
+#      Optional variable TRADEBOT_CAPITAL (default 5000): the account size the
+#      bot sizes trades for, so demo results match what you'd really trade.
 # To stop it: set TRADEBOT_ENABLED to anything else, or disable the workflow.
 name: demo-bot
 
@@ -54,13 +56,18 @@ jobs:
           OKX_API_KEY: ${{ secrets.OKX_API_KEY }}
           OKX_API_SECRET: ${{ secrets.OKX_API_SECRET }}
           OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+          # The bot trades as if the account held this much, however large the
+          # demo balance is. Set the repo variable to the amount you would
+          # really trade with; default 5000 USDT.
+          CAPITAL: ${{ vars.TRADEBOT_CAPITAL || '5000' }}
         run: |
           set -o pipefail   # a crash inside `| tee` must fail the step, not pass silently
           if [ -z "$OKX_API_KEY" ]; then echo "OKX secrets not set; nothing to do"; exit 0; fi
           mkdir -p demo_state
           python -u -m tradebot live ${{ steps.coins.outputs.symbols }} \
             --exchange okx --strategy opportunity --interval 1d \
-            --risk 0.01 --trade-usdt 1000 --max-trade-usdt 1000 --max-daily-loss 300 \
+            --risk 0.01 --capital "$CAPITAL" --trade-usdt "$CAPITAL" --max-trade-usdt "$CAPITAL" \
+            --max-daily-loss "$(python -c "print($CAPITAL * 0.03)")" \
             --max-open 5 --no-adopt --state-dir demo_state --once | tee -a demo_state/run.log
           python -m tradebot report ${{ steps.coins.outputs.symbols }} \
             --exchange okx --state-dir demo_state | tee demo_state/report.txt

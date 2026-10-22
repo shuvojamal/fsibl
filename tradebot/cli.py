@@ -104,6 +104,8 @@ def main():
                     help="binance: Spot Testnet / live; okx: demo trading / live")
     lv.add_argument("--max-open", type=int, default=0,
                     help="cap on simultaneous open positions across all symbols (0 = no cap)")
+    lv.add_argument("--capital", type=float, default=0,
+                    help="size trades as if the account held only this many USDT (0 = whole balance)")
     lv.add_argument("--once", action="store_true",
                     help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
@@ -167,7 +169,7 @@ def main():
         trader = LiveTrader(client, a.symbols, a.interval, _params(a), a.trade_usdt,
                             (a.max_trade_usdt, a.max_daily_loss, a.kill_file), a.state_dir,
                             dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt,
-                            max_open=a.max_open)
+                            max_open=a.max_open, capital=a.capital)
         trader.preflight()
         if a.once:
             trader.step()

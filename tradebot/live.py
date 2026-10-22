@@ -63,11 +63,15 @@ class RiskGuard:
 
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
-                 guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0):
+                 guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
+                 capital=0.0):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
         self.max_open = max_open  # cap on simultaneous positions; 0 = no cap
+        # Trade as if the account held only this much (plus the bot's own P&L),
+        # whatever the exchange balance is. 0 = use the whole balance.
+        self.capital = capital
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -191,12 +195,25 @@ class LiveTrader:
         return None
 
     def _equity(self):
-        """Account value in USDT: free USDT plus open positions at their last price."""
+        """Account value in USDT for sizing.
+
+        With `capital` set, the bot runs its own virtual sub-account: starting
+        capital plus realised P&L plus open positions marked to market. Without
+        it, the whole exchange balance counts.
+        """
+        held = {sym: pos for sym, pos in self.state["positions"].items() if pos["qty"] > 0}
+        if self.capital:
+            unreal = sum(p["qty"] * (self.client.price(s) - p["entry"]) for s, p in held.items())
+            return self.capital + self.state.get("realised", 0.0) + unreal
         total = self.client.balances().get("USDT", 0.0)
-        for sym, pos in self.state["positions"].items():
-            if pos["qty"] > 0:
-                total += pos["qty"] * self.client.price(sym)
+        for sym, pos in held.items():
+            total += pos["qty"] * self.client.price(sym)
         return total
+
+    def _bot_cash(self):
+        """With `capital` set: cash left in the virtual sub-account."""
+        invested = sum(p["qty"] * p["entry"] for p in self.state["positions"].values() if p["qty"] > 0)
+        return self.capital + self.state.get("realised", 0.0) - invested
 
     def _spend(self, plan, price):
         """USDT to spend on this buy.
@@ -209,6 +226,8 @@ class LiveTrader:
         spend = self.trade_usdt
         if hasattr(self.engine, "size"):
             spend = min(spend, self.engine.size(self._equity(), price, plan.stop) * price)
+        if self.capital:
+            spend = min(spend, max(0.0, self._bot_cash()))
         return spend
 
     def _open(self, sym, pos, plan, price):
@@ -256,6 +275,7 @@ class LiveTrader:
             return
         pnl = qty * (avg - pos["entry"]) - fee
         self.guard.record(pnl)
+        self.state["realised"] = self.state.get("realised", 0.0) + pnl
         self._log(sym, "SELL", qty, avg, fee, reason, pnl, order.get("orderId"))
         pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
 

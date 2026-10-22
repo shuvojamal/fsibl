@@ -29,6 +29,42 @@ python -m tradebot paper BTCUSDT ETHUSDT --capital 1000 --fast 12 --slow 26
 python -m unittest discover -s tests
 ```
 
+## Opportunity strategy (`--strategy opportunity`)
+
+Trades only when enough independent checks line up. Eight checks, one
+point each:
+
+| # | Check | Passes when |
+|---|---|---|
+| 1 | `trend_up` | price above a rising 200-EMA |
+| 2 | `ema_aligned` | 20-EMA above 50-EMA |
+| 3 | `momentum` | MACD histogram positive and rising |
+| 4 | `rsi_zone` | RSI between 45 and 65 (strong, not overbought) |
+| 5 | `volume` | volume above its 20-bar average |
+| 6 | `volatility_ok` | ATR between 0.5% and 5% of price |
+| 7 | `breakout` | close above the previous 20-bar high |
+| 8 | `pullback` | price within 1 ATR of the 20-EMA |
+
+A trade needs `--min-score` of them (default 5). The stop is 2×ATR below
+entry, the target 2× the stop distance above it (2:1 reward-to-risk), and
+the position is sized so that hitting the stop loses `--risk` of equity
+(default 1%). The exit is the stop, the target, or the 20/50 EMA turning
+down. Every log line names the checks that passed, so you can see *why*
+the bot bought.
+
+```bash
+python -m tradebot backtest BTCUSDT ETHUSDT --strategy opportunity --interval 1d --candles 1500
+python -m tradebot paper BTCUSDT ETHUSDT SOLUSDT --strategy opportunity --interval 1d
+python -m tradebot live BTCUSDT ETHUSDT --strategy opportunity --interval 1d --dry-run
+```
+
+Use **daily candles**. On 1h and 4h candles the strategy loses money at
+every setting, mostly to fees; on daily candles it was profitable on
+unseen data for BTC, ETH and SOL, with small drawdowns, at about one or two
+trades a month. Full numbers in `docs/opportunity-backtest-2026-10-22.md`.
+It protects capital in bad markets; it does not keep up with buy-and-hold
+in good ones.
+
 ## Cross-exchange arbitrage (`arb`)
 
 ```bash

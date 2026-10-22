@@ -14,9 +14,7 @@ from datetime import datetime, timezone
 
 from tradebot.binance_client import BinanceClient, BinanceError, fill_summary
 from tradebot.data import INTERVAL_MS, fetch_candles
-from tradebot.strategy import BUY, SELL, compute, decide
-
-HISTORY = 300
+from tradebot.engines import EmaEngine
 
 
 def _now():
@@ -65,8 +63,9 @@ class RiskGuard:
 
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
-                 guard_args, state_dir, dry_run=False):
-        self.client, self.p, self.interval = client, params, interval
+                 guard_args, state_dir, dry_run=False, engine=None):
+        self.client, self.interval = client, interval
+        self.engine = engine or EmaEngine(params)
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -77,7 +76,7 @@ class LiveTrader:
         self.state.setdefault("params", asdict(params))
         for s in self.symbols:
             self.state.setdefault("positions", {}).setdefault(
-                s, {"qty": 0.0, "entry": 0.0, "last_candle": 0})
+                s, {"qty": 0.0, "entry": 0.0, "stop": 0.0, "target": 0.0, "last_candle": 0})
 
     def _load(self):
         if os.path.exists(self.state_path):
@@ -122,6 +121,8 @@ class LiveTrader:
                 print(f"[{_now()}] {sym}: found {held} {base} on the exchange, treating it as an "
                       f"open position at {price:.4f}")
                 pos["qty"], pos["entry"] = held, price
+                # No plan was recorded for it, so protect it with a wide safety stop.
+                pos["stop"], pos["target"] = price * 0.9, price * 1.2
         elif pos["qty"] > 0 and held < pos["qty"] * 0.99:
             print(f"[{_now()}] {sym}: state says {pos['qty']} but exchange has {held}; "
                   f"trusting the exchange")
@@ -141,43 +142,53 @@ class LiveTrader:
 
     def _step_symbol(self, sym):
         pos = self.state["positions"][sym]
-        candles = fetch_candles(sym, self.interval, HISTORY)
+        candles = fetch_candles(sym, self.interval, self.engine.history)
         last = candles[-1]
         if last.open_time == pos["last_candle"]:
             return
         pos["last_candle"] = last.open_time
 
         if pos["qty"] > 0:
-            stop = pos["entry"] * (1 - self.p.stop_loss)
-            target = pos["entry"] * (1 + self.p.take_profit)
-            if last.low <= stop:
+            if last.low <= pos["stop"]:
                 return self._close(sym, pos, "stop_loss")
-            if last.high >= target:
+            if last.high >= pos["target"]:
                 return self._close(sym, pos, "take_profit")
 
-        ind = compute([c.close for c in candles], self.p)
-        action = decide(len(candles) - 1, ind, self.p, pos["qty"] > 0)
-        if action == BUY:
-            self._open(sym, pos)
-        elif action == SELL:
-            self._close(sym, pos, "signal")
+        action = self.engine.decide(candles, pos["qty"] > 0)
+        if action and action[0] == "buy":
+            self._open(sym, pos, action[1], last.close)
+        elif action and action[0] == "sell":
+            self._close(sym, pos, action[1])
 
-    def _open(self, sym, pos):
-        ok, why = self.guard.can_open(self.trade_usdt)
+    def _spend(self, plan, price):
+        """USDT to spend: the per-trade size, reduced by risk-based sizing if the engine has it."""
+        spend = self.trade_usdt
+        if hasattr(self.engine, "size"):
+            spend = min(spend, self.engine.size(self.trade_usdt, price, plan.stop) * price)
+        return spend
+
+    def _open(self, sym, pos, plan, price):
+        spend = self._spend(plan, price)
+        if spend < self.client.symbol_filters(sym)["min_notional"]:
+            print(f"[{_now()}] {sym}: risk-sized order {spend:.2f} USDT is below the exchange minimum")
+            return
+        ok, why = self.guard.can_open(spend)
         if not ok:
             print(f"[{_now()}] {sym}: BUY blocked: {why}")
             return
+        why_buy = "+".join(plan.reasons) or "signal"
         if self.dry_run:
-            price = self.client.price(sym)
-            print(f"[{_now()}] DRY RUN would BUY {self.trade_usdt:.2f} USDT of {sym} at ~{price:.4f}")
+            print(f"[{_now()}] DRY RUN would BUY {spend:.2f} USDT of {sym} at ~{price:.4f} "
+                  f"stop {plan.stop:.4f} target {plan.target:.4f} ({why_buy})")
             return
-        order = self.client.market_order(sym, "BUY", quote_qty=self.trade_usdt)
+        order = self.client.market_order(sym, "BUY", quote_qty=spend)
         qty, avg, fee = fill_summary(order)
         if qty == 0:
             print(f"[{_now()}] {sym}: BUY not filled ({order.get('status')})")
             return
         pos["qty"], pos["entry"] = qty, avg
-        self._log(sym, "BUY", qty, avg, fee, "signal", None, order.get("orderId"))
+        pos["stop"], pos["target"] = plan.stop, plan.target
+        self._log(sym, "BUY", qty, avg, fee, why_buy, None, order.get("orderId"))
 
     def _close(self, sym, pos, reason):
         ok, why = self.guard.can_close()
@@ -187,7 +198,7 @@ class LiveTrader:
         if self.dry_run:
             price = self.client.price(sym)
             print(f"[{_now()}] DRY RUN would SELL {pos['qty']} {sym} at ~{price:.4f} ({reason})")
-            pos["qty"], pos["entry"] = 0.0, 0.0
+            pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
             return
         order = self.client.market_order(sym, "SELL", qty=pos["qty"])
         qty, avg, fee = fill_summary(order)
@@ -197,7 +208,7 @@ class LiveTrader:
         pnl = qty * (avg - pos["entry"]) - fee
         self.guard.record(pnl)
         self._log(sym, "SELL", qty, avg, fee, reason, pnl, order.get("orderId"))
-        pos["qty"], pos["entry"] = 0.0, 0.0
+        pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
 
     def _log(self, sym, side, qty, price, fee, reason, pnl, order_id):
         pnl_s = "" if pnl is None else f"{pnl:+.4f}"

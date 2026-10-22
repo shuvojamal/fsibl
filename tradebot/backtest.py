@@ -107,9 +107,9 @@ def run(candles, p=Params(), capital=1000.0):
     return res
 
 
-def _close(res, qty, entry, entry_time, price, time, reason):
+def _close(res, qty, entry, entry_time, price, time, reason, cash=0.0):
     res.trades.append(Trade(entry_time, entry, time, price, reason))
-    return qty * price * (1 - FEE), 0.0
+    return cash + qty * price * (1 - FEE), 0.0
 
 
 GRID = {
@@ -139,3 +139,51 @@ def optimize(candles, train_frac=0.7, min_trades=5):
     if best is None:
         return None
     return best[0], best[1], run(test, best[0])
+
+
+def run_opportunity(candles, strat, capital=1000.0):
+    """Replay an Opportunity strategy: per-trade ATR stop/target, risk-sized."""
+    strat.prepare(candles)
+    res = Result(start_capital=capital)
+    cash, qty, entry, entry_time = capital, 0.0, 0.0, 0
+    stop = target = 0.0
+    pending = None  # (action, plan) decided on the previous close
+
+    for i, c in enumerate(candles):
+        if pending and pending[0] == BUY and qty == 0:
+            plan = pending[1]
+            entry = c.open * (1 + SLIPPAGE)
+            qty = min(strat.size(cash, entry, plan.stop), cash * (1 - FEE) / entry)
+            if qty > 0:
+                cash -= qty * entry / (1 - FEE)
+                entry_time, stop, target = c.open_time, plan.stop, plan.target
+        elif pending and pending[0] == SELL and qty > 0:
+            cash, qty = _close(res, qty, entry, entry_time, c.open * (1 - SLIPPAGE),
+                               c.open_time, "signal", cash)
+        pending = None
+
+        if qty > 0:
+            if c.low <= stop:
+                cash, qty = _close(res, qty, entry, entry_time,
+                                   min(stop, c.open) * (1 - SLIPPAGE), c.open_time, "stop_loss", cash)
+            elif c.high >= target:
+                cash, qty = _close(res, qty, entry, entry_time,
+                                   max(target, c.open) * (1 - SLIPPAGE), c.open_time, "take_profit", cash)
+
+        if qty > 0:
+            if strat.should_exit(i):
+                pending = (SELL, None)
+        else:
+            plan = strat.signal(i)
+            if plan:
+                pending = (BUY, plan)
+        res.equity.append(cash + qty * c.close)
+
+    if qty > 0:
+        last = candles[-1]
+        cash, qty = _close(res, qty, entry, entry_time, last.close * (1 - SLIPPAGE),
+                           last.close_time, "end", cash)
+        res.equity[-1] = cash
+    if candles:
+        res.buy_hold_return = candles[-1].close / candles[0].open * (1 - FEE) ** 2 - 1
+    return res

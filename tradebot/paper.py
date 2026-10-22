@@ -12,9 +12,7 @@ from datetime import datetime, timezone
 
 from tradebot.backtest import FEE, SLIPPAGE
 from tradebot.data import INTERVAL_MS, fetch_candles
-from tradebot.strategy import BUY, SELL, Params, compute, decide
-
-HISTORY = 300  # candles needed to warm up the indicators
+from tradebot.engines import EmaEngine
 
 
 def _now():
@@ -22,9 +20,10 @@ def _now():
 
 
 class PaperTrader:
-    def __init__(self, symbols, interval, params, capital, state_dir="paper_state"):
+    def __init__(self, symbols, interval, params, capital, state_dir="paper_state", engine=None):
         self.symbols = [s.upper() for s in symbols]
-        self.interval, self.p = interval, params
+        self.interval = interval
+        self.engine = engine or EmaEngine(params)
         self.state_path = os.path.join(state_dir, "state.json")
         self.trades_path = os.path.join(state_dir, "trades.csv")
         os.makedirs(state_dir, exist_ok=True)
@@ -40,7 +39,7 @@ class PaperTrader:
 
     @staticmethod
     def _flat(cash):
-        return {"cash": cash, "qty": 0.0, "entry": 0.0, "last_candle": 0}
+        return {"cash": cash, "qty": 0.0, "entry": 0.0, "stop": 0.0, "target": 0.0, "last_candle": 0}
 
     def step(self):
         """Check every symbol once. Returns total equity in USDT."""
@@ -57,39 +56,42 @@ class PaperTrader:
 
     def _step_symbol(self, sym):
         pos = self.state["positions"][sym]
-        candles = fetch_candles(sym, self.interval, HISTORY)
+        candles = fetch_candles(sym, self.interval, self.engine.history)
         last = candles[-1]
         price = last.close
 
         if last.open_time != pos["last_candle"]:  # act once per new closed candle
             pos["last_candle"] = last.open_time
             if pos["qty"] > 0:
-                stop = pos["entry"] * (1 - self.p.stop_loss)
-                target = pos["entry"] * (1 + self.p.take_profit)
-                if last.low <= stop:
-                    self._sell(sym, pos, min(stop, price), "stop_loss")
-                elif last.high >= target:
-                    self._sell(sym, pos, max(target, price), "take_profit")
-            ind = compute([c.close for c in candles], self.p)
-            action = decide(len(candles) - 1, ind, self.p, pos["qty"] > 0)
-            if action == BUY:
-                self._buy(sym, pos, price)
-            elif action == SELL:
-                self._sell(sym, pos, price, "signal")
+                if last.low <= pos["stop"]:
+                    self._sell(sym, pos, min(pos["stop"], price), "stop_loss")
+                elif last.high >= pos["target"]:
+                    self._sell(sym, pos, max(pos["target"], price), "take_profit")
+            action = self.engine.decide(candles, pos["qty"] > 0)
+            if action and action[0] == "buy":
+                self._buy(sym, pos, price, action[1])
+            elif action and action[0] == "sell":
+                self._sell(sym, pos, price, action[1])
         return pos["cash"] + pos["qty"] * price
 
-    def _buy(self, sym, pos, price):
+    def _buy(self, sym, pos, price, plan):
         fill = price * (1 + SLIPPAGE)
-        pos["qty"] = pos["cash"] * (1 - FEE) / fill
-        pos["entry"], pos["cash"] = fill, 0.0
-        self._log(sym, "BUY", fill, pos["qty"], "signal", None)
+        qty = pos["cash"] * (1 - FEE) / fill
+        if hasattr(self.engine, "size"):  # risk-based sizing
+            qty = min(qty, self.engine.size(pos["cash"], fill, plan.stop))
+        if qty <= 0:
+            return
+        pos["qty"], pos["entry"] = qty, fill
+        pos["cash"] -= qty * fill / (1 - FEE)
+        pos["stop"], pos["target"] = plan.stop, plan.target
+        self._log(sym, "BUY", fill, qty, "+".join(plan.reasons) or "signal", None)
 
     def _sell(self, sym, pos, price, reason):
         fill = price * (1 - SLIPPAGE)
         qty = pos["qty"]
-        pos["cash"] = qty * fill * (1 - FEE)
+        pos["cash"] += qty * fill * (1 - FEE)
         ret = fill / pos["entry"] * (1 - FEE) ** 2 - 1
-        pos["qty"], pos["entry"] = 0.0, 0.0
+        pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
         self._log(sym, "SELL", fill, qty, reason, ret)
 
     def _log(self, sym, side, price, qty, reason, ret):

@@ -7,7 +7,9 @@ from tradebot.data import fetch_candles
 from tradebot.arb import ArbScanner
 from tradebot.exchanges import EXCHANGES
 from tradebot.binance_client import LIVE_URL, TESTNET_URL, BinanceClient
+from tradebot.engines import make_engine
 from tradebot.live import LiveTrader
+from tradebot.opportunity import Opportunity, OppParams
 from tradebot.paper import PaperTrader
 from tradebot.strategy import Params
 
@@ -27,6 +29,20 @@ def _report(title, res, candles):
     print(f"  max drawdown     {res.max_drawdown:.2%}")
 
 
+def _opp(a):
+    return OppParams(min_score=a.min_score, risk_frac=a.risk)
+
+
+def _engine(a):
+    return make_engine(a.strategy, _params(a), _opp(a))
+
+
+def _run_backtest(a, candles):
+    if a.strategy == "opportunity":
+        return backtest.run_opportunity(candles, Opportunity(_opp(a)))
+    return backtest.run(candles, _params(a))
+
+
 def _params(a):
     return Params(fast=a.fast, slow=a.slow, rsi_max=a.rsi_max,
                   stop_loss=a.stop_loss, take_profit=a.take_profit)
@@ -38,6 +54,10 @@ def main():
 
     def common(p):
         p.add_argument("--interval", default="1h")
+        p.add_argument("--strategy", choices=["ema", "opportunity"], default="ema",
+                       help="ema: crossover; opportunity: trade only when enough checks agree")
+        p.add_argument("--min-score", type=int, default=5, help="opportunity: checks required, of 8")
+        p.add_argument("--risk", type=float, default=0.01, help="opportunity: equity fraction risked per trade")
         p.add_argument("--fast", type=int, default=12)
         p.add_argument("--slow", type=int, default=26)
         p.add_argument("--rsi-max", type=float, default=70)
@@ -90,7 +110,7 @@ def main():
     if a.cmd == "backtest":
         for sym in a.symbols:
             candles = fetch_candles(sym, a.interval, a.candles)
-            _report(f"{sym.upper()} {a.interval}", backtest.run(candles, _params(a)), candles)
+            _report(f"{sym.upper()} {a.interval} [{a.strategy}]", _run_backtest(a, candles), candles)
     elif a.cmd == "optimize":
         for sym in a.symbols:
             candles = fetch_candles(sym, a.interval, a.candles)
@@ -104,7 +124,8 @@ def main():
             _report("training (used for tuning)", train, candles[:split])
             _report("unseen data (the honest number)", test, candles[split:])
     elif a.cmd == "paper":
-        PaperTrader(a.symbols, a.interval, _params(a), a.capital, a.state_dir).run_forever()
+        PaperTrader(a.symbols, a.interval, _params(a), a.capital, a.state_dir,
+                    engine=_engine(a)).run_forever()
     elif a.cmd == "live":
         if a.live and not a.i_accept_the_risk:
             ap.error("--live places real orders with real money; add --i-accept-the-risk "
@@ -112,7 +133,7 @@ def main():
         client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
         trader = LiveTrader(client, a.symbols, a.interval, _params(a), a.trade_usdt,
                             (a.max_trade_usdt, a.max_daily_loss, a.kill_file), a.state_dir,
-                            dry_run=a.dry_run)
+                            dry_run=a.dry_run, engine=_engine(a))
         trader.preflight()
         trader.run_forever()
     elif a.cmd == "arb":

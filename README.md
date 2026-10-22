@@ -69,6 +69,14 @@ number of simultaneous positions with `--max-open 5`; a long list of coins
 is fine as long as the cap holds (`docs/research-round4-2026-10-22.md`,
 `docs/research-round6-2026-10-22.md`).
 
+**Which coins:** trade the 15 most-traded coins, re-checked each quarter,
+not a hand-picked list (`docs/research-round9-2026-10-22.md`):
+
+```bash
+python -m tradebot scan --top 15                 # ranked list with today's signals
+python -m tradebot scan --top 15 --symbols-only  # just the symbols, for `live`
+```
+
 Use **daily candles**. On 1h and 4h candles the strategy loses money at
 every setting, mostly to fees; on daily candles it was profitable on
 unseen data for BTC, ETH and SOL, with small drawdowns, at about one or two

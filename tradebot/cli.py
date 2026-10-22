@@ -113,6 +113,12 @@ def main():
                     help="required together with --live")
     common(lv)
 
+    sc = sub.add_parser("scan", help="rank a coin pool by 90-day volume and show today's signals")
+    sc.add_argument("--top", type=int, default=15, help="keep the N most-traded coins (default 15)")
+    sc.add_argument("--pool", nargs="+", default=None, help="coins to consider (default: built-in 40)")
+    sc.add_argument("--symbols-only", action="store_true",
+                    help="print just the top-N symbols, space-separated, for pasting into `live`")
+
     rp = sub.add_parser("report", help="one-screen status of a live/demo run")
     rp.add_argument("symbols", nargs="+")
     rp.add_argument("--exchange", choices=["binance", "okx", "none"], default="okx",
@@ -162,6 +168,15 @@ def main():
                             max_open=a.max_open)
         trader.preflight()
         trader.run_forever()
+    elif a.cmd == "scan":
+        from tradebot.scan import POOL, format_scan, scan
+        rows, skipped = scan(a.pool or POOL, a.top)
+        if a.symbols_only:
+            print(" ".join(r[0] for r in rows))
+        else:
+            print("\n".join(format_scan(rows)))
+            if skipped:
+                print(f"\nskipped (no data or too short): {', '.join(skipped)}")
     elif a.cmd == "report":
         from tradebot.report import report
         if a.exchange == "none":

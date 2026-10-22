@@ -43,13 +43,14 @@ class ScorerTests(unittest.TestCase):
         self.assertIsNotNone(Opportunity(OppParams(min_score=score)).prepare(cs).signal(259))
         self.assertIsNone(Opportunity(OppParams(min_score=score + 1)).prepare(cs).signal(259))
 
-    def test_plan_has_atr_stop_and_2to1_target(self):
+    def test_plan_has_atr_stop_and_reward_risk_target(self):
         cs = uptrend()
-        s = Opportunity(OppParams(min_score=0)).prepare(cs)
+        p = OppParams(min_score=0)
+        s = Opportunity(p).prepare(cs)
         plan = s.signal(259)
         price, a = cs[-1].close, s.atr[259]
-        self.assertAlmostEqual(plan.stop, price - 2 * a)
-        self.assertAlmostEqual(plan.target - price, 2 * (price - plan.stop))
+        self.assertAlmostEqual(plan.stop, price - p.stop_atr * a)
+        self.assertAlmostEqual(plan.target - price, p.reward_risk * (price - plan.stop))
 
     def test_flat_market_is_never_an_opportunity(self):
         s = Opportunity(OppParams(min_score=5)).prepare(candles([100.0] * 260))

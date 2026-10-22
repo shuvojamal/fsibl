@@ -63,9 +63,10 @@ class RiskGuard:
 
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
-                 guard_args, state_dir, dry_run=False, engine=None):
+                 guard_args, state_dir, dry_run=False, engine=None, adopt=True):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
+        self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -115,7 +116,7 @@ class LiveTrader:
         base = sym[:-4] if sym.endswith("USDT") else sym
         held = balances.get(base, 0.0)
         f = self.client.symbol_filters(sym)
-        if pos["qty"] == 0 and held >= f["min_qty"]:
+        if pos["qty"] == 0 and held >= f["min_qty"] and self.adopt:
             price = self.client.price(sym)
             if held * price >= f["min_notional"]:
                 print(f"[{_now()}] {sym}: found {held} {base} on the exchange, treating it as an "

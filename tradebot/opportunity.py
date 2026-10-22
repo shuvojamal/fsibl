@@ -25,7 +25,8 @@ class OppParams:
     atr_max: float = 0.05      # ...and too wild above this
     breakout: int = 20
     stop_atr: float = 2.0      # stop = entry - stop_atr * ATR
-    reward_risk: float = 2.0   # target = entry + reward_risk * (entry - stop)
+    reward_risk: float = 3.0   # target = entry + reward_risk * (entry - stop); 3:1 held up
+                               # best across 10 coins in docs/research-round1-2026-10-22.md
     risk_frac: float = 0.01    # fraction of equity risked per trade
     min_score: int = 5         # out of 8
 

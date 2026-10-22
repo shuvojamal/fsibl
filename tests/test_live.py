@@ -181,6 +181,13 @@ class LiveTraderTests(unittest.TestCase):
             t.preflight()
         self.assertEqual(t.state["positions"]["BTCUSDT"]["qty"], 0.5)
 
+    def test_no_adopt_leaves_existing_coins_alone(self):
+        self.fake.btc = 0.5
+        t = self.trader(adopt=False)
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight()
+        self.assertEqual(t.state["positions"]["BTCUSDT"]["qty"], 0.0)
+
 
 class RiskGuardTests(unittest.TestCase):
     def test_daily_loss_limit(self):

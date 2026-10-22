@@ -111,6 +111,28 @@ class OKXClientTests(unittest.TestCase):
         self.assertIn("Insufficient", str(cm.exception))
 
 
+class UnlistedSymbolTests(unittest.TestCase):
+    def test_preflight_skips_a_coin_the_exchange_does_not_list(self):
+        fake = FakeOKX()
+        real = fake.__call__
+
+        def transport(method, url, headers, body):
+            if "instruments" in url and "ZEC-USDT" in url:
+                return 200, json.dumps({"code": "51001", "msg": "Instrument ID doesn't exist.",
+                                        "data": []}).encode()
+            return real(method, url, headers, body)
+
+        d = tempfile.mkdtemp()
+        t = LiveTrader(client(transport), ["ZECUSDT", "BTCUSDT"], "1h",
+                       Params(fast=3, slow=10, rsi_max=101, take_profit=10), trade_usdt=20,
+                       guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d)
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight()
+            t.step()
+        self.assertEqual(t.symbols, ["BTCUSDT"])
+        self.assertEqual(len(fake.orders), 1)  # BTC still traded
+
+
 class LiveTraderOnOKXTests(unittest.TestCase):
     def test_full_cycle_on_okx(self):
         fake = FakeOKX()

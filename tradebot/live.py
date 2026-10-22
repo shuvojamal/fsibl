@@ -103,8 +103,17 @@ class LiveTrader:
         print(f"[{_now()}] free USDT: {usdt:,.2f}; per-trade size: {self.trade_usdt:,.2f}")
         if usdt < self.trade_usdt:
             print(f"[{_now()}] WARNING: not enough USDT for one trade")
-        for sym in self.symbols:
-            f = self.client.symbol_filters(sym)
+        for sym in list(self.symbols):
+            try:
+                f = self.client.symbol_filters(sym)
+            except BinanceError as e:
+                # Not every coin is listed on every exchange (or on its demo).
+                # Skip it rather than refuse to trade the rest.
+                held = self.state["positions"].get(sym, {}).get("qty", 0) > 0
+                print(f"[{_now()}] {sym}: skipped, not tradable on this exchange ({e.msg})"
+                      + (" WARNING: state shows an open position" if held else ""))
+                self.symbols.remove(sym)
+                continue
             if self.trade_usdt < f["min_notional"]:
                 raise SystemExit(f"{sym}: per-trade size {self.trade_usdt} is below the exchange "
                                  f"minimum {f['min_notional']}")

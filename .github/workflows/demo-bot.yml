@@ -55,6 +55,7 @@ jobs:
           OKX_API_SECRET: ${{ secrets.OKX_API_SECRET }}
           OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
         run: |
+          set -o pipefail   # a crash inside `| tee` must fail the step, not pass silently
           if [ -z "$OKX_API_KEY" ]; then echo "OKX secrets not set; nothing to do"; exit 0; fi
           mkdir -p demo_state
           python -u -m tradebot live ${{ steps.coins.outputs.symbols }} \

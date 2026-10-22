@@ -22,8 +22,8 @@ class OppParams:
     fast: int = 20
     slow: int = 50
     trend: int = 200           # long-term EMA
-    rsi_lo: float = 45.0
-    rsi_hi: float = 65.0
+    rsi_lo: float = 40.0       # 45-65 was too tight: it excluded strong-momentum
+    rsi_hi: float = 80.0       # entries (docs/research-round7-2026-10-22.md)
     vol_period: int = 20
     atr_period: int = 14
     atr_min: float = 0.005     # ATR as a fraction of price: too quiet below this

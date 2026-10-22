@@ -39,7 +39,7 @@ point each:
 | 1 | `trend_up` | price above a rising 200-EMA |
 | 2 | `ema_aligned` | 20-EMA above 50-EMA |
 | 3 | `momentum` | MACD histogram positive and rising |
-| 4 | `rsi_zone` | RSI between 45 and 65 (strong, not overbought) |
+| 4 | `rsi_zone` | RSI between 40 and 80 (not oversold, not blow-off) |
 | 5 | `volume` | volume above its 20-bar average |
 | 6 | `volatility_ok` | ATR between 0.5% and 5% of price |
 | 7 | `breakout` | close above the previous 20-bar high |

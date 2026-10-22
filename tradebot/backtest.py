@@ -171,6 +171,9 @@ def run_opportunity(candles, strat, capital=1000.0):
                                    max(target, c.open) * (1 - SLIPPAGE), c.open_time, "take_profit", cash)
 
         if qty > 0:
+            # A strategy may ratchet the stop up as the trade works (trailing stop).
+            if hasattr(strat, "update_stop"):
+                stop = max(stop, strat.update_stop(i, stop))
             if strat.should_exit(i):
                 pending = (SELL, None)
         else:

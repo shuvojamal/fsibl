@@ -1,0 +1,23 @@
+venue: OKX DEMO
+free USDT: 87,036.33
+
+open positions: 0
+
+closed trades: 0, realised P&L: +0.00 USDT
+
+today's score (1d candles, need 5 of 8):
+     ADAUSDT   3/8  ema_aligned, rsi_zone, pullback
+     AVAXUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
+  ** BNBUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+  ** BTCUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+     DOGEUSDT  2/8  rsi_zone, pullback
+  ** ETHUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+     LINKUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
+  ** NEARUSDT  5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
+  ** PEPEUSDT  5/8  trend_up, ema_aligned, momentum, rsi_zone, volume
+  ** SOLUSDT   5/8  trend_up, ema_aligned, rsi_zone, volatility_ok, pullback
+     SUIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+     TRXUSDT   4/8  trend_up, rsi_zone, volatility_ok, pullback
+  ** UNIUSDT   5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
+  ** XRPUSDT   5/8  trend_up, rsi_zone, volume, volatility_ok, pullback
+  ** ZECUSDT   6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback

@@ -1,0 +1,6 @@
+time,symbol,side,qty,price,fee,reason,pnl_usdt,order_id
+2026-10-22 19:26:39 UTC,BNBUSDT,BUY,1.36338825,732.73299183,0.99999735,trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback,,4033068231502647296
+2026-10-22 19:26:41 UTC,BTCUSDT,BUY,0.01225942,81488.33658852,0.99986189,trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback,,4033068292705931264
+2026-10-22 19:26:44 UTC,ETHUSDT,BUY,0.4178837,2390.61618893,0.99999475,trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback,,4033068391959941120
+2026-10-22 19:26:48 UTC,NEARUSDT,BUY,201.94057003999998,4.94700000,0.99999999,trend_up+ema_aligned+rsi_zone+volume+pullback,,4033068509299789824
+2026-10-22 19:26:50 UTC,PEPEUSDT,BUY,226274065.434,0.00000442,1.00113250,trend_up+ema_aligned+momentum+rsi_zone+volume,,4033068590669287424

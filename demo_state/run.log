@@ -2,3 +2,13 @@
 [2026-10-22 19:21:20 UTC] free USDT: 87,036.33; per-trade size: 1,000.00
 [2026-10-22 19:23:36 UTC] connected to https://www.okx.com (clock offset -54 ms)
 [2026-10-22 19:23:36 UTC] free USDT: 87,036.33; per-trade size: 1,000.00
+[2026-10-22 19:26:33 UTC] connected to https://www.okx.com (clock offset -87 ms)
+[2026-10-22 19:26:33 UTC] free USDT: 87,036.33; per-trade size: 1,000.00
+[2026-10-22 19:26:36 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-22 19:26:39 UTC] BUY BNBUSDT 1.36338825 @ 732.7330 fee 1.0000 (trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback)  order 4033068231502647296
+[2026-10-22 19:26:41 UTC] BUY BTCUSDT 0.01225942 @ 81488.3366 fee 0.9999 (trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback)  order 4033068292705931264
+[2026-10-22 19:26:44 UTC] BUY ETHUSDT 0.4178837 @ 2390.6162 fee 1.0000 (trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback)  order 4033068391959941120
+[2026-10-22 19:26:48 UTC] BUY NEARUSDT 201.94057003999998 @ 4.9470 fee 1.0000 (trend_up+ema_aligned+rsi_zone+volume+pullback)  order 4033068509299789824
+[2026-10-22 19:26:50 UTC] BUY PEPEUSDT 226274065.434 @ 0.0000 fee 1.0011 (trend_up+ema_aligned+momentum+rsi_zone+volume)  order 4033068590669287424
+[2026-10-22 19:26:51 UTC] SOLUSDT: BUY skipped, 5 positions open (cap 5)
+[2026-10-22 19:26:54 UTC] UNIUSDT: BUY skipped, 5 positions open (cap 5)

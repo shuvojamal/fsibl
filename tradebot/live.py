@@ -63,10 +63,11 @@ class RiskGuard:
 
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
-                 guard_args, state_dir, dry_run=False, engine=None, adopt=True):
+                 guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
+        self.max_open = max_open  # cap on simultaneous positions; 0 = no cap
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -188,6 +189,11 @@ class LiveTrader:
         return spend
 
     def _open(self, sym, pos, plan, price):
+        if self.max_open:
+            open_now = sum(1 for p in self.state["positions"].values() if p["qty"] > 0)
+            if open_now >= self.max_open:
+                print(f"[{_now()}] {sym}: BUY skipped, {open_now} positions open (cap {self.max_open})")
+                return
         spend = self._spend(plan, price)
         if spend < self.client.symbol_filters(sym)["min_notional"]:
             print(f"[{_now()}] {sym}: risk-sized order {spend:.2f} USDT is below the exchange minimum")

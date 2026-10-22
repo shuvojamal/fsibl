@@ -181,6 +181,15 @@ class LiveTraderTests(unittest.TestCase):
             t.preflight()
         self.assertEqual(t.state["positions"]["BTCUSDT"]["qty"], 0.5)
 
+    def test_max_open_cap_blocks_new_buys(self):
+        t = self.trader(max_open=1)
+        t.state["positions"]["ETHUSDT"] = {"qty": 1.0, "entry": 100.0, "stop": 90.0,
+                                           "target": 1e9, "last_candle": 0}
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight()
+            t.step()
+        self.assertEqual(self.fake.orders, [])  # BTC buy signal, but one slot and it's taken
+
     def test_no_adopt_leaves_existing_coins_alone(self):
         self.fake.btc = 0.5
         t = self.trader(adopt=False)

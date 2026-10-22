@@ -64,8 +64,10 @@ With `live`, the opportunity strategy sizes each buy from the **whole
 account**: `--risk` (default 1%) of account equity is lost if the stop is
 hit, and `--trade-usdt` only caps the notional. Set the cap generously
 (e.g. `--trade-usdt 1000 --max-trade-usdt 1000` on a 5,000 USDT account)
-or the risk sizing never gets room to work. On one shared account, keep to
-about five coins; see `docs/research-round4-2026-10-22.md`.
+or the risk sizing never gets room to work. On one shared account, cap the
+number of simultaneous positions with `--max-open 5`; a long list of coins
+is fine as long as the cap holds (`docs/research-round4-2026-10-22.md`,
+`docs/research-round6-2026-10-22.md`).
 
 Use **daily candles**. On 1h and 4h candles the strategy loses money at
 every setting, mostly to fees; on daily candles it was profitable on

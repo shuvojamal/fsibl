@@ -102,6 +102,8 @@ def main():
     lv.add_argument("--state-dir", default="live_state")
     lv.add_argument("--exchange", choices=["binance", "okx"], default="binance",
                     help="binance: Spot Testnet / live; okx: demo trading / live")
+    lv.add_argument("--max-open", type=int, default=0,
+                    help="cap on simultaneous open positions across all symbols (0 = no cap)")
     lv.add_argument("--no-adopt", action="store_true",
                     help="leave coins already in the account alone instead of managing them as positions")
     lv.add_argument("--dry-run", action="store_true", help="connect and decide, but place no orders")
@@ -148,7 +150,8 @@ def main():
             client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
         trader = LiveTrader(client, a.symbols, a.interval, _params(a), a.trade_usdt,
                             (a.max_trade_usdt, a.max_daily_loss, a.kill_file), a.state_dir,
-                            dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt)
+                            dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt,
+                            max_open=a.max_open)
         trader.preflight()
         trader.run_forever()
     elif a.cmd == "test-order":

@@ -6,6 +6,7 @@ standard library (Python 3.9+) and **never places real orders**. It can:
 - **backtest**: replay the strategy over past candles, with fees (0.1% per side) and slippage
 - **optimize**: tune the settings on older data, then test them on newer data they never saw
 - **paper**: trade live prices with fake money, saving positions to `paper_state/`
+- **arb**: scan nine exchanges for cross-exchange price gaps and paper-trade them (see below)
 
 Price data comes from Binance's public market-data API
 (`data-api.binance.vision`). No API key or account is needed.
@@ -27,6 +28,30 @@ python -m tradebot optimize BTCUSDT --interval 1h
 python -m tradebot paper BTCUSDT ETHUSDT --capital 1000 --fast 12 --slow 26
 python -m unittest discover -s tests
 ```
+
+## Cross-exchange arbitrage (`arb`)
+
+```bash
+python -m tradebot arb BTCUSDT ETHUSDT SOLUSDT --poll 3            # scan until Ctrl+C
+python -m tradebot arb BTCUSDT --exchanges binance okx mexc --seconds 600
+```
+
+Every few seconds the scanner fetches the best bid and ask for each coin on
+Binance, Kraken, Coinbase, OKX, KuCoin, Gate, Bitget, MEXC and HTX (public
+endpoints, no keys). For every pair of exchanges it computes
+
+    gross gap = sell-side bid / buy-side ask − 1
+    net gap   = gross gap − taker fee on each side
+
+and prints the widest one. A gap whose net is positive is paper-traded, sized
+to the smaller of the two top-of-book quantities. Every scan is appended to
+`arb_logs/scans.csv`, every paper trade to `arb_logs/arb_trades.csv`.
+
+Paper mode assumes you already hold USDT *and* the coin on every exchange,
+because moving coins between exchanges takes minutes and costs a withdrawal
+fee, and the gap is gone long before the transfer lands.
+
+**What a 5-minute scan over 10 coins found:** see `docs/arb-scan-2026-10-22.md`.
 
 ## Results so far (1h candles, Mar–Oct 2026)
 

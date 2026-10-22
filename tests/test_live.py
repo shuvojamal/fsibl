@@ -189,6 +189,44 @@ class LiveTraderTests(unittest.TestCase):
         self.assertEqual(t.state["positions"]["BTCUSDT"]["qty"], 0.0)
 
 
+class RiskSizedLiveTests(unittest.TestCase):
+    """The opportunity engine sizes each buy from the whole account, not the per-trade cap."""
+
+    def test_spend_is_risk_fraction_of_account_equity(self):
+        from tradebot.engines import OpportunityEngine
+        from tradebot.opportunity import OppParams
+        from tests.test_opportunity import uptrend
+        fake = FakeBinance(usdt=1000.0)
+        d = tempfile.mkdtemp()
+        engine = OpportunityEngine(OppParams(min_score=0, risk_frac=0.01))
+        t = LiveTrader(client(fake), ["BTCUSDT"], "1d", Params(), trade_usdt=5000,
+                       guard_args=(5000, 1000, os.path.join(d, "STOP")), state_dir=d, engine=engine)
+        candles = uptrend()
+        action = engine.decide(candles, in_position=False)
+        price, stop = candles[-1].close, action[1].stop
+        with mock.patch("tradebot.live.fetch_candles", return_value=candles):
+            t.preflight()
+            t.step()
+        self.assertEqual(len(fake.orders), 1)
+        spent = float(fake.orders[0]["quoteOrderQty"])
+        expected = 1000.0 * 0.01 / (price - stop) * price  # lose 1% of 1000 USDT at the stop
+        self.assertAlmostEqual(spent, expected, places=1)
+
+    def test_per_trade_size_caps_the_risk_sizing(self):
+        from tradebot.engines import OpportunityEngine
+        from tradebot.opportunity import OppParams
+        from tests.test_opportunity import uptrend
+        fake = FakeBinance(usdt=1000.0)
+        d = tempfile.mkdtemp()
+        engine = OpportunityEngine(OppParams(min_score=0, risk_frac=0.01))
+        t = LiveTrader(client(fake), ["BTCUSDT"], "1d", Params(), trade_usdt=30,
+                       guard_args=(50, 1000, os.path.join(d, "STOP")), state_dir=d, engine=engine)
+        with mock.patch("tradebot.live.fetch_candles", return_value=uptrend()):
+            t.preflight()
+            t.step()
+        self.assertEqual(float(fake.orders[0]["quoteOrderQty"]), 30.0)
+
+
 class RiskGuardTests(unittest.TestCase):
     def test_daily_loss_limit(self):
         g = RiskGuard(50, 20, "/nonexistent/STOP", {})

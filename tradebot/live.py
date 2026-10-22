@@ -166,11 +166,25 @@ class LiveTrader:
         elif action and action[0] == "sell":
             self._close(sym, pos, action[1])
 
+    def _equity(self):
+        """Account value in USDT: free USDT plus open positions at their last price."""
+        total = self.client.balances().get("USDT", 0.0)
+        for sym, pos in self.state["positions"].items():
+            if pos["qty"] > 0:
+                total += pos["qty"] * self.client.price(sym)
+        return total
+
     def _spend(self, plan, price):
-        """USDT to spend: the per-trade size, reduced by risk-based sizing if the engine has it."""
+        """USDT to spend on this buy.
+
+        Engines with risk-based sizing (the opportunity scorer) size the trade
+        so that hitting the stop loses `risk_frac` of the whole account; the
+        per-trade size then acts only as a cap. Other engines spend the
+        per-trade size outright.
+        """
         spend = self.trade_usdt
         if hasattr(self.engine, "size"):
-            spend = min(spend, self.engine.size(self.trade_usdt, price, plan.stop) * price)
+            spend = min(spend, self.engine.size(self._equity(), price, plan.stop) * price)
         return spend
 
     def _open(self, sym, pos, plan, price):

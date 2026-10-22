@@ -25,6 +25,8 @@ OKX_URL = "https://www.okx.com"
 
 
 def http_transport(method, url, headers, body):
+    # OKX answers 403 to Python's default User-Agent.
+    headers = {"User-Agent": "tradebot/0.1", **headers}
     req = urllib.request.Request(url, data=body, headers=headers, method=method)
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
@@ -78,7 +80,10 @@ class OKXClient:
                             "OK-ACCESS-TIMESTAMP": ts, "OK-ACCESS-PASSPHRASE": self.passphrase})
         status, raw = self.transport(method, self.base_url + request_path, headers,
                                      payload.encode() if payload else None)
-        data = json.loads(raw) if raw else {}
+        try:
+            data = json.loads(raw) if raw else {}
+        except ValueError:
+            raise BinanceError(status, None, f"non-JSON reply from OKX: {raw[:120]!r}")
         code = str(data.get("code", "0")) if isinstance(data, dict) else "?"
         if status >= 400 or code != "0":
             msg = data.get("msg", "") if isinstance(data, dict) else raw[:200]

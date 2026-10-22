@@ -49,14 +49,14 @@ def report(client, state_dir, symbols, interval="1d", params=None, lines=None):
             price = client.price(s) if client is not None else fetch_candles(s, interval, 2)[-1].close
             pnl = (price - q["entry"]) * q["qty"]
             total_unreal += pnl
-            out.append(f"  {s:9} {q['qty']:>14.6f} {q['entry']:>12.4f} {price:>12.4f} {q['stop']:>12.4f} "
+            out.append(f"  {s:9} {q['qty']:>14.6f} {q['entry']:>12.6g} {price:>12.6g} {q['stop']:>12.6g} "
                        f"{pnl:>+9.2f} {price / q['entry'] - 1:>+7.2%} {q['stop'] / price - 1:>+8.2%}")
         out.append(f"  unrealised total: {total_unreal:+.2f} USDT")
 
     n, pnl, rows = realised(state_dir)
     out.append(f"\nclosed trades: {n}, realised P&L: {pnl:+.2f} USDT")
     for r in rows[-10:]:
-        out.append(f"  {r['time']} {r['side']:4} {r['symbol']:9} {float(r['qty']):.6f} @ {float(r['price']):.4f} "
+        out.append(f"  {r['time']} {r['side']:4} {r['symbol']:9} {float(r['qty']):.6f} @ {float(r['price']):.6g} "
                    f"{r['reason']} {r.get('pnl_usdt', '')}")
 
     out.append(f"\ntoday's score ({interval} candles, need {p.min_score} of {Opportunity.CHECKS}):")

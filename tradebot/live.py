@@ -261,7 +261,7 @@ class LiveTrader:
 
     def _log(self, sym, side, qty, price, fee, reason, pnl, order_id):
         pnl_s = "" if pnl is None else f"{pnl:+.4f}"
-        print(f"[{_now()}] {side} {sym} {qty} @ {price:.4f} fee {fee:.4f} ({reason}) "
+        print(f"[{_now()}] {side} {sym} {qty} @ {price:.6g} fee {fee:.4f} ({reason}) "
               f"{pnl_s} order {order_id}")
         new = not os.path.exists(self.trades_path)
         with open(self.trades_path, "a", newline="") as f:

@@ -12,7 +12,7 @@ from tradebot.opportunity import Opportunity, OppParams
 from tradebot.backtest import FEE, SLIPPAGE
 src = open(f'{HERE}/research9.py').read()
 # reuse pool loading and quarterly ranking from round 9, without its experiments
-ns = {}
+ns = {'__file__': _os.path.join(HERE, 'research9.py')}
 exec(src.split("WINDOWS = ")[0], ns)
 pool, top_n = ns['pool'], ns['top_n']
 

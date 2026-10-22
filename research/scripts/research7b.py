@@ -14,7 +14,7 @@ import importlib.util
 spec = importlib.util.spec_from_file_location('r7', f'{HERE}/research7.py')
 # reuse research7's portfolio() without re-running its experiments: exec only the needed defs
 src = open(f'{HERE}/research7.py').read().split("WINDOWS = ")[0]
-ns = {}
+ns = {'__file__': _os.path.join(HERE, 'research7.py')}
 exec(src, ns)
 portfolio, Ablated = ns['portfolio'], ns['Ablated']
 

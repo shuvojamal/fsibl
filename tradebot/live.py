@@ -144,9 +144,20 @@ class LiveTrader:
     # -- main loop --------------------------------------------------------
 
     def step(self):
+        # Exits first, then buys: when more coins signal than there are free
+        # slots, the highest-scoring ones get them (research round 11).
+        buys = []
         for sym in self.symbols:
             try:
-                self._step_symbol(sym)
+                buy = self._step_symbol(sym)
+                if buy:
+                    buys.append(buy)
+            except (OSError, BinanceError) as e:
+                print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
+        buys.sort(key=lambda b: -b[2].score)
+        for sym, pos, plan, price in buys:
+            try:
+                self._open(sym, pos, plan, price)
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
         self._save()
@@ -156,14 +167,16 @@ class LiveTrader:
         candles = fetch_candles(sym, self.interval, self.engine.history)
         last = candles[-1]
         if last.open_time == pos["last_candle"]:
-            return
+            return None
         pos["last_candle"] = last.open_time
 
         if pos["qty"] > 0:
             if last.low <= pos["stop"]:
-                return self._close(sym, pos, "stop_loss")
+                self._close(sym, pos, "stop_loss")
+                return None
             if last.high >= pos["target"]:
-                return self._close(sym, pos, "take_profit")
+                self._close(sym, pos, "take_profit")
+                return None
             if hasattr(self.engine, "trail_stop"):
                 new_stop = self.engine.trail_stop(candles, pos)
                 if new_stop > pos["stop"]:
@@ -172,9 +185,10 @@ class LiveTrader:
 
         action = self.engine.decide(candles, pos["qty"] > 0)
         if action and action[0] == "buy":
-            self._open(sym, pos, action[1], last.close)
-        elif action and action[0] == "sell":
+            return (sym, pos, action[1], last.close)  # opened by step(), best score first
+        if action and action[0] == "sell":
             self._close(sym, pos, action[1])
+        return None
 
     def _equity(self):
         """Account value in USDT: free USDT plus open positions at their last price."""

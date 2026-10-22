@@ -27,6 +27,7 @@ research/
 | 8 | `research8.py` | `research8.out` | `docs/research-round8-…` | `fc95fc3` | Time exits, re-entry cooldown, third coin universe |
 | 9 | `research9.py` | `research9.out` | `docs/research-round9-…` | `e744b5a` | Volume-ranked universe rule (no hindsight) |
 | 10 | `research10.py` | `research10.out` | `docs/research-round10-…` | `02d7b0b` | Partial profit-taking |
+| 11 | `research11.py` | `research11.out` | `docs/research-round11-…` | `c2f1495` | Which signal gets a free slot; cost of checking stops once a day |
 
 Earlier experiments:
 - **Cross-exchange arbitrage** (9 exchanges, 10 coins): `results/arbitrage/`,

@@ -236,6 +236,35 @@ class RiskSizedLiveTests(unittest.TestCase):
         self.assertEqual(float(fake.orders[0]["quoteOrderQty"]), 30.0)
 
 
+class SlotPriorityTests(unittest.TestCase):
+    def test_highest_score_gets_the_last_free_slot(self):
+        from tradebot.opportunity import Plan
+
+        class FixedEngine:
+            history = 50
+            scores = {"BTCUSDT": 5, "ETHUSDT": 7}
+
+            def decide(self, candles, in_position):
+                return ("buy", Plan(candles[-1].close * 0.9, 1e12, self.sym_score, ["x"]))
+
+        engine = FixedEngine()
+        fake = FakeBinance(price=100.0)
+        d = tempfile.mkdtemp()
+        t = LiveTrader(client(fake), ["BTCUSDT", "ETHUSDT"], "1d", Params(), trade_usdt=20,
+                       guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d,
+                       engine=engine, max_open=1)
+
+        def fetch(sym, interval, n):
+            engine.sym_score = engine.scores[sym]
+            return trending_candles()
+
+        with mock.patch("tradebot.live.fetch_candles", side_effect=fetch):
+            t.preflight()
+            t.step()
+        self.assertEqual(len(fake.orders), 1)
+        self.assertEqual(fake.orders[0]["symbol"], "ETHUSDT")  # score 7 beats score 5
+
+
 class RiskGuardTests(unittest.TestCase):
     def test_daily_loss_limit(self):
         g = RiskGuard(50, 20, "/nonexistent/STOP", {})

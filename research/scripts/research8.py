@@ -14,7 +14,7 @@ sys.path.insert(0, ROOT)
 from tradebot.data import fetch_candles
 from tradebot.opportunity import Opportunity, OppParams
 src = open(f'{HERE}/research7.py').read().split("WINDOWS = ")[0]
-ns = {}; exec(src, ns)
+ns = {'__file__': _os.path.join(HERE, 'research7.py')}; exec(src, ns)
 orig = pickle.load(open(f'{OUT}/daily10.pkl', 'rb')); new = pickle.load(open(f'{OUT}/daily_new10.pkl', 'rb'))
 THIRD = "SHIBUSDT SANDUSDT MANAUSDT AXSUSDT EOSUSDT VETUSDT HBARUSDT ICPUSDT GRTUSDT THETAUSDT".split()
 cache = f'{OUT}/daily_third10.pkl'

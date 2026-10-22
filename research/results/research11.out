@@ -1,0 +1,15 @@
+Top 15 by volume, max 5 open, 1% risk. Cells: return, max DD, profit factor.
+
+variant                                |              full 4y |         from 2024-10 |         from 2025-07 |         from 2025-12
+# A. which signal gets a free slot (stops fill at the stop price)
+pool order (earlier backtests)         | +136.9% -28.3% 1.62 |  +59.1% -28.3% 1.42 |  +36.7% -17.1% 1.54 |  +24.9% -17.2% 1.42
+alphabetical (live bot until now)      | +172.4% -28.2% 1.73 |  +59.6% -28.2% 1.43 |  +39.7% -15.0% 1.62 |  +28.4% -14.9% 1.56
+highest score first                    | +160.8% -29.3% 1.68 |  +55.2% -29.3% 1.38 |  +39.1% -14.9% 1.59 |  +27.1% -14.9% 1.49
+most-traded first                      | +151.2% -30.0% 1.63 |  +57.3% -30.0% 1.39 |  +32.7% -17.1% 1.43 |  +25.5% -17.2% 1.41
+strongest 20-day trend first           | +133.9% -30.1% 1.54 |  +54.7% -30.1% 1.34 |  +35.0% -17.1% 1.41 |  +29.5% -15.2% 1.46
+random order (10 seeds: mean [min..max]) | +134.4% [+111%..+165%] |  +53.5% [+44%..+65%] |  +33.9% [+29%..+42%] |  +24.0% [+21%..+28%]
+
+# B. stop execution (alphabetical order)
+exchange stop order (fills at stop)    | +172.4% -28.2% 1.73 |  +59.6% -28.2% 1.43 |  +39.7% -15.0% 1.62 |  +28.4% -14.9% 1.56
+checked at daily close                 | +213.5% -22.9% 1.81 |  +76.6% -22.9% 1.53 |  +37.4% -19.1% 1.52 |  +22.5% -19.3% 1.34
+checked next morning (sells at open)   | +213.8% -22.9% 1.81 |  +76.6% -22.9% 1.53 |  +37.4% -19.1% 1.52 |  +22.5% -19.3% 1.34

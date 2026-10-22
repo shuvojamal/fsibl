@@ -141,8 +141,13 @@ def optimize(candles, train_frac=0.7, min_trades=5):
     return best[0], best[1], run(test, best[0])
 
 
-def run_opportunity(candles, strat, capital=1000.0):
-    """Replay an Opportunity strategy: per-trade ATR stop/target, risk-sized."""
+def run_opportunity(candles, strat, capital=1000.0, start=0):
+    """Replay an Opportunity strategy: per-trade ATR stop/target, risk-sized.
+
+    `start` begins trading at that candle index while the indicators warm up
+    on everything before it, so a test window is not blind for its first 200
+    days (the 200-EMA warm-up).
+    """
     strat.prepare(candles)
     res = Result(start_capital=capital)
     cash, qty, entry, entry_time = capital, 0.0, 0.0, 0
@@ -150,6 +155,8 @@ def run_opportunity(candles, strat, capital=1000.0):
     pending = None  # (action, plan) decided on the previous close
 
     for i, c in enumerate(candles):
+        if i < start:
+            continue
         if pending and pending[0] == BUY and qty == 0:
             plan = pending[1]
             entry = c.open * (1 + SLIPPAGE)
@@ -188,5 +195,5 @@ def run_opportunity(candles, strat, capital=1000.0):
                            last.close_time, "end", cash)
         res.equity[-1] = cash
     if candles:
-        res.buy_hold_return = candles[-1].close / candles[0].open * (1 - FEE) ** 2 - 1
+        res.buy_hold_return = candles[-1].close / candles[start].open * (1 - FEE) ** 2 - 1
     return res

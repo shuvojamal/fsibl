@@ -154,6 +154,11 @@ class LiveTrader:
                 return self._close(sym, pos, "stop_loss")
             if last.high >= pos["target"]:
                 return self._close(sym, pos, "take_profit")
+            if hasattr(self.engine, "trail_stop"):
+                new_stop = self.engine.trail_stop(candles, pos)
+                if new_stop > pos["stop"]:
+                    print(f"[{_now()}] {sym}: stop raised {pos['stop']:.4f} -> {new_stop:.4f}")
+                    pos["stop"] = new_stop
 
         action = self.engine.decide(candles, pos["qty"] > 0)
         if action and action[0] == "buy":

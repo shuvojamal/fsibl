@@ -51,6 +51,13 @@ class OpportunityEngine:
     def size(self, equity, price, stop):
         return self.strat.size(equity, price, stop)
 
+    def trail_stop(self, candles, pos):
+        """New stop for an open position after the latest closed candle (never lower)."""
+        s = self.strat.prepare(candles)
+        s.peak = max(pos.get("peak") or pos["entry"], candles[-1].close)
+        pos["peak"] = s.peak
+        return s.update_stop(len(candles) - 1, pos["stop"])
+
 
 def make_engine(name, ema_params=None, opp_params=None):
     if name == "opportunity":

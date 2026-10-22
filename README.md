@@ -45,12 +45,14 @@ point each:
 | 7 | `breakout` | close above the previous 20-bar high |
 | 8 | `pullback` | price within 1 ATR of the 20-EMA |
 
-A trade needs `--min-score` of them (default 5). The stop is 2×ATR below
-entry, the target 2× the stop distance above it (2:1 reward-to-risk), and
-the position is sized so that hitting the stop loses `--risk` of equity
-(default 1%). The exit is the stop, the target, or the 20/50 EMA turning
-down. Every log line names the checks that passed, so you can see *why*
-the bot bought.
+A trade needs `--min-score` of them (default 5). The initial stop is 2×ATR
+below entry, and the position is sized so that hitting it loses `--risk`
+of equity (default 1%). The exit is a **trailing stop**: after each daily
+close the stop is raised to the highest close since entry minus 3×ATR, and
+never lowered, so a real trend can pay many times the initial risk while a
+failed one costs about 1%. (`trail_atr=0` in `OppParams` restores the older
+fixed 3:1 target plus EMA-cross exit.) Every log line names the checks
+that passed, so you can see *why* the bot bought.
 
 ```bash
 python -m tradebot backtest BTCUSDT ETHUSDT --strategy opportunity --interval 1d --candles 1500

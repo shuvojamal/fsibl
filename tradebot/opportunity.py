@@ -2,10 +2,15 @@
 
 Each check is a classic technical-analysis condition. They are scored one
 point each, and a trade is only taken when the total reaches `min_score`.
-Stops and targets come from ATR (volatility), not fixed percentages, so a
-quiet market gets a tight stop and a wild one a wide stop. Position size is
+Stops come from ATR (volatility), not fixed percentages, so a quiet market
+gets a tight stop and a wild one a wide stop. Position size is
 fixed-fractional: a set fraction of equity is risked per trade, so the bot
 buys fewer coins when the stop is far away.
+
+Exit: by default a trailing ("chandelier") stop that follows the highest
+close since entry minus `trail_atr` ATRs, which lets a real trend pay far
+more than a fixed target. With `trail_atr=0` the older exit applies: a
+fixed `reward_risk` target plus the fast/slow EMA turning down.
 """
 from dataclasses import dataclass, field
 
@@ -24,9 +29,9 @@ class OppParams:
     atr_min: float = 0.005     # ATR as a fraction of price: too quiet below this
     atr_max: float = 0.05      # ...and too wild above this
     breakout: int = 20
-    stop_atr: float = 2.0      # stop = entry - stop_atr * ATR
-    reward_risk: float = 3.0   # target = entry + reward_risk * (entry - stop); 3:1 held up
-                               # best across 10 coins in docs/research-round1-2026-10-22.md
+    stop_atr: float = 2.0      # initial stop = entry - stop_atr * ATR
+    trail_atr: float = 3.0     # trailing stop = highest close - trail_atr * ATR; 0 = off
+    reward_risk: float = 3.0   # only with trail_atr=0: target = entry + reward_risk * risk
     risk_frac: float = 0.01    # fraction of equity risked per trade
     min_score: int = 5         # out of 8
 
@@ -44,13 +49,17 @@ class Plan:
     reasons: list = field(default_factory=list)
 
 
+NO_TARGET = 1000.0  # multiplier: a target this far away never fills
+
+
 class Opportunity:
-    """Strategy object: prepare(candles) once, then signal(i) / should_exit(i)."""
+    """Strategy object: prepare(candles) once, then signal(i) / update_stop(i) / should_exit(i)."""
 
     CHECKS = 8
 
     def __init__(self, p=OppParams()):
         self.p = p
+        self.peak = None  # highest close since entry, for the trailing stop
 
     def prepare(self, candles):
         p = self.p
@@ -98,11 +107,24 @@ class Opportunity:
         stop = price - self.p.stop_atr * a
         if stop <= 0:
             return None
-        target = price + self.p.reward_risk * (price - stop)
+        if self.p.trail_atr > 0:
+            self.peak = price
+            target = price * NO_TARGET
+        else:
+            target = price + self.p.reward_risk * (price - stop)
         return Plan(stop, target, score, [n for n, ok in checks if ok])
 
+    def update_stop(self, i, stop):
+        """Trailing stop after candle i closes; never lower than the current stop."""
+        if self.p.trail_atr <= 0 or self.atr[i] is None:
+            return stop
+        self.peak = max(self.peak or 0.0, self.closes[i])
+        return max(stop, self.peak - self.p.trail_atr * self.atr[i])
+
     def should_exit(self, i):
-        """Trend has turned: fast EMA below slow EMA."""
+        """Without a trail: the trend has turned (fast EMA below slow EMA)."""
+        if self.p.trail_atr > 0:
+            return False
         return (self.fast[i] is not None and self.slow[i] is not None
                 and self.fast[i] < self.slow[i])
 

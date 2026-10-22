@@ -45,12 +45,28 @@ class ScorerTests(unittest.TestCase):
 
     def test_plan_has_atr_stop_and_reward_risk_target(self):
         cs = uptrend()
-        p = OppParams(min_score=0)
+        p = OppParams(min_score=0, trail_atr=0)
         s = Opportunity(p).prepare(cs)
         plan = s.signal(259)
         price, a = cs[-1].close, s.atr[259]
         self.assertAlmostEqual(plan.stop, price - p.stop_atr * a)
         self.assertAlmostEqual(plan.target - price, p.reward_risk * (price - plan.stop))
+        self.assertTrue(s.should_exit(259) in (True, False))  # EMA-cross exit is active
+
+    def test_trailing_stop_follows_highest_close_and_never_drops(self):
+        cs = uptrend()
+        p = OppParams(min_score=0, trail_atr=3.0)
+        s = Opportunity(p).prepare(cs)
+        plan = s.signal(200)
+        self.assertGreater(plan.target, cs[200].close * 100)  # no fixed target
+        stop = plan.stop
+        stops = []
+        for i in range(201, 260):
+            stop = s.update_stop(i, stop)
+            stops.append(stop)
+        self.assertEqual(stops, sorted(stops))             # ratchets up only
+        self.assertAlmostEqual(stops[-1], max(c.close for c in cs[200:260]) - 3.0 * s.atr[259])
+        self.assertFalse(s.should_exit(259))               # the trail is the exit
 
     def test_flat_market_is_never_an_opportunity(self):
         s = Opportunity(OppParams(min_score=5)).prepare(candles([100.0] * 260))

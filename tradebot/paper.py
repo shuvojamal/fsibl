@@ -67,6 +67,8 @@ class PaperTrader:
                     self._sell(sym, pos, min(pos["stop"], price), "stop_loss")
                 elif last.high >= pos["target"]:
                     self._sell(sym, pos, max(pos["target"], price), "take_profit")
+            if pos["qty"] > 0 and hasattr(self.engine, "trail_stop"):
+                pos["stop"] = self.engine.trail_stop(candles, pos)
             action = self.engine.decide(candles, pos["qty"] > 0)
             if action and action[0] == "buy":
                 self._buy(sym, pos, price, action[1])

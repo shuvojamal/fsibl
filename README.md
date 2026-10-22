@@ -177,6 +177,15 @@ until you add the three OKX demo secrets and set the repository variable
 it checks once a day, a stop is acted on at the next daily run, not the
 moment it is touched; expect fills somewhat worse than the backtest's.
 
+## Dashboard app (phone or browser)
+
+`dashboard/index.html` shows the bot live: equity and P&L (open positions
+priced every 15 s), all trades, today's signals, recent runs and the log,
+with **Pause / Resume** (no new trades; stops keep running) and **Run now**.
+It talks only to GitHub (with a fine-grained token kept on your device) and
+to Binance for prices. `.github/workflows/android.yml` wraps it in an Android
+app and publishes `TradebotDesk.apk` as the release **dashboard-latest**.
+
 **Going live** needs two flags, `--live --i-accept-the-risk`, and live-only
 API keys. On Binance, create a key with *Enable Spot Trading* only: no
 withdrawals, no margin, no futures, and restrict it to your IP. Start with

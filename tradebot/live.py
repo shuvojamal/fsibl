@@ -64,7 +64,7 @@ class RiskGuard:
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
                  guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
-                 capital=0.0, max_drawdown=0.0):
+                 capital=0.0, max_drawdown=0.0, pause_entries=False):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
@@ -76,6 +76,8 @@ class LiveTrader:
         # this far below its peak, no new positions until a human resets it.
         # Exits keep working. 0 = off.
         self.max_drawdown = max_drawdown
+        # Paused from the dashboard: no new positions, but stops and exits run.
+        self.pause_entries = pause_entries
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -168,6 +170,7 @@ class LiveTrader:
                 self._open(sym, pos, plan, price)
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
+        self._record_equity()
         self._save()
 
     def _step_symbol(self, sym):
@@ -197,6 +200,24 @@ class LiveTrader:
         if action and action[0] == "sell":
             self._close(sym, pos, action[1])
         return None
+
+    def _record_equity(self):
+        """Append one equity snapshot per run to equity.csv (used by the dashboard)."""
+        try:
+            eq = self._equity()
+        except (OSError, BinanceError) as e:
+            print(f"[{_now()}] equity snapshot skipped: {e}")
+            return
+        if self.max_drawdown:
+            self.state["equity_peak"] = max(self.state.get("equity_peak", eq), eq)
+        path = os.path.join(os.path.dirname(self.state_path), "equity.csv")
+        new = not os.path.exists(path)
+        open_n = sum(1 for p in self.state["positions"].values() if p["qty"] > 0)
+        with open(path, "a", newline="") as f:
+            w = csv.writer(f)
+            if new:
+                w.writerow(["time", "equity", "realised", "open_positions"])
+            w.writerow([_now(), f"{eq:.2f}", f"{self.state.get('realised', 0.0):.2f}", open_n])
 
     def _equity(self):
         """Account value in USDT for sizing.
@@ -252,6 +273,9 @@ class LiveTrader:
         return False
 
     def _open(self, sym, pos, plan, price):
+        if self.pause_entries:
+            print(f"[{_now()}] {sym}: BUY skipped, bot is paused (exits still run)")
+            return
         if self.drawdown_halted():
             print(f"[{_now()}] {sym}: BUY blocked: circuit breaker ({self.state['halted']})")
             return

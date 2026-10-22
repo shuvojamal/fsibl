@@ -258,6 +258,37 @@ class VirtualCapitalTests(unittest.TestCase):
         self.assertAlmostEqual(spent, expected, places=1)
 
 
+class PauseTests(unittest.TestCase):
+    def test_paused_bot_buys_nothing_but_records_equity(self):
+        fake = FakeBinance(price=100.0)
+        d = tempfile.mkdtemp()
+        t = LiveTrader(client(fake), ["BTCUSDT"], "1h",
+                       Params(fast=3, slow=10, rsi_max=101, take_profit=10), trade_usdt=20,
+                       guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d, pause_entries=True)
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight()
+            t.step()
+        self.assertEqual(fake.orders, [])
+        with open(os.path.join(d, "equity.csv")) as f:
+            rows = f.read().splitlines()
+        self.assertEqual(rows[0], "time,equity,realised,open_positions")
+        self.assertEqual(len(rows), 2)
+
+    def test_paused_bot_still_sells_on_stop(self):
+        fake = FakeBinance(price=100.0)
+        fake.btc = 1.0
+        d = tempfile.mkdtemp()
+        t = LiveTrader(client(fake), ["BTCUSDT"], "1h", Params(), trade_usdt=20,
+                       guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d,
+                       pause_entries=True, adopt=False)
+        t.state["positions"]["BTCUSDT"] = {"qty": 1.0, "entry": 150.0, "stop": 140.0,
+                                           "target": 1e9, "last_candle": 0}
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight()
+            t.step()
+        self.assertEqual([o["side"] for o in fake.orders], ["SELL"])
+
+
 class CircuitBreakerTests(unittest.TestCase):
     def _trader(self, d, fake):
         from tradebot.engines import OpportunityEngine

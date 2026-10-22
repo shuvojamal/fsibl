@@ -7,6 +7,8 @@
 #      Optional variable TRADEBOT_CAPITAL (default 5000): the account size the
 #      bot sizes trades for, so demo results match what you'd really trade.
 # To stop it: set TRADEBOT_ENABLED to anything else, or disable the workflow.
+# Pause from the dashboard app: it creates demo_state/PAUSED (no new entries;
+# stops and exits keep running). Resume deletes the file.
 name: demo-bot
 
 on:
@@ -64,13 +66,21 @@ jobs:
           set -o pipefail   # a crash inside `| tee` must fail the step, not pass silently
           if [ -z "$OKX_API_KEY" ]; then echo "OKX secrets not set; nothing to do"; exit 0; fi
           mkdir -p demo_state
+          PAUSE=""
+          if [ -f demo_state/PAUSED ]; then PAUSE="--pause-entries"; echo "PAUSED from the dashboard: no new entries, exits still run"; fi
           python -u -m tradebot live ${{ steps.coins.outputs.symbols }} \
             --exchange okx --strategy opportunity --interval 1d \
             --risk 0.01 --capital "$CAPITAL" --trade-usdt "$CAPITAL" --max-trade-usdt "$CAPITAL" \
             --max-daily-loss "$(python -c "print($CAPITAL * 0.03)")" \
-            --max-drawdown 0.35 --max-open 5 --no-adopt --state-dir demo_state --once | tee -a demo_state/run.log
+            --max-drawdown 0.35 --max-open 5 --no-adopt --state-dir demo_state --once $PAUSE | tee -a demo_state/run.log
           python -m tradebot report ${{ steps.coins.outputs.symbols }} \
             --exchange okx --state-dir demo_state | tee demo_state/report.txt
+          python - <<EOF
+          import json, datetime
+          json.dump({"time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+                     "capital": float("$CAPITAL"), "symbols": "${{ steps.coins.outputs.symbols }}".split(),
+                     "paused": bool("$PAUSE")}, open("demo_state/last_run.json", "w"), indent=2)
+          EOF
 
       - name: Save state
         run: |
@@ -78,4 +88,5 @@ jobs:
           git config user.email "tradebot@users.noreply.github.com"
           git add demo_state
           git diff --cached --quiet || git commit -m "demo-bot: daily run $(date -u +%F)"
+          git pull --rebase   # the dashboard may have paused/resumed meanwhile
           git push

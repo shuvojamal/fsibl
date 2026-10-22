@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10161f">
+<title>Tradebot Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column, a sticky status bar with the controls, then summary → positions → trades → signals → runs. */
+:root {
+  --bg: #10161f; --panel: #17202c; --line: #263244; --fg: #e3e9f1; --muted: #8a97a8;
+  --accent: #e0a63c; --up: #3fbf7f; --down: #e5604f; --warn: #e0a63c;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f3f5f8; --panel: #ffffff; --line: #d9dfe7; --fg: #16202c; --muted: #5c6878;
+  --accent: #a86b00; --up: #13804d; --down: #c23b2c; --warn: #a86b00; color-scheme: light } }
+:root[data-theme="light"] {
+  --bg: #f3f5f8; --panel: #ffffff; --line: #d9dfe7; --fg: #16202c; --muted: #5c6878;
+  --accent: #a86b00; --up: #13804d; --down: #c23b2c; --warn: #a86b00; color-scheme: light }
+* { box-sizing: border-box }
+html, body { margin: 0 }
+body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans);
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px) }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--panel); z-index: 10 }
+.wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 40px }
+header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--panel);
+  border-bottom: 1px solid var(--line) }
+header.bar .wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-block: 10px }
+h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: .01em }
+.pill { font: 600 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 6px 9px;
+  border-radius: 999px; border: 1px solid currentColor }
+.pill.run { color: var(--up) } .pill.pause { color: var(--warn) } .pill.halt, .pill.err { color: var(--down) } .pill.idle { color: var(--muted) }
+.grow { flex: 1 }
+button { font: 600 14px var(--sans); color: var(--fg); background: transparent; border: 1px solid var(--line);
+  border-radius: 8px; padding: 9px 13px; cursor: pointer }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+button.primary { background: var(--accent); border-color: var(--accent); color: #1a1205 }
+button.danger { border-color: var(--down); color: var(--down) }
+button:disabled { opacity: .5; cursor: default }
+.confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; font-size: 14px; color: var(--muted) }
+section { margin-top: 22px }
+h2 { font: 600 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0 }
+.tile .k { color: var(--muted); font-size: 12px }
+.tile .v { font: 600 22px/1.2 var(--mono); font-variant-numeric: tabular-nums; margin-top: 4px; overflow-wrap: anywhere }
+.tile .s { font: 12px var(--mono); color: var(--muted); margin-top: 2px }
+.up { color: var(--up) } .down { color: var(--down) }
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-top: 10px }
+.chart svg { width: 100%; height: 160px; display: block }
+.scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px }
+table { width: 100%; border-collapse: collapse; font: 13px var(--mono); font-variant-numeric: tabular-nums }
+th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap }
+th { color: var(--muted); font-weight: 400; font-size: 11px; letter-spacing: .05em; text-transform: uppercase }
+th:first-child, td:first-child { text-align: left }
+tr:last-child td { border-bottom: 0 }
+.empty { color: var(--muted); padding: 14px; font-size: 14px }
+.note { color: var(--muted); font-size: 13px; margin-top: 8px }
+.msg { margin-top: 12px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); font-size: 14px }
+.msg.err { border-color: var(--down); color: var(--down) } .msg.ok { border-color: var(--up); color: var(--up) }
+form.setup { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; max-width: 560px }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--muted) }
+input { font: 14px var(--mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; width: 100% }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: 12px var(--mono); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line) }
+.chip.sig { border-color: var(--accent); color: var(--accent) } .chip.in { border-color: var(--up); color: var(--up) }
+a { color: var(--accent) }
+@media (prefers-reduced-motion: no-preference) { .live { animation: blink 2s ease-in-out infinite } }
+@keyframes blink { 50% { opacity: .35 } }
+</style>
+</head>
+<body>
+<header class="bar"><div class="wrap">
+  <h1>Tradebot Desk</h1>
+  <span id="status" class="pill idle">Not connected</span>
+  <span class="grow"></span>
+  <button id="btn-pause" hidden>Pause</button>
+  <button id="btn-resume" class="primary" hidden>Resume</button>
+  <button id="btn-run" hidden>Run now</button>
+  <button id="btn-refresh" hidden>Refresh</button>
+  <button id="btn-settings">Settings</button>
+  <div id="confirm" class="confirm" hidden></div>
+</div></header>
+
+<main class="wrap">
+  <div id="msg" hidden></div>
+
+  <section id="setup" hidden>
+    <h2>Connect to your bot</h2>
+    <form class="setup" id="setup-form">
+      <label for="f-token">GitHub token (fine-grained, this repo only)
+        <input id="f-token" type="password" autocomplete="off" placeholder="github_pat_…" required>
+      </label>
+      <label for="f-repo">Repository
+        <input id="f-repo" value="shuvojamal/binancebot" required>
+      </label>
+      <div><button class="primary" type="submit">Connect</button></div>
+      <div class="note">
+        Create the token at github.com → Settings → Developer settings → Fine-grained tokens.
+        Repository access: only <b>binancebot</b>. Permissions: <b>Contents: Read and write</b> (to pause/resume)
+        and <b>Actions: Read and write</b> (to see runs and press Run now). The token is kept only on this device
+        and is sent only to api.github.com.
+      </div>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <section>
+      <h2>Account <span id="live-dot" class="live" title="live prices">●</span></h2>
+      <div class="tiles">
+        <div class="tile"><div class="k">Bot equity</div><div class="v" id="t-equity">–</div><div class="s" id="t-capital">–</div></div>
+        <div class="tile"><div class="k">Total P&amp;L</div><div class="v" id="t-pnl">–</div><div class="s" id="t-pnlpct">–</div></div>
+        <div class="tile"><div class="k">Open P&amp;L (live)</div><div class="v" id="t-unreal">–</div><div class="s" id="t-open">–</div></div>
+        <div class="tile"><div class="k">Closed trades</div><div class="v" id="t-closed">–</div><div class="s" id="t-winrate">–</div></div>
+      </div>
+      <div class="chart"><svg id="chart" viewBox="0 0 600 160" preserveAspectRatio="none" role="img" aria-label="Equity history"></svg></div>
+      <div class="note" id="lastrun">–</div>
+    </section>
+
+    <section>
+      <h2>Open positions</h2>
+      <div class="scroll" id="positions"></div>
+      <div class="note">Prices update every 15 s from Binance. The bot itself acts once a day at 00:07 UTC (6:07 am Bangladesh): it sells anything below its stop, raises trailing stops and buys new signals.</div>
+    </section>
+
+    <section>
+      <h2>All trades</h2>
+      <div class="scroll" id="trades"></div>
+    </section>
+
+    <section>
+      <h2>Today's signals</h2>
+      <div class="chips" id="signals"></div>
+      <div class="note">Needs 5 of 8 checks to buy. <span class="chip in">IN</span> held, <span class="chip sig">5/8+</span> buy signal.</div>
+    </section>
+
+    <section>
+      <h2>Recent runs</h2>
+      <div class="scroll" id="runs"></div>
+    </section>
+
+    <section>
+      <h2>Bot log (latest lines)</h2>
+      <div class="scroll"><pre id="log" style="margin:0;padding:12px;font:12px/1.5 var(--mono);white-space:pre"></pre></div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k) } catch (e) { return null } },
+    set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k) } catch (e) {} },
+  };
+  let cfg = { token: store.get("tb_token"), repo: store.get("tb_repo") || "shuvojamal/binancebot" };
+  let data = {}, prices = {}, pausedSha = null, priceTimer = null;
+  const WORKFLOW = "demo-bot.yml", DIR = "demo_state";
+
+  function msg(text, kind) {
+    const m = $("msg");
+    if (!text) { m.hidden = true; return }
+    m.className = "msg " + (kind || ""); m.textContent = text; m.hidden = false;
+  }
+  const fmt = (n, d = 2) => (n == null || isNaN(n)) ? "–" : n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const signed = (n, d = 2) => (n == null || isNaN(n)) ? "–" : (n >= 0 ? "+" : "−") + fmt(Math.abs(n), d);
+  const px = n => n == null ? "–" : (n >= 100 ? fmt(n, 2) : n >= 1 ? fmt(n, 4) : Number(n).toPrecision(5));
+  const cls = n => n > 0 ? "up" : n < 0 ? "down" : "";
+
+  async function gh(path, opts = {}) {
+    const r = await fetch("https://api.github.com/repos/" + cfg.repo + path, {
+      ...opts,
+      headers: { "Authorization": "Bearer " + cfg.token, "Accept": opts.accept || "application/vnd.github+json",
+                 "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) },
+    });
+    if (r.status === 401) throw new Error("GitHub rejected the token (401). Open Settings and paste a valid token.");
+    if (r.status === 403) throw new Error("The token lacks permission (403). It needs Contents and Actions access to " + cfg.repo + ".");
+    return r;
+  }
+  async function file(name, raw = true) {
+    const r = await gh(`/contents/${DIR}/${name}?ref=main&t=${Date.now()}`, { accept: raw ? "application/vnd.github.raw+json" : undefined });
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`Could not read ${name} (HTTP ${r.status}).`);
+    return raw ? r.text() : r.json();
+  }
+  const csv = text => {
+    if (!text) return [];
+    const [head, ...rows] = text.trim().split(/\r?\n/);
+    const keys = head.split(",");
+    return rows.filter(Boolean).map(l => { const v = l.split(","); return Object.fromEntries(keys.map((k, i) => [k, v[i]])) });
+  };
+
+  async function load() {
+    msg("");
+    $("btn-refresh").disabled = true;
+    try {
+      const [state, trades, equity, report, last, log, paused, runs] = await Promise.all([
+        file("live_state.json"), file("live_trades.csv"), file("equity.csv"), file("report.txt"),
+        file("last_run.json"), file("run.log"), file("PAUSED", false),
+        gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : { workflow_runs: [] }),
+      ]);
+      data = {
+        state: state ? JSON.parse(state) : { positions: {} },
+        trades: csv(trades), equity: csv(equity), report: report || "", last: last ? JSON.parse(last) : {},
+        log: log || "", runs: runs.workflow_runs || [],
+      };
+      pausedSha = paused ? paused.sha : null;
+      render();
+      await refreshPrices();
+    } catch (e) {
+      msg(e.message, "err"); setStatus("err", "Error");
+    } finally { $("btn-refresh").disabled = false }
+  }
+
+  function heldPositions() {
+    return Object.entries((data.state && data.state.positions) || {}).filter(([, p]) => p.qty > 0);
+  }
+
+  async function refreshPrices() {
+    const held = heldPositions();
+    if (!held.length) { renderMoney(); return }
+    try {
+      const syms = JSON.stringify(held.map(([s]) => s));
+      const r = await fetch("https://data-api.binance.vision/api/v3/ticker/price?symbols=" + encodeURIComponent(syms));
+      if (r.ok) for (const t of await r.json()) prices[t.symbol] = parseFloat(t.price);
+      $("live-dot").style.color = "var(--up)";
+    } catch (e) { $("live-dot").style.color = "var(--down)" }
+    renderPositions(); renderMoney();
+  }
+
+  function setStatus(kind, text) { const s = $("status"); s.className = "pill " + kind; s.textContent = text }
+
+  function render() {
+    const st = data.state;
+    if (st.halted) setStatus("halt", "Circuit breaker");
+    else if (pausedSha) setStatus("pause", "Paused");
+    else setStatus("run", "Running");
+    $("btn-pause").hidden = !!pausedSha; $("btn-resume").hidden = !pausedSha;
+    for (const id of ["btn-run", "btn-refresh"]) $(id).hidden = false;
+    const last = data.last.time || (data.equity.length ? data.equity[data.equity.length - 1].time : null);
+    $("lastrun").textContent = (last ? "Last bot run: " + last + ". " : "No bot run recorded yet. ") +
+      (st.halted ? "Circuit breaker: " + st.halted : pausedSha ? "Paused: no new trades, stops still run." : "");
+    renderPositions(); renderTrades(); renderSignals(); renderRuns(); renderMoney();
+    $("log").textContent = data.log.trim().split("\n").slice(-25).join("\n") || "No log yet.";
+  }
+
+  function renderPositions() {
+    const held = heldPositions();
+    if (!held.length) { $("positions").innerHTML = '<div class="empty">No open positions.</div>'; return }
+    let rows = "";
+    for (const [s, p] of held) {
+      const now = prices[s], pnl = now != null ? (now - p.entry) * p.qty : null;
+      const pct = now != null ? now / p.entry - 1 : null, toStop = now != null ? p.stop / now - 1 : null;
+      rows += `<tr><td>${s.replace("USDT", "")}</td><td>${px(p.entry)}</td><td>${px(now)}</td><td>${px(p.stop)}</td>
+        <td class="${cls(pnl)}">${signed(pnl)}</td><td class="${cls(pct)}">${pct == null ? "–" : signed(pct * 100, 1) + "%"}</td>
+        <td>${toStop == null ? "–" : fmt(toStop * 100, 1) + "%"}</td><td>${fmt(p.entry * p.qty)}</td></tr>`;
+    }
+    $("positions").innerHTML = `<table><thead><tr><th>Coin</th><th>Entry</th><th>Now</th><th>Stop</th><th>P&amp;L $</th><th>P&amp;L %</th><th>To stop</th><th>Size $</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderTrades() {
+    const t = data.trades.slice().reverse();
+    if (!t.length) { $("trades").innerHTML = '<div class="empty">No trades yet.</div>'; return }
+    const rows = t.map(r => {
+      const pnl = r.pnl_usdt ? parseFloat(r.pnl_usdt) : null;
+      return `<tr><td>${(r.time || "").replace(" UTC", "")}</td><td class="${r.side === "BUY" ? "" : "down"}">${r.side}</td>
+        <td>${(r.symbol || "").replace("USDT", "")}</td><td>${px(parseFloat(r.price))}</td><td>${fmt(parseFloat(r.qty) * parseFloat(r.price))}</td>
+        <td class="${cls(pnl)}">${pnl == null ? "" : signed(pnl)}</td><td style="text-align:left">${(r.reason || "").replace(/\+/g, " ")}</td></tr>`;
+    }).join("");
+    $("trades").innerHTML = `<table><thead><tr><th>Time (UTC)</th><th>Side</th><th>Coin</th><th>Price</th><th>Value $</th><th>P&amp;L $</th><th style="text-align:left">Reason</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderSignals() {
+    const part = data.report.split("today's score")[1] || "";
+    const items = part.split("\n").slice(1).map(l => l.match(/^\s*(IN|\*\*)?\s*([A-Z0-9]+)USDT\s+(\d)\/8/)).filter(Boolean);
+    $("signals").innerHTML = items.length ? items.map(([, flag, sym, sc]) =>
+      `<span class="chip ${flag === "IN" ? "in" : +sc >= 5 ? "sig" : ""}">${sym} ${sc}/8${flag === "IN" ? " · IN" : ""}</span>`).join("")
+      : '<span class="note">No scan yet.</span>';
+  }
+
+  function renderRuns() {
+    const runs = data.runs;
+    if (!runs.length) { $("runs").innerHTML = '<div class="empty">No runs found (the token may lack Actions access).</div>'; return }
+    const rows = runs.map(r => {
+      const res = r.status !== "completed" ? r.status.replace("_", " ") : r.conclusion;
+      const c = res === "success" ? "up" : res === "failure" ? "down" : "";
+      return `<tr><td>${new Date(r.created_at).toISOString().slice(0, 16).replace("T", " ")}</td><td>${r.event === "schedule" ? "daily" : "manual"}</td>
+        <td class="${c}">${res}</td><td><a href="${r.html_url}" target="_blank" rel="noopener">open</a></td></tr>`;
+    }).join("");
+    $("runs").innerHTML = `<table><thead><tr><th>Started (UTC)</th><th>Trigger</th><th>Result</th><th>Log</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderMoney() {
+    const st = data.state || {}, capital = data.last.capital || 5000, realised = st.realised || 0;
+    const held = heldPositions();
+    let unreal = 0, known = true;
+    for (const [s, p] of held) { if (prices[s] == null) known = false; else unreal += (prices[s] - p.entry) * p.qty }
+    const equity = capital + realised + (known ? unreal : 0), pnl = equity - capital;
+    $("t-equity").textContent = fmt(equity); $("t-capital").textContent = "capital " + fmt(capital, 0) + " USDT";
+    $("t-pnl").textContent = signed(pnl); $("t-pnl").className = "v " + cls(pnl);
+    $("t-pnlpct").textContent = signed(pnl / capital * 100, 2) + "% · realised " + signed(realised);
+    $("t-unreal").textContent = known ? signed(unreal) : "…"; $("t-unreal").className = "v " + cls(unreal);
+    $("t-open").textContent = held.length + " of 5 slots used";
+    const closed = data.trades.filter(r => r.side === "SELL" && r.pnl_usdt);
+    const wins = closed.filter(r => parseFloat(r.pnl_usdt) > 0).length;
+    $("t-closed").textContent = closed.length;
+    $("t-winrate").textContent = closed.length ? `${wins} won · ${Math.round(wins / closed.length * 100)}% (expect ~35%)` : "expect ~35% winners";
+    drawChart(capital, equity);
+  }
+
+  function drawChart(capital, liveEquity) {
+    const pts = data.equity.map(r => ({ t: Date.parse(r.time.replace(" UTC", "Z").replace(" ", "T")), v: parseFloat(r.equity) })).filter(p => !isNaN(p.t) && !isNaN(p.v));
+    pts.push({ t: Date.now(), v: liveEquity });
+    const svg = $("chart"), W = 600, H = 160, pad = 18;
+    const vs = pts.map(p => p.v).concat([capital]);
+    let lo = Math.min(...vs), hi = Math.max(...vs);
+    if (hi - lo < capital * 0.01) { lo -= capital * 0.005; hi += capital * 0.005 }
+    const t0 = pts[0].t, t1 = Math.max(pts[pts.length - 1].t, t0 + 1);
+    const x = t => pad + (t - t0) / (t1 - t0) * (W - 2 * pad), y = v => H - pad - (v - lo) / (hi - lo) * (H - 2 * pad);
+    const line = pts.map((p, i) => (i ? "L" : "M") + x(p.t).toFixed(1) + "," + y(p.v).toFixed(1)).join("");
+    const last = pts[pts.length - 1], color = last.v >= capital ? "var(--up)" : "var(--down)";
+    svg.innerHTML = `
+      <line x1="${pad}" x2="${W - pad}" y1="${y(capital)}" y2="${y(capital)}" stroke="var(--line)" stroke-dasharray="4 4"/>
+      <text x="${pad}" y="${y(capital) - 4}" fill="var(--muted)" font-size="10" font-family="var(--mono)">start ${fmt(capital, 0)}</text>
+      ${pts.length > 1 ? `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>` : ""}
+      <circle cx="${x(last.t)}" cy="${y(last.v)}" r="4" fill="${color}"/>
+      <text x="${W - pad}" y="${Math.max(12, y(last.v) - 8)}" fill="var(--fg)" font-size="11" text-anchor="end" font-family="var(--mono)">${fmt(last.v)}</text>`;
+  }
+
+  // ---- controls (each asks for confirmation inside the page) ----
+  function ask(question, okLabel, action, danger) {
+    const box = $("confirm");
+    box.innerHTML = "";
+    const q = document.createElement("span"); q.textContent = question;
+    const yes = document.createElement("button"); yes.textContent = okLabel; yes.className = danger ? "danger" : "primary";
+    const no = document.createElement("button"); no.textContent = "Cancel";
+    no.onclick = () => { box.hidden = true };
+    yes.onclick = async () => { yes.disabled = no.disabled = true; try { await action() } catch (e) { msg(e.message, "err") } box.hidden = true };
+    box.append(q, yes, no); box.hidden = false;
+  }
+  $("btn-pause").onclick = () => ask("Pause new trades? Stops and exits keep running.", "Pause", async () => {
+    const body = JSON.stringify({ message: "dashboard: pause new entries", branch: "main",
+      content: btoa("Paused from the dashboard at " + new Date().toISOString() + "\n") });
+    const r = await gh(`/contents/${DIR}/PAUSED`, { method: "PUT", body });
+    if (!r.ok) throw new Error("Pause failed (HTTP " + r.status + ").");
+    msg("Paused. The next bot run will open no new trades.", "ok"); await load();
+  }, true);
+  $("btn-resume").onclick = () => ask("Resume trading?", "Resume", async () => {
+    const r = await gh(`/contents/${DIR}/PAUSED`, { method: "DELETE",
+      body: JSON.stringify({ message: "dashboard: resume", sha: pausedSha, branch: "main" }) });
+    if (!r.ok) throw new Error("Resume failed (HTTP " + r.status + ").");
+    msg("Resumed. The next bot run trades normally.", "ok"); await load();
+  });
+  $("btn-run").onclick = () => ask("Run the bot now on the OKX demo account?", "Run now", async () => {
+    const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main" }) });
+    if (r.status !== 204) throw new Error("Could not start a run (HTTP " + r.status + ").");
+    msg("Run started. It takes about a minute; tap Refresh after that.", "ok");
+    setTimeout(load, 8000);
+  });
+  $("btn-refresh").onclick = load;
+  $("btn-settings").onclick = () => { $("setup").hidden = false; $("app").hidden = true; $("f-repo").value = cfg.repo };
+  $("setup-form").onsubmit = e => {
+    e.preventDefault();
+    cfg = { token: $("f-token").value.trim(), repo: $("f-repo").value.trim() };
+    store.set("tb_token", cfg.token); store.set("tb_repo", cfg.repo);
+    start();
+  };
+
+  function start() {
+    if (!cfg.token) { $("setup").hidden = false; $("app").hidden = true; return }
+    $("setup").hidden = true; $("app").hidden = false;
+    load();
+    clearInterval(priceTimer); priceTimer = setInterval(refreshPrices, 15000);
+  }
+  start();
+})();
+</script>
+</body>
+</html>

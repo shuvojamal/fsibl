@@ -110,6 +110,8 @@ def main():
                     help="circuit breaker: stop new entries once equity is this fraction below its peak (e.g. 0.35)")
     lv.add_argument("--reset-halt", action="store_true",
                     help="clear a tripped circuit breaker (do this only after reviewing why it tripped)")
+    lv.add_argument("--pause-entries", action="store_true",
+                    help="open no new positions; stops and exits keep running")
     lv.add_argument("--once", action="store_true",
                     help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
@@ -173,7 +175,8 @@ def main():
         trader = LiveTrader(client, a.symbols, a.interval, _params(a), a.trade_usdt,
                             (a.max_trade_usdt, a.max_daily_loss, a.kill_file), a.state_dir,
                             dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt,
-                            max_open=a.max_open, capital=a.capital, max_drawdown=a.max_drawdown)
+                            max_open=a.max_open, capital=a.capital, max_drawdown=a.max_drawdown,
+                            pause_entries=a.pause_entries)
         if a.reset_halt and trader.state.pop("halted", None):
             trader.state.pop("equity_peak", None)
             print("circuit breaker reset")

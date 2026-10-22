@@ -166,6 +166,15 @@ python -m tradebot live BTCUSDT ETHUSDT --exchange okx --dry-run
 python -m tradebot live BTCUSDT ETHUSDT --exchange okx --trade-usdt 50
 ```
 
+**Running it every day without a computer on:** `.github/workflows/demo-bot.yml`
+runs the opportunity bot once a day at 00:07 UTC on GitHub's servers
+(`live --once`), trading the top 15 coins by volume plus anything it still
+holds, and commits its state and a `report.txt` to `demo_state/`. It is off
+until you add the three OKX demo secrets and set the repository variable
+`TRADEBOT_ENABLED=true` (Settings → Secrets and variables → Actions). Because
+it checks once a day, a stop is acted on at the next daily run, not the
+moment it is touched; expect fills somewhat worse than the backtest's.
+
 **Going live** needs two flags, `--live --i-accept-the-risk`, and live-only
 API keys. On Binance, create a key with *Enable Spot Trading* only: no
 withdrawals, no margin, no futures, and restrict it to your IP. Start with

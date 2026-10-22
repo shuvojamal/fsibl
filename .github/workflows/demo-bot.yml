@@ -1,0 +1,73 @@
+# Runs the opportunity bot once a day on the OKX demo account, right after
+# the daily candle closes, and commits its state back so positions carry
+# over between runs. Off until the repo owner opts in:
+#   1. Settings > Secrets and variables > Actions > Secrets:
+#        OKX_API_KEY, OKX_API_SECRET, OKX_PASSPHRASE   (demo-trading key)
+#   2. Same page > Variables: TRADEBOT_ENABLED = true
+# To stop it: set TRADEBOT_ENABLED to anything else, or disable the workflow.
+name: demo-bot
+
+on:
+  schedule:
+    - cron: "7 0 * * *"   # 00:07 UTC daily, after the daily candle closes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: demo-bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    if: vars.TRADEBOT_ENABLED == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: python -m unittest discover -s tests -t .
+
+      - name: Pick coins (top 15 by 90-day volume, plus anything still held)
+        id: coins
+        run: |
+          TOP=$(python -m tradebot scan --top 15 --symbols-only)
+          HELD=$(python - <<'EOF'
+          import json, os
+          p = "demo_state/live_state.json"
+          if os.path.exists(p):
+              pos = json.load(open(p)).get("positions", {})
+              print(" ".join(s for s, q in pos.items() if q.get("qty", 0) > 0))
+          EOF
+          )
+          SYMS=$(echo $TOP $HELD | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          echo "symbols=$SYMS" >> "$GITHUB_OUTPUT"
+          echo "trading: $SYMS"
+
+      - name: Run the bot once (OKX demo)
+        env:
+          OKX_API_KEY: ${{ secrets.OKX_API_KEY }}
+          OKX_API_SECRET: ${{ secrets.OKX_API_SECRET }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+        run: |
+          if [ -z "$OKX_API_KEY" ]; then echo "OKX secrets not set; nothing to do"; exit 0; fi
+          mkdir -p demo_state
+          python -u -m tradebot live ${{ steps.coins.outputs.symbols }} \
+            --exchange okx --strategy opportunity --interval 1d \
+            --risk 0.01 --trade-usdt 1000 --max-trade-usdt 1000 --max-daily-loss 300 \
+            --max-open 5 --no-adopt --state-dir demo_state --once | tee -a demo_state/run.log
+          python -m tradebot report ${{ steps.coins.outputs.symbols }} \
+            --exchange okx --state-dir demo_state | tee demo_state/report.txt
+
+      - name: Save state
+        run: |
+          git config user.name "tradebot"
+          git config user.email "tradebot@users.noreply.github.com"
+          git add demo_state
+          git diff --cached --quiet || git commit -m "demo-bot: daily run $(date -u +%F)"
+          git push

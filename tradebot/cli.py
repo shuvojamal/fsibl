@@ -104,6 +104,8 @@ def main():
                     help="binance: Spot Testnet / live; okx: demo trading / live")
     lv.add_argument("--max-open", type=int, default=0,
                     help="cap on simultaneous open positions across all symbols (0 = no cap)")
+    lv.add_argument("--once", action="store_true",
+                    help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
                     help="leave coins already in the account alone instead of managing them as positions")
     lv.add_argument("--dry-run", action="store_true", help="connect and decide, but place no orders")
@@ -167,7 +169,10 @@ def main():
                             dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt,
                             max_open=a.max_open)
         trader.preflight()
-        trader.run_forever()
+        if a.once:
+            trader.step()
+        else:
+            trader.run_forever()
     elif a.cmd == "scan":
         from tradebot.scan import POOL, format_scan, scan
         rows, skipped = scan(a.pool or POOL, a.top)

@@ -145,11 +145,16 @@ class BinanceClient:
 
 
 def fill_summary(order):
-    """(executed qty, average price, commission in quote) from a FULL order response."""
+    """(net qty actually received, average price, commission in quote) from a FULL order.
+
+    Exchanges usually take a buy's fee out of the coin bought, so the amount
+    that lands in the account is less than executedQty. The net figure is
+    what a later sell must use, or the sell comes up short.
+    """
     qty = float(order.get("executedQty", 0))
     quote = float(order.get("cummulativeQuoteQty", 0))
     avg = quote / qty if qty else 0.0
-    commission = 0.0
+    commission = base_fee = 0.0
     for f in order.get("fills", []):
         c, asset = float(f["commission"]), f["commissionAsset"]
         # Commission is charged in the quote (USDT), the base coin, or BNB.
@@ -158,4 +163,5 @@ def fill_summary(order):
             commission += c
         elif order["symbol"].startswith(asset):
             commission += c * float(f["price"])
-    return qty, avg, commission
+            base_fee += c
+    return qty - base_fee, avg, commission

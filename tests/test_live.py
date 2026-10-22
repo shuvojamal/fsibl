@@ -100,6 +100,17 @@ class ClientTests(unittest.TestCase):
         self.assertAlmostEqual(avg, 50000.0)
         self.assertAlmostEqual(fee, 0.1)
 
+    def test_fill_summary_nets_out_fee_taken_in_the_coin(self):
+        # Seen on OKX demo: a 0.00024421 BTC buy charged 0.00000024 BTC in fee,
+        # so only 0.00024397 BTC arrived; selling the gross amount comes up short.
+        order = {"symbol": "BTCUSDT", "executedQty": "0.00024421",
+                 "cummulativeQuoteQty": "20.0", "fills": [
+                     {"price": "81896.5", "qty": "0.00024421",
+                      "commission": "0.00000024", "commissionAsset": "BTC"}]}
+        qty, avg, fee = fill_summary(order)
+        self.assertAlmostEqual(qty, 0.00024397)
+        self.assertAlmostEqual(fee, 0.00000024 * 81896.5)
+
 
 def trending_candles(n=320, k=2):
     """Down-trend, then a sharp rally whose EMA crossover lands on the last candle."""

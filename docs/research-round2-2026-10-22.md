@@ -1,5 +1,12 @@
 # Strategy research, round 2 (2026-10-22)
 
+> **Correction (round 5):** the per-window tests in section B ran each
+> window with cold indicators, so every window was blind for its first
+> ~200 days. The returns below are understated, and the "zero trades since
+> 2026-05-25" line is wrong. Corrected tables are in
+> `research-round5-2026-10-22.md`. Sections A and C compared variants
+> under the same handicap, so their conclusions stand.
+
 Three questions about the opportunity scorer that survived round 1, plus a
 robustness check. Same setup: 10 coins, fees 0.1%/side, 0.05% slippage,
 1% of equity risked per trade, next-open fills.

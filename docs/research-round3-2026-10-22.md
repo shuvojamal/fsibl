@@ -1,5 +1,11 @@
 # Strategy research, round 3 (2026-10-22): exits and sizing
 
+> **Correction (round 5):** the four per-window columns below were run
+> with cold indicators (blind for the first ~200 days of each window), so
+> their absolute figures are understated; the full-history column and the
+> comparison between variants are unaffected. Corrected window tables are
+> in `research-round5-2026-10-22.md`.
+
 Entry rule held fixed at the round-1 universal setting (5 of 8 checks,
 2×ATR initial stop, 1% of equity risked). Daily candles, 10 coins. Each
 variant is judged on four test windows *and* the full four years, so it

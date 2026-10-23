@@ -10,12 +10,20 @@ through GitHub's contents API:
     RESET_HALT      clear a tripped circuit breaker
     PAUSED          no new entries (exits keep running)
 
+For the owner's real-money account (binance_live/ on the VPS), settings.json
+also carries "mode": "off" | "test" | "live". "test" connects with the real
+keys and decides, but places no orders (--dry-run). "live" trades real money
+and is only accepted together with "confirm": "I ACCEPT THE RISK", typed by
+the owner in the app; anything else falls back to "off".
+
 Everything is validated and clamped here before it reaches a command line,
 so a typo in the app can't produce a dangerous or broken run.
 """
 import json
 import os
 import re
+
+CONFIRM = "I ACCEPT THE RISK"
 
 # name: (default, lowest allowed, highest allowed)
 LIMITS = {
@@ -57,6 +65,14 @@ def read_controls(state_dir, default_capital=5000.0):
             v = min(hi, max(lo, v))
         out[key] = int(v) if isinstance(default, int) else v
     out["gold"] = bool(raw.get("gold", True))
+    mode = raw.get("mode", "off")
+    if mode not in ("off", "test", "live"):
+        notes.append(f"mode={mode!r} unknown; using off")
+        mode = "off"
+    if mode == "live" and raw.get("confirm") != CONFIRM:
+        notes.append("mode=live without the typed confirmation; using off")
+        mode = "off"
+    out["mode"] = mode
 
     close = []
     cpath = os.path.join(state_dir, "CLOSE")
@@ -90,3 +106,12 @@ def live_args(c):
     if c["close"]:
         args += ["--close-now"] + c["close"]
     return args
+
+
+def real_money_flags(c):
+    """Extra `tradebot live` flags for the real-money account, or None while it is off."""
+    if c["mode"] == "live":
+        return ["--live", "--i-accept-the-risk"]
+    if c["mode"] == "test":
+        return ["--live", "--i-accept-the-risk", "--dry-run"]   # real keys, no orders
+    return None

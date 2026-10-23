@@ -79,6 +79,30 @@ Then open the app, tap the account chip at the top, and pick
 - The emergency backstop isn't available on Binance in this bot, so the
   setting is ignored there. The daily-close stop still applies.
 
+## Real-money account (opt-in, off by default)
+
+A third account, **Binance REAL (VPS)**, trades the owner's real Binance
+account with the same rules. It's kept apart from the testnet bot: its own
+keys file, its own records folder (`binance_live/`) and its own timer.
+
+1. On binance.com > API Management, create a key with **Spot trading only**
+   (no withdrawals, margin or futures), **restricted to the VPS's IP**.
+2. On the VPS: `bash /opt/tradebot/repo/deploy/vps/setup-live.sh`. It shows
+   the server's IP, checks that real Binance is reachable, creates
+   `/opt/tradebot/tradebot-live.env` (root:tradebot, 640), and installs
+   `tradebot-live.timer`.
+3. Paste the real key and secret: `nano /opt/tradebot/tradebot-live.env`.
+4. In the app: tap the account chip, pick **REAL**, then Bot tab >
+   **Edit settings** > Capital **300** (or your amount), then
+   **No-orders test**. Within 10 minutes the app shows your real balance
+   and what the bot would buy (`--dry-run`, nothing is placed).
+5. Only if that looks right: **Go live…** and type `I ACCEPT THE RISK`.
+   **Sell all + Off** sells everything on the next pass and switches the
+   real account off again; **Switch off** just stops it.
+
+With no settings, or `mode` anything but `test`/`live`, or `live` without
+the exact confirmation, the real timer does nothing.
+
 ## Everyday commands (on the VPS)
 
 | | |
@@ -88,6 +112,7 @@ Then open the app, tap the account chip at the top, and pick
 | Start it again | `systemctl start tradebot.timer` |
 | Health check (timer, last run, positions, log) | `bash /opt/tradebot/repo/deploy/vps/status.sh` |
 | Update the code | it pulls `main` before every run by itself |
+| Add the real-money account (off until enabled in the app) | `bash /opt/tradebot/repo/deploy/vps/setup-live.sh` |
 | Remove everything | `bash /opt/tradebot/repo/deploy/vps/uninstall.sh` (asks first; removes only the bot's directory, user and units) |
 
 ## Notes

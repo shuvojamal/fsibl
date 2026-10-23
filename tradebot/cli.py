@@ -240,6 +240,7 @@ def main():
         print(" ".join(live_args(c)))
         print("gold" if c["gold"] else "nogold")
         print(f"max_open={c['max_open']}")
+        print(f"mode={c['mode']}")
     elif a.cmd == "audit":
         from tradebot.audit import audit
         problems = audit(a.state_dir, a.max_open)

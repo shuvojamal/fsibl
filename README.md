@@ -242,7 +242,10 @@ to Binance for prices. `.github/workflows/android.yml` wraps it in an Android
 app and publishes `TradebotDesk.apk` as the release **dashboard-latest**.
 
 **Going live** needs two flags, `--live --i-accept-the-risk`, and live-only
-API keys. On Binance, create a key with *Enable Spot Trading* only: no
+API keys. On the VPS this is packaged as an opt-in third account (see
+`deploy/vps/README.md`, "Real-money account"): separate keys file and
+records, off by default, a no-orders test first, and live only after the
+owner types `I ACCEPT THE RISK` in the app. On Binance, create a key with *Enable Spot Trading* only: no
 withdrawals, no margin, no futures, and restrict it to your IP. Start with
 `--trade-usdt` set to an amount you are fine losing entirely.
 

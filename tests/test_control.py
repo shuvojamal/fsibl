@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from tradebot.control import live_args, read_controls
+from tradebot.control import live_args, read_controls, real_money_flags
 
 
 class Controls(unittest.TestCase):
@@ -38,6 +38,19 @@ class Controls(unittest.TestCase):
         a = live_args(read_controls(self.d))
         self.assertIn("--pause-entries", a); self.assertIn("--reset-halt", a)
         self.assertEqual(a[-4:], ["--close-now", "ALL", "BTCUSDT", "ETHUSDT"])
+
+
+    def test_real_money_is_off_unless_the_owner_typed_the_confirmation(self):
+        self.assertIsNone(real_money_flags(read_controls(self.d)))            # default: off
+        self.put("settings.json", json.dumps({"mode": "test"}))
+        self.assertEqual(real_money_flags(read_controls(self.d)), ["--live", "--i-accept-the-risk", "--dry-run"])
+        self.put("settings.json", json.dumps({"mode": "live", "confirm": "yes"}))
+        c = read_controls(self.d)
+        self.assertEqual(c["mode"], "off"); self.assertIsNone(real_money_flags(c))
+        self.put("settings.json", json.dumps({"mode": "live", "confirm": "I ACCEPT THE RISK"}))
+        self.assertEqual(real_money_flags(read_controls(self.d)), ["--live", "--i-accept-the-risk"])
+        self.put("settings.json", json.dumps({"mode": "yolo"}))
+        self.assertEqual(read_controls(self.d)["mode"], "off")
 
 
 if __name__ == "__main__":

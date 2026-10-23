@@ -30,6 +30,7 @@ body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -we
 .brand { font-weight: 700; font-size: 17px; letter-spacing: -.01em }
 .acct { border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 600 12px var(--sans); padding: 5px 10px; border-radius: 999px; cursor: pointer }
 .acct::after { content: " ▾"; color: var(--muted) }
+.acct.real { border-color: var(--down); color: var(--down); background: var(--down-bg) }
 .choice { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; text-align: left; font: inherit; color: var(--fg); width: 100% }
 .choice[aria-current="true"] { border-color: var(--accent); background: var(--accent-bg) }
 .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted) }
@@ -172,6 +173,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   const ACCOUNTS = {
     demo: { dir: "demo_state", name: "OKX demo", short: "OKX", gh: true },
     vps: { dir: "binance_state", name: "Binance testnet (VPS)", short: "VPS", gh: false },
+    real: { dir: "binance_live", name: "Binance REAL (VPS)", short: "REAL", gh: false, real: true },
   };
   const WORKFLOW = "demo-bot.yml";
   let acct = ACCOUNTS[S.get("tb_acct")] ? S.get("tb_acct") : "demo", DIR = ACCOUNTS[acct].dir;
@@ -232,7 +234,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     setTimeout(load, 75000);
   }
   const maxOpen = () => +((data && data.settings.max_open) || 5);
-  const DEFAULTS = () => ({ capital: (data && data.last.capital) || 5000, risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3,
+  const DEFAULTS = () => ({ capital: (data && data.last.capital) || (ACCOUNTS[acct].real ? 300 : 5000), risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3,
                             max_drawdown_pct: 35, gold: true, rebuy_wait_days: 7, alert_pct: 20 });
   const alertPct = () => +({ ...DEFAULTS(), ...((data && data.settings) || {}) }.alert_pct);
   const csv = t => { if (!t) return []; const [h, ...rows] = t.trim().split(/\r?\n/); const k = h.split(",");
@@ -292,6 +294,10 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   function statusFromData() {
     if (!data) return;
     const lastT = data.last.time ? parseT(data.last.time) : 0;
+    if (ACCOUNTS[acct].real) {
+      const m = realMode();
+      return setStatus(m === "live" ? "halt" : m === "test" ? "pause" : "", m === "live" ? "REAL · LIVE" : m === "test" ? "REAL · no-orders test" : "REAL · off");
+    }
     if (data.schedule === "vps" && (!lastT || Date.now() - lastT > 26 * 3600000)) setStatus("halt", lastT ? "VPS silent" : "Not set up");
     else if (data.schedule !== "vps" && data.schedule && data.schedule !== "active") setStatus("halt", "Stopped");
     else if (data.state.halted) setStatus("halt", "Breaker tripped");
@@ -493,6 +499,22 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     return `<div class="list">${rows}</div>`;
   }
 
+  const CONFIRM = "I ACCEPT THE RISK";
+  const realMode = () => { const st = (data && data.settings) || {}; return st.mode === "live" && st.confirm === CONFIRM ? "live" : st.mode === "test" ? "test" : "off" };
+  function realCard() {
+    const m = realMode();
+    const label = { off: "OFF: the bot does nothing on your real account", test: "NO-ORDERS TEST: reads your real balance and shows what it would buy, places nothing",
+                    live: "LIVE: trading real money with the rules and limits below" }[m];
+    return `<div class="card" style="border:2px solid ${m === "live" ? "var(--down)" : "var(--line)"}">
+      <div style="font-weight:700;color:${m === "live" ? "var(--down)" : "var(--fg)"}">${label}</div>
+      <div class="note" style="margin-top:6px">Keys live only on your VPS (tradebot-live.env, installed with setup-live.sh). Records are kept apart in binance_live/.
+        Start with the no-orders test, then live with a small capital (300–500). Sell all + Off stops everything.</div></div>
+      <div class="actions">
+        ${m !== "off" ? `<button class="btn" data-act="realmode" data-mode="off">Switch off</button>` : `<button class="btn primary" data-act="realmode" data-mode="test">No-orders test</button>`}
+        ${m === "live" ? `<button class="btn danger" data-act="realstop">Sell all + Off</button>` : `<button class="btn danger" data-act="realmode" data-mode="live">Go live…</button>`}
+      </div>`;
+  }
+
   function scheduleCard() {
     if (data.schedule === "vps") {
       const t = data.last.time ? parseT(data.last.time) : 0;
@@ -537,7 +559,8 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
                   backstop_pct: +$("s-bs").value, daily_loss_pct: +$("s-dl").value, max_drawdown_pct: +$("s-dd").value, gold: $("s-gold").checked,
                   rebuy_wait_days: +$("s-rb").value, alert_pct: +$("s-al").value };
       $("save").disabled = true;
-      try { await putFile("settings.json", JSON.stringify(v, null, 2) + "\n", "dashboard: strategy settings"); data.settings = v; close(); render(); toast("Saved. Used from the next run.") }
+      const merged = { ...data.settings, ...v };       // keeps the real account's mode and confirmation
+      try { await putFile("settings.json", JSON.stringify(merged, null, 2) + "\n", "dashboard: strategy settings"); data.settings = merged; close(); render(); toast("Saved. Used from the next run.") }
       catch (e) { close(); toast(e.message, true) }
     };
   }
@@ -549,7 +572,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         <div class="main"><div class="t">${r.ev === "schedule" ? "Daily run" : "Manual run"}</div><div class="s">${new Date(r.t).toLocaleString()}</div></div>
         <div class="r"><a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;text-decoration:none">Log ›</a></div></div>`;
     }).join("") : `<div class="empty">${ACCOUNTS[acct].gh ? "No runs visible. The token needs Actions access." : "No run from the VPS yet."}</div>`;
-    return `
+    return `${ACCOUNTS[acct].real ? `<h2>Real money</h2>${realCard()}` : ""}
       <div class="actions">${pausedSha ? `<button class="btn primary" data-act="resume">${I.play}Resume</button>` : `<button class="btn warn" data-act="pause">${I.pause}Pause</button>`}
         <button class="btn" data-act="run">${I.bolt}Run now</button></div>
       <h2>Recent runs</h2><div class="list">${runs}</div>
@@ -618,6 +641,36 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     }),
     settings: () => openSettings(false),
     strategy: () => openStrategy(),
+    realmode: el => {
+      const mode = el.dataset.mode;
+      const save = async (extra) => {
+        const st = { ...data.settings, mode, ...extra };
+        if (mode !== "live") delete st.confirm;
+        await putFile("settings.json", JSON.stringify(st, null, 2) + "\n", `dashboard: real account ${mode}`);
+        data.settings = st; await dispatch(); render();
+      };
+      if (mode === "off") return confirmSheet("Switch the real account off?", "The bot stops all activity on your real account. Open positions stay open on Binance; sell them first with Sell all if you want to close them.",
+        "Switch off", "primary", async () => { await save({}); toast("Real account off.") });
+      if (mode === "test") return confirmSheet("Start the no-orders test?", "Within 10 minutes your VPS reads your real balance with the real keys and shows what the bot would buy. It places no orders.",
+        "Start test", "primary", async () => { await save({}); toast("No-orders test requested. Check back in 10 minutes.") });
+      sheet(`<h3 style="color:var(--down)">Trade real money?</h3>
+        <p>The bot will place real orders on your Binance account with the capital set below (Edit settings). You can lose money: the backtest had drops of up to about 40% and losing years. Did the no-orders test look right?</p>
+        <label><span>Type <b>${CONFIRM}</b> to confirm</span><input id="r-confirm" autocomplete="off" placeholder="${CONFIRM}"></label>
+        <div class="actions"><button class="btn" id="no">Cancel</button><button class="btn danger" id="yes">Go live</button></div>`);
+      $("no").onclick = close;
+      $("yes").onclick = async () => {
+        if ($("r-confirm").value.trim() !== CONFIRM) return toast("Type the confirmation exactly.", true);
+        $("yes").disabled = true;
+        try { await save({ confirm: CONFIRM }); close(); toast("Real trading switched on. The VPS picks it up within 10 minutes.") } catch (e) { close(); toast(e.message, true) }
+      };
+    },
+    realstop: () => confirmSheet("Sell everything and switch off?", "Every position on your real account is sold at market in the next VPS pass (within 10 minutes), then the bot stops trading the real account.",
+      "Sell all + Off", "danger", async () => {
+        // stays live for this one pass so the sale can happen; the VPS switches it off afterwards
+        const st = { ...data.settings, stop_after_close: true };
+        await putFile("settings.json", JSON.stringify(st, null, 2) + "\n", "dashboard: real account sell all then off");
+        await putFile("CLOSE", "ALL\n", "dashboard: real account sell all");
+        data.settings = st; data.closeReq = ["ALL"]; render(); toast("Selling everything on the next pass, then switching off.") }),
     sell: el => { const s = el.dataset.sym; confirmSheet(`Sell ${esc(coin(s))} now?`,
       "It sells at the market price in a run that starts now (about a minute), which locks in the current profit or loss. The bot won't buy it back for 7 days.",
       "Sell now", "danger", async () => {
@@ -645,13 +698,14 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const t = e.target.closest(".tab"); if (t) { tab = t.dataset.tab; S.set("tb_tab", tab); scrollTo(0, 0); render() }
   });
   $("refresh").onclick = load;
-  $("acct").textContent = ACCOUNTS[acct].short;
+  const chip = () => { $("acct").textContent = ACCOUNTS[acct].short; $("acct").classList.toggle("real", !!ACCOUNTS[acct].real) };
+  chip();
   $("acct").onclick = () => {
     sheet(`<h3>Account</h3>${Object.entries(ACCOUNTS).map(([k, a]) => `<button class="choice" data-acct="${k}" aria-current="${k === acct}">
       <div class="coin">${a.short}</div><div><div style="font-weight:700">${a.name}</div>
-      <div class="muted" style="font-size:12px">${a.gh ? "Runs on GitHub every day · test money" : "Runs on your VPS (Germany) · test money"}</div></div></button>`).join("")}`);
+      <div class="muted" style="font-size:12px">${a.real ? "Runs on your VPS · REAL MONEY · off until you switch it on" : a.gh ? "Runs on GitHub every day · test money" : "Runs on your VPS (Germany) · test money"}</div></div></button>`).join("")}`);
     for (const b of document.querySelectorAll("[data-acct]")) b.onclick = () => {
-      acct = b.dataset.acct; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); $("acct").textContent = ACCOUNTS[acct].short;
+      acct = b.dataset.acct; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); chip();
       close(); loadCache(); render(); load();
     };
   };

@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
-# Called by tradebot.timer every 10 minutes, as the "tradebot" user, with the
-# keys from tradebot.env. Trades the Binance Spot TESTNET (test money).
+# Called every 10 minutes by a systemd timer, as the "tradebot" user.
+#
+#   run.sh        Binance Spot TESTNET (test money), keys from tradebot.env,
+#                 records in binance_state/          (tradebot.timer)
+#   run.sh real   the owner's REAL Binance account, keys from tradebot-live.env,
+#                 records in binance_live/           (tradebot-live.timer)
+#
+# The real account does nothing until the owner switches it on in the app:
+# binance_live/settings.json "mode" = "test" (real keys, no orders: --dry-run)
+# or "live" (real orders, only with the typed confirmation "I ACCEPT THE
+# RISK"). Anything else, or no settings file, means off.
 #
 # It does a full run once a day after the 00:00 UTC candle closes, and in
 # between only when the dashboard app left a request in binance_state/
@@ -10,7 +19,15 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
-STATE=binance_state
+# the test and real timers share one checkout: never run two passes at once
+exec 9>"../.run.lock"
+flock 9
+MODE_ARG="${1:-test}"
+if [ "$MODE_ARG" = real ]; then
+  STATE=binance_live; DEFAULT_CAPITAL=300; VENUE="BINANCE REAL (VPS)"
+else
+  STATE=binance_state; DEFAULT_CAPITAL=5000; VENUE="BINANCE TESTNET (VPS)"
+fi
 mkdir -p "$STATE"
 
 git pull -q --rebase --autostash || echo "git pull failed; running on the local copy"
@@ -24,19 +41,28 @@ for f in CLOSE RESET_HALT RUN_NOW; do
   if [ -f "$STATE/$f" ] && [ -z "$reason" ]; then reason="request ($f)"; fi
 done
 [ -n "$reason" ] || exit 0
-[ -n "${BINANCE_API_KEY:-}" ] || { echo "BINANCE_API_KEY is empty: put the testnet keys in tradebot.env in the install directory"; exit 1; }
-echo "[$(date -u '+%F %T') UTC] run: $reason" | tee -a "$STATE/run.log"
 
 # settings and requests from the app, validated and clamped
-python3 -m tradebot controls --state-dir "$STATE" --default-capital 5000 > /tmp/tradebot-ctl.txt
+python3 -m tradebot controls --state-dir "$STATE" --default-capital "$DEFAULT_CAPITAL" > /tmp/tradebot-ctl.txt
 ARGS=$(sed -n 1p /tmp/tradebot-ctl.txt)
 GOLD=""; [ "$(sed -n 2p /tmp/tradebot-ctl.txt)" = gold ] && GOLD=PAXGUSDT
 MAX_OPEN=$(sed -n 3p /tmp/tradebot-ctl.txt | cut -d= -f2)
+MODE=$(sed -n 4p /tmp/tradebot-ctl.txt | cut -d= -f2)
+REAL=""; REPORT_REAL=""
+if [ "$MODE_ARG" = real ]; then
+  case "$MODE" in
+    test) REAL="--live --i-accept-the-risk --dry-run"; REPORT_REAL="--live" ;;
+    live) REAL="--live --i-accept-the-risk"; REPORT_REAL="--live" ;;
+    *) rm -f "$STATE/RUN_NOW" "$STATE/CLOSE" "$STATE/RESET_HALT"; exit 0 ;;   # off: do nothing at all
+  esac
+fi
+[ -n "${BINANCE_API_KEY:-}" ] || { echo "BINANCE_API_KEY is empty: put the keys in the keys file in the install directory"; exit 1; }
+echo "[$(date -u '+%F %T') UTC] run: $reason${REAL:+ (REAL ACCOUNT, mode $MODE)}" | tee -a "$STATE/run.log"
 
 TOP=$(python3 -m tradebot scan --top 15 --symbols-only)
 HELD=$(python3 -c '
 import json, os
-p = "binance_state/live_state.json"
+p = "'"$STATE"'/live_state.json"
 if os.path.exists(p):
     print(" ".join(s for s, q in json.load(open(p)).get("positions", {}).items() if q.get("qty", 0) > 0))')
 SYMS=$(echo $TOP $HELD $GOLD | tr ' ' '\n' | sort -u | tr '\n' ' ')
@@ -44,11 +70,26 @@ SYMS=$(echo $TOP $HELD $GOLD | tr ' ' '\n' | sort -u | tr '\n' ' ')
 set +e
 # shellcheck disable=SC2086  # ARGS and SYMS are validated word lists
 python3 -u -m tradebot live $SYMS --exchange binance --strategy opportunity --interval 1d \
-  $ARGS --no-adopt --state-dir "$STATE" --once 2>&1 | tee -a "$STATE/run.log"
+  $ARGS $REAL --no-adopt --state-dir "$STATE" --once 2>&1 | tee -a "$STATE/run.log"
 ok=${PIPESTATUS[0]}
 set -e
 rm -f "$STATE/CLOSE" "$STATE/RESET_HALT" "$STATE/RUN_NOW"
-python3 -m tradebot report $SYMS --exchange binance --state-dir "$STATE" > "$STATE/report.txt" 2>&1 || true
+if [ "$MODE_ARG" = real ] && [ "$ok" = 0 ]; then
+  # "Sell all + Off" from the app: the sale has run, now switch the real account off
+  python3 - "$STATE/settings.json" <<'PY'
+import json, sys
+p = sys.argv[1]
+try:
+    s = json.load(open(p))
+except (OSError, ValueError):
+    sys.exit(0)
+if s.pop("stop_after_close", False):
+    s["mode"] = "off"; s.pop("confirm", None)
+    json.dump(s, open(p, "w"), indent=2)
+    print("real account switched off after selling everything")
+PY
+fi
+python3 -m tradebot report $SYMS --exchange binance $REPORT_REAL --state-dir "$STATE" > "$STATE/report.txt" 2>&1 || true
 python3 -m tradebot shadow $SYMS --state-dir "$STATE" --max-open "$MAX_OPEN" > "$STATE/shadow.txt" 2>&1 || true
 python3 - <<PY
 import json, datetime
@@ -57,7 +98,7 @@ c = read_controls("$STATE", 5000)
 for k in ("close", "reset_halt", "notes"):
     c.pop(k)
 json.dump({"time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-           "venue": "BINANCE TESTNET (VPS)", "reason": "$reason", "ok": $ok == 0,
+           "venue": "$VENUE", "reason": "$reason", "ok": $ok == 0,
            "symbols": "$SYMS".split(), **c}, open("$STATE/last_run.json", "w"), indent=2)
 PY
 if [ "$ok" = 0 ] && [ "$reason" = daily ]; then echo "$today" > "$STATE/.last_daily"; fi

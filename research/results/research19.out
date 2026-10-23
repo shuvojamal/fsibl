@@ -1,0 +1,35 @@
+check: round 12 simulator +22.67%/yr, 487 trades; this one with live settings +22.67%/yr, 487 trades
+
+                                             whole period 2017-08 -> 2026-10
+  LIVE: stop at close, market buy            +22.7%/yr  maxDD -31.4%  Sharpe 0.97  trades 487  win  34%  avg +0.46R
+  A. exchange stop order (intraday)          +18.9%/yr  maxDD -32.4%  Sharpe 0.84  trades 487  win  35%  avg +0.38R
+  A2. close stop + exchange backstop 5% lower +18.7%/yr  maxDD -34.3%  Sharpe 0.82  trades 487  win  34%  avg +0.39R
+  A2. close stop + exchange backstop 10% lower +20.2%/yr  maxDD -35.3%  Sharpe 0.87  trades 487  win  34%  avg +0.42R
+  A2. close stop + exchange backstop 20% lower +22.1%/yr  maxDD -31.9%  Sharpe 0.95  trades 487  win  34%  avg +0.45R
+  B. limit 0.25 ATR below, 1 day             +21.1%/yr  maxDD -40.1%  Sharpe 0.86  trades 497  win  33%  avg +0.44R  limit fills 501, missed 4014 (89%)
+  B. limit 0.5 ATR below, 1 day              +17.3%/yr  maxDD -39.3%  Sharpe 0.70  trades 522  win  31%  avg +0.40R  limit fills 527, missed 4314 (89%)
+  B. limit 0.5 ATR below, 3 days             +33.1%/yr  maxDD -44.5%  Sharpe 1.02  trades 582  win  31%  avg +0.57R  limit fills 587, missed 1901 (76%)
+  B. limit 1 ATR below, 3 days               +27.8%/yr  maxDD -52.3%  Sharpe 0.85  trades 575  win  29%  avg +0.53R  limit fills 579, missed 2287 (80%)
+  A+B. stop order + limit 0.5 ATR, 3 days    +23.1%/yr  maxDD -40.7%  Sharpe 0.79  trades 585  win  28%  avg +0.39R  limit fills 590, missed 1895 (76%)
+
+split halves
+  LIVE: stop at close, market buy            2017-21: +26.9%/yr  maxDD -23.0%  Sharpe 1.17  trades 197  win  38%  avg +0.62R
+                                             2022-26: +19.3%/yr  maxDD -27.6%  Sharpe 0.83  trades 287  win  32%  avg +0.35R
+  A. exchange stop order (intraday)          2017-21: +22.5%/yr  maxDD -21.4%  Sharpe 0.99  trades 197  win  39%  avg +0.52R
+                                             2022-26: +16.1%/yr  maxDD -28.4%  Sharpe 0.72  trades 287  win  33%  avg +0.29R
+  A2. close stop + exchange backstop 5% lower 2017-21: +22.5%/yr  maxDD -22.1%  Sharpe 0.99  trades 197  win  37%  avg +0.53R
+                                             2022-26: +15.7%/yr  maxDD -28.1%  Sharpe 0.70  trades 287  win  31%  avg +0.29R
+  A2. close stop + exchange backstop 10% lower 2017-21: +25.5%/yr  maxDD -20.5%  Sharpe 1.11  trades 197  win  38%  avg +0.59R
+                                             2022-26: +16.0%/yr  maxDD -30.1%  Sharpe 0.70  trades 287  win  31%  avg +0.30R
+  A2. close stop + exchange backstop 20% lower 2017-21: +26.7%/yr  maxDD -21.3%  Sharpe 1.16  trades 197  win  38%  avg +0.62R
+                                             2022-26: +18.4%/yr  maxDD -27.6%  Sharpe 0.79  trades 287  win  31%  avg +0.34R
+  B. limit 0.25 ATR below, 1 day             2017-21: +36.6%/yr  maxDD -22.6%  Sharpe 1.38  trades 191  win  41%  avg +0.84R
+                                             2022-26:  +9.0%/yr  maxDD -35.8%  Sharpe 0.45  trades 303  win  27%  avg +0.19R
+  B. limit 0.5 ATR below, 1 day              2017-21: +41.4%/yr  maxDD -25.7%  Sharpe 1.36  trades 201  win  40%  avg +0.90R
+                                             2022-26:  -0.7%/yr  maxDD -39.1%  Sharpe 0.12  trades 319  win  25%  avg +0.09R
+  B. limit 0.5 ATR below, 3 days             2017-21: +71.5%/yr  maxDD -32.4%  Sharpe 1.69  trades 229  win  39%  avg +1.29R
+                                             2022-26:  +6.1%/yr  maxDD -44.5%  Sharpe 0.35  trades 350  win  26%  avg +0.11R
+  B. limit 1 ATR below, 3 days               2017-21: +64.9%/yr  maxDD -32.2%  Sharpe 1.42  trades 235  win  36%  avg +1.28R
+                                             2022-26:  +0.9%/yr  maxDD -42.7%  Sharpe 0.19  trades 338  win  25%  avg +0.01R
+  A+B. stop order + limit 0.5 ATR, 3 days    2017-21: +51.1%/yr  maxDD -30.0%  Sharpe 1.32  trades 230  win  34%  avg +0.92R
+                                             2022-26:  +2.6%/yr  maxDD -40.7%  Sharpe 0.24  trades 350  win  24%  avg +0.05R

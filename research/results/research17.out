@@ -1,0 +1,31 @@
+PAXG daily candles 2020-08-28 -> 2026-10-21 (2246 days); scored from 2021-03-16
+
+Binance PAXG dollar volume, last 90 days: median 13.4M USD/day (the bot's orders are ~1,000 USD, so liquidity is ample)
+for comparison, the 15th coin by volume trades a median 50M USD/day: PAXG would never make the top 15 on its own, so it must be added as a fixed extra symbol
+
+## 1. Live rules on PAXG alone (1% risk per trade, all capital available)
+  trades 60, win rate 38%, profit factor 1.64, return +27.5%, max drawdown -9.3%
+  buy & hold PAXG over the same window: +138.0%
+  per year: strategy +4.4%, buy & hold +16.7%
+
+## 3. Whole book, same window: top 15 by volume vs top 15 + PAXG (5 slots, 1% risk)
+  without PAXG: +22.7%/yr  maxDD -31.4%  Sharpe 0.93  trades 342
+  with PAXG:    +24.6%/yr  maxDD -27.4%  Sharpe 1.05  trades 348
+  PAXG trades inside the book: 39, total +27.3R, win 49%
+  year   without   with PAXG
+  2021    +36.7%    +36.0%
+  2022    -27.6%    -22.5%
+  2023    +76.8%    +62.0%
+  2024    +33.4%    +45.6%
+  2025    -10.8%     +6.0%
+  2026    +43.0%    +23.7%
+
+## 2. Is gold different?
+  correlation of daily returns: PAXG vs BTC +0.15, PAXG vs the bot +0.10
+  on BTC's 20 worst days (avg -10.7%), PAXG averaged -0.63%
+
+## 4. Separate gold sleeve: X% of capital in the PAXG-only strategy, rest in the crypto book (daily rebalanced)
+  0% gold sleeve: +22.7%/yr  maxDD -31.4%  Sharpe 0.93
+  20% gold sleeve: +19.4%/yr  maxDD -25.6%  Sharpe 0.97
+  30% gold sleeve: +17.7%/yr  maxDD -22.6%  Sharpe 0.99
+  50% gold sleeve: +14.1%/yr  maxDD -16.2%  Sharpe 1.06

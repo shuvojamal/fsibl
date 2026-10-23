@@ -1,0 +1,22 @@
+{
+  "time": "2026-10-23 01:59:42 UTC",
+  "capital": 5000.0,
+  "symbols": [
+    "ADAUSDT",
+    "AVAXUSDT",
+    "BNBUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT",
+    "LINKUSDT",
+    "NEARUSDT",
+    "PEPEUSDT",
+    "SOLUSDT",
+    "SUIUSDT",
+    "TRXUSDT",
+    "UNIUSDT",
+    "XRPUSDT",
+    "ZECUSDT"
+  ],
+  "paused": false
+}

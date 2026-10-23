@@ -8,3 +8,8 @@
 [2026-10-23 17:42:33 UTC] DRY RUN would BUY 55.80 USDT of BTCUSDT at ~81416.0900 stop 77038.8704 target 81416090.0000 (trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback)
 [2026-10-23 17:42:33 UTC] DRY RUN would BUY 53.88 USDT of BNBUSDT at ~731.2800 stop 690.5643 target 731280.0000 (trend_up+ema_aligned+rsi_zone+volatility_ok+pullback)
 audit passed: binance_live is consistent
+[2026-10-23 17:55:20 UTC] run: request (RUN_NOW) (REAL ACCOUNT, mode live)
+[2026-10-23 17:56:20 UTC] connected to https://api.binance.com (clock offset -118 ms)
+[2026-10-23 17:56:20 UTC] free USDT: 0.00; per-trade size: 5,000.00
+[2026-10-23 17:56:20 UTC] WARNING: not enough USDT for one trade
+audit passed: binance_live is consistent

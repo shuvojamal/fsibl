@@ -49,6 +49,8 @@ class FakeOKX:
         if u.path == "/api/v5/trade/order-algo" and method == "POST":
             b = json.loads(body)
             assert b["ordType"] == "conditional" and b["side"] == "sell" and b["slOrdPx"] == "-1"
+            if "tgtCcy" in b:   # what real OKX answered on the demo account
+                return 400, json.dumps({"code": "51000", "msg": "Parameter tgtCcy error"}).encode()
             aid = f"A{len(self.algos) + 1}"
             self.algos[aid] = {"algoId": aid, "state": "live", "sz": float(b["sz"]), "trigger": float(b["slTriggerPx"])}
             self.frozen += float(b["sz"])

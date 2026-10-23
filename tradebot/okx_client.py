@@ -175,7 +175,8 @@ class OKXClient:
         """Rest a conditional market sell of `qty` that fires when the last price
         touches `trigger`. Returns the algo order id."""
         body = {"instId": inst_id(symbol), "tdMode": "cash", "side": "sell", "ordType": "conditional",
-                "sz": self.round_qty(symbol, qty), "tgtCcy": "base_ccy",
+                # a spot sell's size is in the base coin; OKX rejects tgtCcy on algo orders
+                "sz": self.round_qty(symbol, qty),
                 "slTriggerPx": self.round_price(symbol, trigger), "slOrdPx": "-1", "slTriggerPxType": "last"}
         return self._request("POST", "/api/v5/trade/order-algo", body=body, signed=True)[0]["algoId"]
 

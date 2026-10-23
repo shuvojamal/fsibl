@@ -33,6 +33,8 @@ research/
 | 14 | `research14.py` | `research14.out` | `docs/research-round14-2026-10-23.md` | `ae2293c` | Cross-sectional momentum rotation (64 settings, BTC filter), vs and blended with the trend bot |
 | R1 | `review_jev.py` | `review_jev.out` | `docs/review-jev-trades-2026-10-23.md` | `2f76d15` | Review of github.com/zadescoxp/Jev-Trades: its own saved paper trades, re-priced with fees |
 | R2 | (reading only) | — | `docs/review-autotrader-2026-10-23.md` | `4a079f5` | Review of github.com/PkLavc/Autotrader (Kronos model on US stocks); led to round 15 |
+| 16 | `research16.py` | `research16.out` | `docs/research-round16-2026-10-23.md` | `3194d01` | Deflated Sharpe ratio of the live rules vs the number of variants tried |
+| R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:
 - **Cross-exchange arbitrage** (9 exchanges, 10 coins): `results/arbitrage/`,

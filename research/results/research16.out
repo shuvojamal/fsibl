@@ -1,0 +1,31 @@
+Live rules 2017-08 -> 2026-10: daily Sharpe 0.0509 (annualised 0.97), skew +0.26, kurtosis 11.0, 3352 days
+Probability true Sharpe > 0 with NO trial correction (PSR): 0.9985
+
+Variant Sharpes (daily, used to estimate the spread across trials):
+  live rules                   0.0509  (annualised 0.97)
+  costs x2                     0.0477  (annualised 0.91)
+  costs x3                     0.0446  (annualised 0.85)
+  risk 0.5%                    0.0508  (annualised 0.97)
+  risk 2%                      0.0478  (annualised 0.91)
+  top 10                       0.0554  (annualised 1.06)
+  top 20                       0.0513  (annualised 0.98)
+  max open 3                   0.0478  (annualised 0.91)
+  max open 8                   0.0590  (annualised 1.13)
+  ADX>20                       0.0538  (annualised 1.03)
+  ADX>25                       0.0586  (annualised 1.12)
+  min score 4                  0.0441  (annualised 0.84)
+  min score 6                  0.0654  (annualised 1.25)
+  trail 2 ATR                  0.0466  (annualised 0.89)
+  trail 4 ATR                  0.0514  (annualised 0.98)
+  fixed 3:1 target, no trail   0.0386  (annualised 0.74)
+variance of daily Sharpe across variants: 4.33e-05 (sd 0.13 annualised)
+
+Deflated Sharpe ratio (probability the live rules' true Sharpe beats the best-of-N luck bar):
+   N trials | luck bar (annualised)  DSR, spread from variants | luck bar  DSR, spread x4 (whole-project)
+         10 |  0.20  0.991                     |  0.40  0.960
+         50 |  0.29  0.982                     |  0.57  0.888
+        100 |  0.32  0.977                     |  0.64  0.847
+        300 |  0.36  0.968                     |  0.73  0.771
+       1000 |  0.41  0.957                     |  0.82  0.680
+
+Rule of thumb: DSR >= 0.95 is strong evidence; 0.5 means a coin flip between real edge and luck.

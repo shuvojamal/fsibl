@@ -90,3 +90,8 @@ jobs:
           git diff --cached --quiet || git commit -m "demo-bot: daily run $(date -u +%F)"
           git pull --rebase   # the dashboard may have paused/resumed meanwhile
           git push
+
+      # Last, so the state above is saved either way; a failure turns this run
+      # red (ERR in the dashboard app) when the bot's books disagree with themselves.
+      - name: Audit state
+        run: python -m tradebot audit --state-dir demo_state --max-open 5

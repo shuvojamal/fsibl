@@ -158,6 +158,12 @@ python -m tradebot report BTCUSDT ETHUSDT SOLUSDT --exchange okx --state-dir okx
 python -m tradebot report BTCUSDT --exchange none --state-dir okx_opp   # no keys: positions + scores only
 ```
 
+`python -m tradebot audit --state-dir demo_state --max-open 5` checks the
+state for internal consistency: the trade log nets to the quantities held,
+realised P&L matches the SELL rows, every stop sits below the highest price
+held, and no more positions are open than the cap. The daily workflow runs
+it after saving, so a broken ledger shows up as a failed run.
+
 **Risk guard** (on by default, between the strategy and the exchange):
 
 | Flag | Default | What it does |

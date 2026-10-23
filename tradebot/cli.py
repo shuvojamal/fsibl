@@ -133,6 +133,10 @@ def main():
     fd.add_argument("symbols", nargs="*", help="coins to check (default: the scan pool's top names)")
     fd.add_argument("--flag-at", type=float, default=0.20, help="annualised funding that counts as an opportunity")
 
+    au = sub.add_parser("audit", help="check a state directory for internal consistency (exit 1 on problems)")
+    au.add_argument("--state-dir", default="live_state")
+    au.add_argument("--max-open", type=int, default=0)
+
     rp = sub.add_parser("report", help="one-screen status of a live/demo run")
     rp.add_argument("symbols", nargs="+")
     rp.add_argument("--exchange", choices=["binance", "okx", "none"], default="okx",
@@ -202,6 +206,14 @@ def main():
         from tradebot.funding import format_funding, scan_funding
         coins = a.symbols or "BTC ETH SOL XRP BNB DOGE ADA LINK AVAX LTC DOT NEAR SUI TRX UNI".split()
         print("\n".join(format_funding(scan_funding(coins), a.flag_at)))
+    elif a.cmd == "audit":
+        from tradebot.audit import audit
+        problems = audit(a.state_dir, a.max_open)
+        for p in problems:
+            print("AUDIT FAIL:", p)
+        if problems:
+            raise SystemExit(1)
+        print(f"audit passed: {a.state_dir} is consistent")
     elif a.cmd == "report":
         from tradebot.report import report
         if a.exchange == "none":

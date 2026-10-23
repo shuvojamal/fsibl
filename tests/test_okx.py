@@ -249,5 +249,30 @@ class BackstopTests(unittest.TestCase):
         self.assertEqual(len(self.fake.algos), 1)   # no new backstop for a closed position
 
 
+
+class ManualCloseTests(unittest.TestCase):
+    def test_dashboard_sell_closes_cancels_backstop_and_blocks_rebuy(self):
+        from tradebot.audit import audit
+        d, fake = tempfile.mkdtemp(), FakeOKX()
+        mk = lambda **kw: LiveTrader(client(fake), ["BTCUSDT"], "1h",
+                                     Params(fast=3, slow=10, rsi_max=101, take_profit=10), trade_usdt=20,
+                                     guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d, backstop=0.2, **kw)
+        t = mk()
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight(); t.step()
+        fake.price = 110.0
+        t2 = mk(close_now=["btcusdt"])
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles(n=321)):
+            t2.preflight(); t2.step()           # the new candle would signal a buy again
+        self.assertEqual(t2.state["positions"]["BTCUSDT"]["qty"], 0.0)
+        self.assertEqual(fake.algos["A1"]["state"], "canceled")
+        with open(os.path.join(d, "live_trades.csv")) as f:
+            rows = f.read().splitlines()
+        self.assertEqual([r.split(",")[2] for r in rows[1:]], ["BUY", "SELL"])   # no re-buy
+        self.assertIn(",manual,", rows[2])
+        self.assertGreater(t2.state["realised"], 0)
+        self.assertEqual(audit(d), [])
+
+
 if __name__ == "__main__":
     unittest.main()

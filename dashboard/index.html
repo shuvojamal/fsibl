@@ -66,6 +66,12 @@ h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; 
 .btn.warn { background: var(--warn-bg); color: var(--warn) }
 .btn.danger { background: var(--down-bg); color: var(--down) }
 .btn:disabled { opacity: .5 }
+.btn.sm { height: 38px; font-size: 14px; border-radius: 12px; box-shadow: none }
+.pending { font-size: 12px; font-weight: 700; color: var(--warn); background: var(--warn-bg); padding: 8px 10px; border-radius: 10px; text-align: center }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+select { font: 15px var(--sans); color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; width: 100% }
+.check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--fg) }
+.check input { width: 20px; height: 20px }
 .btn:focus-visible, .icon-btn:focus-visible, .tab:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 
 /* position cards */
@@ -191,6 +197,20 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     if (!r.ok) throw new Error(`Couldn't read ${name} (HTTP ${r.status}).`);
     return raw ? r.text() : r.json();
   }
+  async function putFile(name, text, message) {
+    const meta = await file(name, false);
+    const body = { message, branch: "main", content: btoa(unescape(encodeURIComponent(text))) };
+    if (meta) body.sha = meta.sha;
+    const r = await gh(`/contents/${DIR}/${name}`, { method: "PUT", body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(`Couldn't save ${name} (HTTP ${r.status}).`);
+  }
+  async function dispatch() {
+    if (data && data.schedule && data.schedule !== "active") throw new Error("The daily schedule is stopped. Turn it on in the Bot tab first.");
+    const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main" }) });
+    if (r.status !== 204) throw new Error("Couldn't start a run (HTTP " + r.status + ").");
+    setTimeout(load, 75000);
+  }
+  const maxOpen = () => +((data && data.settings.max_open) || 5);
   const csv = t => { if (!t) return []; const [h, ...rows] = t.trim().split(/\r?\n/); const k = h.split(",");
     return rows.filter(Boolean).map(l => { const v = l.split(","); return Object.fromEntries(k.map((x, i) => [x, v[i]])) }) };
 
@@ -198,14 +218,18 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     if (!cfg.token || loading) return;
     loading = true; $("refresh").classList.add("spin");
     try {
-      const [state, trades, equity, report, last, log, paused, runs, fills] = await Promise.all([
+      const [state, trades, equity, report, last, log, paused, runs, fills, settings, closeReq, resetReq, wf] = await Promise.all([
         file("live_state.json"), file("live_trades.csv"), file("equity.csv"), file("report.txt"),
         file("last_run.json"), file("run.log"), file("PAUSED", false),
         gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : {}),
-        file("fills.csv"),
+        file("fills.csv"), file("settings.json"), file("CLOSE"), file("RESET_HALT", false),
+        gh(`/actions/workflows/${WORKFLOW}`).then(r => r.ok ? r.json() : {}),
       ]);
       data = { state: state ? JSON.parse(state) : { positions: {} }, trades: csv(trades), equity: csv(equity),
-               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills), runs: (runs.workflow_runs || []).map(r => ({
+               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills),
+               settings: (() => { try { return JSON.parse(settings || "{}") } catch (e) { return {} } })(),
+               closeReq: (closeReq || "").toUpperCase().split(/\s+/).filter(Boolean), resetPending: !!resetReq,
+               schedule: wf.state || "active", runs: (runs.workflow_runs || []).map(r => ({
                  t: r.created_at, ev: r.event, st: r.status, c: r.conclusion, url: r.html_url })), loadedAt: Date.now() };
       pausedSha = paused ? paused.sha : null;
       render();
@@ -240,7 +264,8 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   function setStatus(kind, text) { const s = $("status"); s.className = "status " + kind; s.lastElementChild.textContent = text }
   function statusFromData() {
     if (!data) return;
-    if (data.state.halted) setStatus("halt", "Breaker tripped");
+    if (data.schedule && data.schedule !== "active") setStatus("halt", "Stopped");
+    else if (data.state.halted) setStatus("halt", "Breaker tripped");
     else if (pausedSha) setStatus("pause", "Paused");
     else setStatus("run", "Running");
   }
@@ -282,7 +307,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         <div class="stat"><div class="k">Win rate</div><div class="v num">${a.closed ? Math.round(a.wins / a.closed * 100) + "%" : "–"}</div></div>
       </div>
       <div class="actions">${pauseBtn}<button class="btn" data-act="run">${I.bolt}Run now</button></div>
-      <h2>Open positions · ${held().length} of 5</h2>
+      <h2>Open positions · ${held().length} of ${maxOpen()}</h2>
       ${posCards(3)}
       ${held().length > 3 ? `<button class="btn" data-goto="positions">See all positions</button>` : ""}
       <div class="note">Prices live from Binance${prices._at ? " · updated " + ago(prices._at) : ""}. The bot trades once a day at 6:07 am (Bangladesh)${last ? " · last run " + ago(last) : ""}.${data.state.halted ? " Circuit breaker: " + esc(data.state.halted) : ""}</div>`;
@@ -304,12 +329,16 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         <div class="risk"><div class="track"><div class="fill" style="width:${(room * 100).toFixed(0)}%;background:${col}"></div></div>
           <div class="row3 num"><span>Stop ${px(p.stop)}</span><span>${toStop == null ? "" : F[1].format(toStop * 100) + "% above stop"}</span><span>Now ${px(now)}</span></div>
           ${p.backstop_px ? `<div class="num" style="font-size:12px">Emergency backstop on OKX at ${px(p.backstop_px)}</div>` : ""}</div>
+        ${data.closeReq.includes(s) || data.closeReq.includes("ALL")
+          ? `<div class="pending">Sell requested · happens in the next run</div>`
+          : `<button class="btn danger sm" data-act="sell" data-sym="${esc(s)}">Sell ${esc(coin(s))} now</button>`}
       </div>`;
     }).join("");
   }
 
   function vPositions() {
-    return `<h2>Open positions · ${held().length} of 5</h2>${posCards()}
+    return `<h2>Open positions · ${held().length} of ${maxOpen()}</h2>${posCards()}
+      ${held().length > 1 && !data.closeReq.includes("ALL") ? `<button class="btn danger" data-act="sellall">Sell all positions now</button>` : ""}
       <div class="note">The bar shows how far the price is above its stop-loss. Green is comfortable, amber is getting close, red is near the stop. Stops rise automatically as prices go up and never move down. The stop is checked once a day at the close; the emergency backstop is a real order resting on OKX 20% lower, which only fires in a crash or if the bot can't run.</div>`;
   }
 
@@ -356,6 +385,46 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     return `<div class="list">${rows}</div>`;
   }
 
+  function scheduleCard() {
+    const on = data.schedule === "active";
+    return `<div class="list"><div class="item"><div class="side ${on ? "buy" : "sell"}" style="${on ? "background:var(--up-bg);color:var(--up)" : ""}">${on ? "ON" : "OFF"}</div>
+      <div class="main"><div class="t">${on ? "Runs every day after the daily close" : "Stopped: the bot does not run"}</div>
+      <div class="s">${on ? "about 6:07 am Bangladesh time; GitHub may start it late" : "no stop checks, no trades; only the OKX backstops protect open positions"}</div></div>
+      <div class="r"><button class="btn sm ${on ? "danger" : "primary"}" data-act="schedule" style="padding:0 14px">${on ? "Stop" : "Start"}</button></div></div></div>`;
+  }
+  function settingsCard() {
+    const c = { capital: data.last.capital || 5000, risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3, max_drawdown_pct: 35, gold: true, ...data.settings };
+    return `<div class="card note">Capital ${money(+c.capital, 0)} USDT · risk ${c.risk_pct}% per trade · up to ${c.max_open} positions ·
+      backstop ${+c.backstop_pct ? c.backstop_pct + "% below stops" : "off"} · daily loss limit ${c.daily_loss_pct}% · circuit breaker at ${c.max_drawdown_pct}% below peak · gold ${c.gold ? "on" : "off"} · demo account only.
+      ${data.state.halted ? `<br><b style="color:var(--down)">Circuit breaker tripped:</b> ${esc(data.state.halted)}` : ""}</div>
+      <div class="actions"><button class="btn" data-act="strategy">${I.gear}Edit settings</button>
+      ${data.state.halted ? (data.resetPending ? `<div class="pending">Reset requested</div>` : `<button class="btn warn" data-act="resethalt">Reset breaker</button>`) : `<button class="btn" data-act="run">${I.bolt}Run now</button>`}</div>`;
+  }
+  function openStrategy() {
+    const c = { capital: data.last.capital || 5000, risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3, max_drawdown_pct: 35, gold: true, ...data.settings };
+    const opt = (vals, cur, fmt) => vals.map(v => `<option value="${v}" ${+cur === v ? "selected" : ""}>${fmt(v)}</option>`).join("");
+    sheet(`<h3>Strategy settings</h3>
+      <p>Used from the next run. The tested defaults are 1% risk, 5 positions, 20% backstop. Higher risk means bigger swings both ways.</p>
+      <div class="field-row">
+        <label>Capital (USDT)<input id="s-cap" type="number" min="100" step="100" value="${esc(c.capital)}"></label>
+        <label>Risk per trade<select id="s-risk">${opt([0.25, 0.5, 0.75, 1, 1.5, 2], c.risk_pct, v => v + "%")}</select></label>
+        <label>Max positions<select id="s-open">${opt([1, 2, 3, 4, 5, 6, 7, 8, 10], c.max_open, v => v)}</select></label>
+        <label>Emergency backstop<select id="s-bs">${opt([0, 10, 20, 30], c.backstop_pct, v => v ? v + "% below stop" : "Off")}</select></label>
+        <label>Daily loss limit<select id="s-dl">${opt([1, 2, 3, 5, 10], c.daily_loss_pct, v => v + "% of capital")}</select></label>
+        <label>Circuit breaker<select id="s-dd">${opt([20, 25, 30, 35, 40, 50], c.max_drawdown_pct, v => v + "% below peak")}</select></label>
+      </div>
+      <label class="check"><input id="s-gold" type="checkbox" ${c.gold ? "checked" : ""}> Include gold (PAXG) when the exchange lists it</label>
+      <div class="actions"><button class="btn" id="no">Cancel</button><button class="btn primary" id="save">Save</button></div>`);
+    $("no").onclick = close;
+    $("save").onclick = async () => {
+      const v = { capital: Math.max(100, +$("s-cap").value || 5000), risk_pct: +$("s-risk").value, max_open: +$("s-open").value,
+                  backstop_pct: +$("s-bs").value, daily_loss_pct: +$("s-dl").value, max_drawdown_pct: +$("s-dd").value, gold: $("s-gold").checked };
+      $("save").disabled = true;
+      try { await putFile("settings.json", JSON.stringify(v, null, 2) + "\n", "dashboard: strategy settings"); data.settings = v; close(); render(); toast("Saved. Used from the next run.") }
+      catch (e) { close(); toast(e.message, true) }
+    };
+  }
+
   function vBot() {
     const runs = data.runs.length ? data.runs.map(r => {
       const res = r.st !== "completed" ? r.st.replace("_", " ") : r.c;
@@ -369,8 +438,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <h2>Recent runs</h2><div class="list">${runs}</div>
       <h2>Execution quality</h2>${fillsCard()}
       <h2>Bot log</h2><div class="card"><pre class="log">${esc(data.log.trim().split("\n").slice(-30).join("\n") || "No log yet.")}</pre></div>
-      <h2>Safety limits</h2><div class="card note">1% of capital risked per trade · at most 5 positions · daily loss limit 3% · circuit breaker stops new trades at 35% below peak · demo account only.</div>
-      <button class="btn" data-act="settings">${I.gear}Settings</button>`;
+      <h2>Daily schedule</h2>${scheduleCard()}
+      <h2>Strategy settings</h2>${settingsCard()}
+      <button class="btn" data-act="settings">${I.gear}Connection (GitHub token)</button>`;
   }
 
   const VIEWS = { home: vHome, positions: vPositions, trades: vTrades, signals: vSignals, bot: vBot };
@@ -423,14 +493,33 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       pausedSha = null; render(); toast("Resumed.");
     }),
     run: () => confirmSheet("Run the bot now?", "It checks every coin on the OKX demo account and acts on any signals or stops. Takes about a minute.", "Run now", "primary", async () => {
-      const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main" }) });
-      if (r.status !== 204) throw new Error("Couldn't start a run (HTTP " + r.status + ").");
-      toast("Run started. Results in about a minute."); setTimeout(load, 70000);
+      await dispatch(); toast("Run started. Results in about a minute.");
     }),
     settings: () => openSettings(false),
+    strategy: () => openStrategy(),
+    sell: el => { const s = el.dataset.sym; confirmSheet(`Sell ${esc(coin(s))} now?`,
+      "It sells at the market price in a run that starts now (about a minute), which locks in the current profit or loss. The bot won't buy it back for 7 days.",
+      "Sell now", "danger", async () => {
+        await putFile("CLOSE", [...new Set([...data.closeReq, s])].join("\n") + "\n", `dashboard: sell ${s}`);
+        data.closeReq = [...new Set([...data.closeReq, s])]; await dispatch(); render(); toast(`Selling ${coin(s)}… results in about a minute.`) }) },
+    sellall: () => confirmSheet("Sell every position now?", "Everything is sold at market price in a run that starts now. None of these coins will be bought back for 7 days. To also stop new buys, press Pause.",
+      "Sell all", "danger", async () => {
+        await putFile("CLOSE", "ALL\n", "dashboard: sell all"); data.closeReq = ["ALL"]; await dispatch(); render(); toast("Selling everything… results in about a minute.") }),
+    resethalt: () => confirmSheet("Reset the circuit breaker?", "Only do this after you've looked at why the account fell this far. The bot can open new positions again from the run that starts now.",
+      "Reset", "warn", async () => { await putFile("RESET_HALT", "reset from the app\n", "dashboard: reset circuit breaker"); data.resetPending = true; await dispatch(); render(); toast("Reset requested.") }),
+    schedule: () => data.schedule === "active"
+      ? confirmSheet("Stop the daily bot?", "The bot stops running completely: no stop-loss checks, no new trades, and Run now and Sell won't work until you start it again. Open positions stay open, protected only by the emergency backstops on OKX. To just stop new buys, use Pause instead.",
+          "Stop bot", "danger", async () => {
+            const r = await gh(`/actions/workflows/${WORKFLOW}/disable`, { method: "PUT" });
+            if (r.status !== 204) throw new Error("Couldn't stop the schedule (HTTP " + r.status + ").");
+            data.schedule = "disabled_manually"; render(); toast("Daily bot stopped.") })
+      : confirmSheet("Start the daily bot again?", "It runs every day after the daily close and checks stops on all open positions.", "Start", "primary", async () => {
+            const r = await gh(`/actions/workflows/${WORKFLOW}/enable`, { method: "PUT" });
+            if (r.status !== 204) throw new Error("Couldn't start the schedule (HTTP " + r.status + ").");
+            data.schedule = "active"; render(); toast("Daily bot started.") }),
   };
   document.addEventListener("click", e => {
-    const a = e.target.closest("[data-act]"); if (a) return ACTS[a.dataset.act]();
+    const a = e.target.closest("[data-act]"); if (a) return ACTS[a.dataset.act](a);
     const g = e.target.closest("[data-goto]"); if (g) { tab = g.dataset.goto; S.set("tb_tab", tab); scrollTo(0, 0); render() }
     const t = e.target.closest(".tab"); if (t) { tab = t.dataset.tab; S.set("tb_tab", tab); scrollTo(0, 0); render() }
   });

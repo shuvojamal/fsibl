@@ -219,6 +219,14 @@ moment it is touched; expect fills somewhat worse than the backtest's.
 `dashboard/index.html` shows the bot live: equity and P&L (open positions
 priced every 15 s), all trades, today's signals, recent runs and the log,
 with **Pause / Resume** (no new trades; stops keep running) and **Run now**.
+From the app you can also **sell a position (or all of them) now** at market,
+not bought back for 7 days; **stop or start the daily schedule**; **edit the
+strategy settings** (capital, risk per trade, max positions, backstop, daily
+loss limit, circuit breaker, gold); and **reset a tripped circuit breaker**.
+The app writes small request files (`settings.json`, `CLOSE`, `RESET_HALT`,
+`PAUSED`) into `demo_state/`; the workflow validates and clamps them with
+`python -m tradebot controls` before they reach the bot (risk is capped at
+2%, positions at 10).
 It talks only to GitHub (with a fine-grained token kept on your device) and
 to Binance for prices. `.github/workflows/android.yml` wraps it in an Android
 app and publishes `TradebotDesk.apk` as the release **dashboard-latest**.

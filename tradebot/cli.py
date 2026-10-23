@@ -118,6 +118,8 @@ def main():
                     help="allow buys even when the latest closed candle is older than one interval")
     lv.add_argument("--backstop", type=float, default=0.0,
                     help="rest a real stop order on the exchange this fraction below each stop, e.g. 0.20 (OKX only; 0 = off)")
+    lv.add_argument("--close-now", nargs="*", default=[], metavar="SYMBOL",
+                    help="sell these positions at market first (ALL = every position); not re-bought for 7 days")
     lv.add_argument("--once", action="store_true",
                     help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
@@ -138,6 +140,10 @@ def main():
     fd = sub.add_parser("funding", help="watch perpetual funding rates for a cash-and-carry opportunity")
     fd.add_argument("symbols", nargs="*", help="coins to check (default: the scan pool's top names)")
     fd.add_argument("--flag-at", type=float, default=0.20, help="annualised funding that counts as an opportunity")
+
+    ct = sub.add_parser("controls", help="read the dashboard's settings/requests and print the live flags")
+    ct.add_argument("--state-dir", default="demo_state")
+    ct.add_argument("--default-capital", type=float, default=5000.0)
 
     au = sub.add_parser("audit", help="check a state directory for internal consistency (exit 1 on problems)")
     au.add_argument("--state-dir", default="live_state")
@@ -191,7 +197,8 @@ def main():
                             dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt,
                             max_open=a.max_open, capital=a.capital, max_drawdown=a.max_drawdown,
                             pause_entries=a.pause_entries, max_price_gap=a.max_price_gap,
-                            require_fresh=not a.no_fresh_check, backstop=a.backstop)
+                            require_fresh=not a.no_fresh_check, backstop=a.backstop,
+                            close_now=a.close_now)
         if a.reset_halt and trader.state.pop("halted", None):
             trader.state.pop("equity_peak", None)
             print("circuit breaker reset")
@@ -213,6 +220,14 @@ def main():
         from tradebot.funding import format_funding, scan_funding
         coins = a.symbols or "BTC ETH SOL XRP BNB DOGE ADA LINK AVAX LTC DOT NEAR SUI TRX UNI".split()
         print("\n".join(format_funding(scan_funding(coins), a.flag_at)))
+    elif a.cmd == "controls":
+        from tradebot.control import live_args, read_controls
+        c = read_controls(a.state_dir, a.default_capital)
+        for n in c["notes"]:
+            print("NOTE:", n, file=__import__("sys").stderr)
+        print(" ".join(live_args(c)))
+        print("gold" if c["gold"] else "nogold")
+        print(f"max_open={c['max_open']}")
     elif a.cmd == "audit":
         from tradebot.audit import audit
         problems = audit(a.state_dir, a.max_open)

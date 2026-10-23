@@ -37,6 +37,18 @@ jobs:
       - name: Tests
         run: python -m unittest discover -s tests -t .
 
+      - name: Read the dashboard's settings and requests
+        id: ctl
+        env:
+          CAPITAL: ${{ vars.TRADEBOT_CAPITAL || '5000' }}
+        run: |
+          mkdir -p demo_state
+          python -m tradebot controls --state-dir demo_state --default-capital "$CAPITAL" > /tmp/ctl.txt
+          cat /tmp/ctl.txt
+          echo "args=$(sed -n 1p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
+          echo "gold=$(sed -n 2p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
+          echo "$(sed -n 3p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
+
       - name: Pick coins (top 15 by 90-day volume, gold, plus anything still held)
         id: coins
         run: |
@@ -51,7 +63,8 @@ jobs:
           )
           # PAXGUSDT (tokenised gold) is always included: it never makes the top 15
           # by volume, but it diversifies the book (research round 17).
-          SYMS=$(echo $TOP $HELD PAXGUSDT | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          GOLD=""; [ "${{ steps.ctl.outputs.gold }}" = "gold" ] && GOLD=PAXGUSDT
+          SYMS=$(echo $TOP $HELD $GOLD | tr ' ' '\n' | sort -u | tr '\n' ' ')
           echo "symbols=$SYMS" >> "$GITHUB_OUTPUT"
           echo "trading: $SYMS"
 
@@ -60,35 +73,34 @@ jobs:
           OKX_API_KEY: ${{ secrets.OKX_API_KEY }}
           OKX_API_SECRET: ${{ secrets.OKX_API_SECRET }}
           OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
-          # The bot trades as if the account held this much, however large the
-          # demo balance is. Set the repo variable to the amount you would
-          # really trade with; default 5000 USDT.
           CAPITAL: ${{ vars.TRADEBOT_CAPITAL || '5000' }}
+        # Capital, risk, slots, backstop and limits come from demo_state/settings.json
+        # (edited in the app, validated and clamped by `tradebot controls`), falling
+        # back to the repo variable TRADEBOT_CAPITAL and the research defaults.
         run: |
           set -o pipefail   # a crash inside `| tee` must fail the step, not pass silently
           if [ -z "$OKX_API_KEY" ]; then echo "OKX secrets not set; nothing to do"; exit 0; fi
-          mkdir -p demo_state
-          PAUSE=""
-          if [ -f demo_state/PAUSED ]; then PAUSE="--pause-entries"; echo "PAUSED from the dashboard: no new entries, exits still run"; fi
           python -u -m tradebot live ${{ steps.coins.outputs.symbols }} \
             --exchange okx --strategy opportunity --interval 1d \
-            --risk 0.01 --capital "$CAPITAL" --trade-usdt "$CAPITAL" --max-trade-usdt "$CAPITAL" \
-            --max-daily-loss "$(python -c "print($CAPITAL * 0.03)")" \
-            --max-drawdown 0.35 --max-open 5 --backstop 0.20 --no-adopt --state-dir demo_state --once $PAUSE | tee -a demo_state/run.log
+            ${{ steps.ctl.outputs.args }} --no-adopt --state-dir demo_state --once | tee -a demo_state/run.log
+          rm -f demo_state/CLOSE demo_state/RESET_HALT   # one-shot requests, now done
           python -m tradebot report ${{ steps.coins.outputs.symbols }} \
             --exchange okx --state-dir demo_state | tee demo_state/report.txt
           python - <<EOF
           import json, datetime
+          from tradebot.control import read_controls
+          c = read_controls("demo_state", float("$CAPITAL"))
+          c.pop("close"); c.pop("reset_halt"); c.pop("notes")
           json.dump({"time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-                     "capital": float("$CAPITAL"), "symbols": "${{ steps.coins.outputs.symbols }}".split(),
-                     "paused": bool("$PAUSE")}, open("demo_state/last_run.json", "w"), indent=2)
+                     "symbols": "${{ steps.coins.outputs.symbols }}".split(), **c},
+                    open("demo_state/last_run.json", "w"), indent=2)
           EOF
 
       - name: Save state
         run: |
           git config user.name "tradebot"
           git config user.email "tradebot@users.noreply.github.com"
-          git add demo_state
+          git add -A demo_state
           git diff --cached --quiet || git commit -m "demo-bot: daily run $(date -u +%F)"
           git pull --rebase   # the dashboard may have paused/resumed meanwhile
           git push
@@ -96,4 +108,4 @@ jobs:
       # Last, so the state above is saved either way; a failure turns this run
       # red (ERR in the dashboard app) when the bot's books disagree with themselves.
       - name: Audit state
-        run: python -m tradebot audit --state-dir demo_state --max-open 5
+        run: python -m tradebot audit --state-dir demo_state --max-open ${{ steps.ctl.outputs.max_open }}

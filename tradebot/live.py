@@ -65,7 +65,7 @@ class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
                  guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
                  capital=0.0, max_drawdown=0.0, pause_entries=False, max_price_gap=0.0,
-                 require_fresh=False, backstop=0.0):
+                 require_fresh=False, backstop=0.0, close_now=(), rebuy_block_days=7):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
@@ -91,6 +91,11 @@ class LiveTrader:
         # only fires in a crash or if the bot doesn't run. 0 = off, and off on
         # clients without resting stop orders.
         self.backstop = backstop if hasattr(client, "place_stop") else 0.0
+        # Sell requests from the dashboard: symbols, or "ALL". A coin sold this
+        # way is not bought back for rebuy_block_days, or the next run would
+        # often just re-enter on the same signal.
+        self.close_now = [c.upper() for c in close_now]
+        self.rebuy_block_days = rebuy_block_days
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -171,6 +176,7 @@ class LiveTrader:
     def step(self):
         # Exits first, then buys: when more coins signal than there are free
         # slots, the highest-scoring ones get them (research round 11).
+        self._manual_closes()
         buys = []
         for sym in self.symbols:
             try:
@@ -308,7 +314,29 @@ class LiveTrader:
             return True
         return False
 
+    def _manual_closes(self):
+        """Sell what the owner asked to sell from the dashboard, at market, now."""
+        if not self.close_now:
+            return
+        want = self.symbols if "ALL" in self.close_now else self.close_now
+        for sym in want:
+            pos = self.state["positions"].get(sym)
+            if not pos or pos["qty"] <= 0:
+                continue
+            try:
+                print(f"[{_now()}] {sym}: SELL requested from the dashboard")
+                self._close(sym, pos, "manual", ref=self.client.price(sym))
+                if pos["qty"] == 0:
+                    until = time.time() * 1000 + self.rebuy_block_days * 86_400_000
+                    self.state.setdefault("rebuy_blocked", {})[sym] = until
+            except (OSError, BinanceError) as e:
+                print(f"[{_now()}] {sym}: manual SELL failed: {type(e).__name__}: {e}")
+
     def _open(self, sym, pos, plan, price):
+        until = self.state.get("rebuy_blocked", {}).get(sym, 0)
+        if until > time.time() * 1000:
+            print(f"[{_now()}] {sym}: BUY skipped, sold by hand {self.rebuy_block_days} days ago or less")
+            return
         if self.pause_entries:
             print(f"[{_now()}] {sym}: BUY skipped, bot is paused (exits still run)")
             return

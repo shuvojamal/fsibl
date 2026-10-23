@@ -3,12 +3,12 @@ free USDT: 82,036.33
 
 open positions: 5
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  BNBUSDT         1.363388      732.733        733.3      706.175     +0.77  +0.08%   -3.70%
-  BTCUSDT         0.012259      81488.3      81516.9      79908.4     +0.35  +0.04%   -1.97%
-  ETHUSDT         0.417884      2390.62      2390.16      2284.07     -0.19  -0.02%   -4.44%
-  NEARUSDT      201.940570        4.947         4.92      4.18751     -5.45  -0.55%  -14.89%
-  PEPEUSDT  226274065.434000    4.415e-06    4.429e-06  3.98071e-06     +3.17  +0.32%  -10.12%
-  unrealised total: -1.35 USDT
+  BNBUSDT         1.363388      732.733        740.2      706.175    +10.18  +1.02%   -4.60%
+  BTCUSDT         0.012259      81488.3      81877.3      79908.4     +4.77  +0.48%   -2.40%
+  ETHUSDT         0.417884      2390.62      2409.26      2284.07     +7.79  +0.78%   -5.20%
+  NEARUSDT      201.940570        4.947        4.955      4.18751     +1.62  +0.16%  -15.49%
+  PEPEUSDT  226274065.434000    4.415e-06      4.5e-06  3.98071e-06    +19.23  +1.93%  -11.54%
+  unrealised total: +43.59 USDT
 
 closed trades: 0, realised P&L: +0.00 USDT
   2026-10-22 19:26:39 UTC BUY  BNBUSDT   1.363388 @ 732.733 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 

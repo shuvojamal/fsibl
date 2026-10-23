@@ -3,8 +3,8 @@ free USDT: 9,070.71
 
 open positions: 1
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  BTCUSDT         0.011360        81804      81591.5      77038.9     -2.41  -0.26%   -5.58%
-  unrealised total: -2.41 USDT
+  BTCUSDT         0.011360        81804        81594      77038.9     -2.39  -0.26%   -5.58%
+  unrealised total: -2.39 USDT
 
 closed trades: 0, realised P&L: +0.00 USDT
   2026-10-23 17:20:47 UTC BUY  BTCUSDT   0.011360 @ 81804 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 

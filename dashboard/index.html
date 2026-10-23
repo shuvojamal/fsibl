@@ -3,28 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0f17">
+<meta name="theme-color" content="#f4f6fb">
 <title>Tradebot Desk</title>
 <style>
 /* App shell: sticky top status, one scrolling view per tab, bottom tab bar. System fonts only, so nothing loads before first paint. */
 :root {
-  --bg: #0b0f17; --surface: #131a26; --surface-2: #1a2333; --line: #232e41; --fg: #eef2f8; --muted: #8592a6;
-  --accent: #8b9cff; --accent-ink: #0b0f17; --up: #34d399; --down: #f87171; --warn: #fbbf24;
-  --up-bg: rgba(52, 211, 153, .12); --down-bg: rgba(248, 113, 113, .12); --warn-bg: rgba(251, 191, 36, .12); --accent-bg: rgba(139, 156, 255, .14);
+  --bg: #f4f6fb; --surface: #ffffff; --surface-2: #eef1f7; --line: #e6eaf2; --fg: #0f1523; --muted: #5f6b80;
+  --accent: #4f5fe6; --accent-ink: #ffffff; --up: #0e9466; --down: #d9473f; --warn: #b26b00;
+  --up-bg: rgba(14, 148, 102, .1); --down-bg: rgba(217, 71, 63, .1); --warn-bg: rgba(255, 176, 32, .16); --accent-bg: rgba(79, 95, 230, .1);
+  --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 16px rgba(16, 24, 40, .06);
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
-  --r: 16px; color-scheme: dark;
+  --r: 16px; color-scheme: light;
 }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
-  --bg: #f4f6fb; --surface: #ffffff; --surface-2: #eef1f7; --line: #e1e6ef; --fg: #101624; --muted: #5f6b80;
-  --accent: #4f5fe6; --accent-ink: #ffffff; --up: #0f9d6b; --down: #d9473f; --warn: #b7791f;
-  --up-bg: rgba(15, 157, 107, .1); --down-bg: rgba(217, 71, 63, .1); --warn-bg: rgba(183, 121, 31, .12); --accent-bg: rgba(79, 95, 230, .1);
-  color-scheme: light } }
-:root[data-theme="light"] {
-  --bg: #f4f6fb; --surface: #ffffff; --surface-2: #eef1f7; --line: #e1e6ef; --fg: #101624; --muted: #5f6b80;
-  --accent: #4f5fe6; --accent-ink: #ffffff; --up: #0f9d6b; --down: #d9473f; --warn: #b7791f;
-  --up-bg: rgba(15, 157, 107, .1); --down-bg: rgba(217, 71, 63, .1); --warn-bg: rgba(183, 121, 31, .12); --accent-bg: rgba(79, 95, 230, .1);
-  color-scheme: light }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent }
 html, body { margin: 0; height: 100% }
 body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased }
@@ -44,7 +35,7 @@ body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -we
 .status.run i { animation: pulse 2s ease-in-out infinite }
 @keyframes pulse { 50% { opacity: .3 } }
 .spacer { flex: 1 }
-.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--surface); color: var(--fg); display: grid; place-items: center; cursor: pointer }
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--surface); color: var(--fg); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow) }
 .icon-btn svg { width: 20px; height: 20px }
 .icon-btn.spin svg { animation: spin .8s linear infinite }
 @keyframes spin { to { transform: rotate(360deg) } }
@@ -52,7 +43,7 @@ body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -we
 /* views */
 main { padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(96px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-width: 720px; margin: 0 auto }
 .view { display: grid; gap: 14px }
-.card { background: var(--surface); border-radius: var(--r); padding: 16px; min-width: 0 }
+.card { background: var(--surface); border-radius: var(--r); padding: 16px; min-width: 0; box-shadow: var(--shadow) }
 h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; letter-spacing: .02em }
 
 /* hero */
@@ -64,12 +55,12 @@ h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; 
 .chart { margin: 14px -4px -4px; height: 140px }
 .chart svg { width: 100%; height: 100%; display: block; overflow: visible }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
-.stat { background: var(--surface); border-radius: 14px; padding: 12px; min-width: 0 }
+.stat { background: var(--surface); border-radius: 14px; padding: 12px; min-width: 0; box-shadow: var(--shadow) }
 .stat .k { font-size: 12px; color: var(--muted) } .stat .v { font-size: 17px; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere }
 
 /* actions */
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
-.btn { height: 48px; border-radius: 14px; border: 0; font: 600 15px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--surface); color: var(--fg) }
+.btn { height: 48px; border-radius: 14px; border: 0; font: 600 15px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow) }
 .btn svg { width: 18px; height: 18px }
 .btn.primary { background: var(--accent); color: var(--accent-ink) }
 .btn.warn { background: var(--warn-bg); color: var(--warn) }
@@ -89,7 +80,7 @@ h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; 
 .row3 { display: flex; justify-content: space-between; gap: 8px }
 
 /* lists */
-.list { background: var(--surface); border-radius: var(--r); overflow: hidden }
+.list { background: var(--surface); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow) }
 .item { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line) }
 .item:last-child { border-bottom: 0 }
 .item .main { min-width: 0; flex: 1 } .item .t { font-weight: 600 } .item .s { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
@@ -102,7 +93,7 @@ h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; 
 .sig { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line) }
 .sig:last-child { border-bottom: 0 }
 .dots { display: flex; gap: 4px }
-.dots b { width: 9px; height: 9px; border-radius: 50%; background: var(--surface-2) }
+.dots b { width: 9px; height: 9px; border-radius: 50%; background: #dde2ec }
 .dots b.on { background: var(--muted) } .dots.go b.on { background: var(--accent) } .dots.held b.on { background: var(--up) }
 .tag { font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px }
 .tag.go { background: var(--accent-bg); color: var(--accent) } .tag.held { background: var(--up-bg); color: var(--up) }
@@ -111,7 +102,7 @@ h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; 
 pre.log { margin: 0; font: 12px/1.6 var(--mono); white-space: pre-wrap; word-break: break-word; color: var(--muted); max-height: 340px; overflow: auto }
 .note { font-size: 13px; color: var(--muted); line-height: 1.5 }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 20;
-  background: var(--fg); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: 0 8px 30px rgba(0,0,0,.3) }
+  background: var(--fg); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: 0 8px 30px rgba(16,24,40,.25) }
 .toast.err { background: var(--down); color: #fff }
 
 /* tab bar */
@@ -123,7 +114,7 @@ nav.tabs { position: fixed; inset: auto 0 0 0; z-index: 6; display: grid; grid-t
 .tab[aria-selected="true"] { color: var(--accent) }
 
 /* sheet (confirm + settings) */
-.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.45); display: grid; align-items: end }
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15,21,35,.35); display: grid; align-items: end }
 .sheet { background: var(--surface); border-radius: 22px 22px 0 0; padding: 20px max(18px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
   display: grid; gap: 14px; max-width: 720px; width: 100%; margin: 0 auto }
 .sheet h3 { margin: 0; font-size: 18px } .sheet p { margin: 0; color: var(--muted) }

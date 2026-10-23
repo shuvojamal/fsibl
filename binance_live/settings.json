@@ -1,6 +1,6 @@
 {
   "mode": "live",
-  "capital": 5000,
+  "capital": 100,
   "confirm": "I ACCEPT THE RISK",
   "risk_pct": 1,
   "max_open": 5,

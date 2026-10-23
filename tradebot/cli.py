@@ -129,6 +129,10 @@ def main():
     sc.add_argument("--symbols-only", action="store_true",
                     help="print just the top-N symbols, space-separated, for pasting into `live`")
 
+    fd = sub.add_parser("funding", help="watch perpetual funding rates for a cash-and-carry opportunity")
+    fd.add_argument("symbols", nargs="*", help="coins to check (default: the scan pool's top names)")
+    fd.add_argument("--flag-at", type=float, default=0.20, help="annualised funding that counts as an opportunity")
+
     rp = sub.add_parser("report", help="one-screen status of a live/demo run")
     rp.add_argument("symbols", nargs="+")
     rp.add_argument("--exchange", choices=["binance", "okx", "none"], default="okx",
@@ -194,6 +198,10 @@ def main():
             print("\n".join(format_scan(rows)))
             if skipped:
                 print(f"\nskipped (no data or too short): {', '.join(skipped)}")
+    elif a.cmd == "funding":
+        from tradebot.funding import format_funding, scan_funding
+        coins = a.symbols or "BTC ETH SOL XRP BNB DOGE ADA LINK AVAX LTC DOT NEAR SUI TRX UNI".split()
+        print("\n".join(format_funding(scan_funding(coins), a.flag_at)))
     elif a.cmd == "report":
         from tradebot.report import report
         if a.exchange == "none":

@@ -1,0 +1,95 @@
+coins with data: 20  days: 2020-01-01 -> 2026-09-30
+  BTC   2020-01-01 -> 2026-09-30  avg funding +11.7%/yr
+  ETH   2020-01-01 -> 2026-09-30  avg funding +13.8%/yr
+  BNB   2020-02-10 -> 2026-09-30  avg funding -0.0%/yr
+  XRP   2020-01-06 -> 2026-09-30  avg funding +14.6%/yr
+  ADA   2020-01-31 -> 2026-09-30  avg funding +13.5%/yr
+  DOGE  2020-07-10 -> 2026-09-30  avg funding +12.4%/yr
+  SOL   2020-09-14 -> 2026-09-30  avg funding +0.2%/yr
+  TRX   2020-01-15 -> 2026-09-30  avg funding +3.2%/yr
+  LTC   2020-01-09 -> 2026-09-30  avg funding +14.8%/yr
+  BCH   2020-01-01 -> 2026-09-30  avg funding +5.2%/yr
+  LINK  2020-01-17 -> 2026-09-30  avg funding +13.7%/yr
+  DOT   2020-08-22 -> 2026-09-30  avg funding +7.8%/yr
+  AVAX  2020-09-23 -> 2026-09-30  avg funding +6.9%/yr
+  XLM   2020-01-20 -> 2026-09-30  avg funding +13.9%/yr
+  ATOM  2020-02-07 -> 2026-09-30  avg funding +9.6%/yr
+  ETC   2020-01-16 -> 2026-09-30  avg funding +11.0%/yr
+  UNI   2020-09-18 -> 2026-09-30  avg funding +14.1%/yr
+  NEAR  2020-10-15 -> 2026-09-30  avg funding +10.4%/yr
+  FIL   2020-10-16 -> 2026-09-30  avg funding +6.3%/yr
+  AAVE  2020-10-16 -> 2026-09-30  avg funding +14.2%/yr
+
+== 1. Tuning grid on 2020-03 .. 2023-12 (1x margin, max 5 hedges) ==
+enter 5% exit 0%                   CAGR +29.4%  total +168.6%  maxDD  1.4%  Sharpe  6.53  trades   91  avg held 4.9  funding +1.767 basis +0.032 costs -0.114  worst day -1.35%
+enter 5% exit 3%                   CAGR +28.8%  total +164.3%  maxDD  1.4%  Sharpe  6.43  trades  149  avg held 4.8  funding +1.793 basis +0.031 costs -0.181  worst day -1.09%
+enter 10% exit 0%                  CAGR +28.9%  total +165.1%  maxDD  1.4%  Sharpe  6.48  trades   74  avg held 4.3  funding +1.716 basis +0.027 costs -0.092  worst day -1.35%
+enter 10% exit 3%                  CAGR +24.3%  total +130.3%  maxDD  0.9%  Sharpe  6.74  trades   95  avg held 4.1  funding +1.372 basis +0.026 costs -0.095  worst day -0.80%
+enter 10% exit 5%                  CAGR +26.5%  total +146.4%  maxDD  1.2%  Sharpe  6.33  trades  115  avg held 3.9  funding +1.563 basis +0.029 costs -0.128  worst day -1.02%
+enter 15% exit 0%                  CAGR +24.6%  total +132.4%  maxDD  1.4%  Sharpe  6.10  trades   34  avg held 2.7  funding +1.353 basis +0.010 costs -0.040  worst day -1.36%
+enter 15% exit 3%                  CAGR +25.0%  total +135.6%  maxDD  0.9%  Sharpe  6.32  trades   44  avg held 2.5  funding +1.388 basis +0.012 costs -0.044  worst day -0.87%
+enter 15% exit 5%                  CAGR +23.7%  total +126.4%  maxDD  1.0%  Sharpe  6.33  trades   51  avg held 2.4  funding +1.297 basis +0.014 costs -0.048  worst day -0.89%
+enter 15% exit 10%                 CAGR +21.6%  total +111.4%  maxDD  1.0%  Sharpe  6.07  trades   57  avg held 2.2  funding +1.159 basis +0.009 costs -0.054  worst day -0.89%
+enter 20% exit 0%                  CAGR +23.3%  total +123.1%  maxDD  1.4%  Sharpe  5.85  trades   30  avg held 2.4  funding +1.257 basis +0.009 costs -0.035  worst day -1.36%
+enter 20% exit 3%                  CAGR +23.5%  total +124.7%  maxDD  1.0%  Sharpe  6.07  trades   38  avg held 2.2  funding +1.277 basis +0.009 costs -0.038  worst day -0.99%
+enter 20% exit 5%                  CAGR +21.6%  total +111.6%  maxDD  0.9%  Sharpe  6.11  trades   46  avg held 2.1  funding +1.145 basis +0.011 costs -0.041  worst day -0.88%
+enter 20% exit 10%                 CAGR +19.1%  total  +95.6%  maxDD  0.9%  Sharpe  5.91  trades   52  avg held 1.9  funding +0.993 basis +0.008 costs -0.045  worst day -0.82%
+enter 30% exit 0%                  CAGR +22.8%  total +120.0%  maxDD  0.9%  Sharpe  5.85  trades   27  avg held 1.9  funding +1.222 basis +0.007 costs -0.028  worst day -0.93%
+enter 30% exit 3%                  CAGR +23.7%  total +126.3%  maxDD  0.9%  Sharpe  5.66  trades   31  avg held 1.8  funding +1.265 basis +0.029 costs -0.032  worst day -0.93%
+enter 30% exit 5%                  CAGR +20.8%  total +106.5%  maxDD  0.9%  Sharpe  5.61  trades   37  avg held 1.7  funding +1.070 basis +0.028 costs -0.033  worst day -0.94%
+enter 30% exit 10%                 CAGR +17.6%  total  +86.4%  maxDD  0.9%  Sharpe  5.37  trades   45  avg held 1.5  funding +0.895 basis +0.007 costs -0.038  worst day -0.91%
+
+best on training data by Sharpe: enter 10%, exit 3%
+
+== 2. Unseen data 2024-01 .. end ==
+tuned  enter 10% exit 3%           CAGR  +3.1%  total   +8.7%  maxDD  0.5%  Sharpe  6.07  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.021  worst day -0.15%
+fixed  enter 10% exit 3%           CAGR  +3.1%  total   +8.7%  maxDD  0.5%  Sharpe  6.07  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.021  worst day -0.15%
+fixed  enter 15% exit 5%           CAGR  +2.5%  total   +6.9%  maxDD  0.2%  Sharpe  5.16  trades   15  avg held 1.1  funding +0.075 basis +0.002 costs -0.008  worst day -0.15%
+fixed  enter 20% exit 5%           CAGR  +2.3%  total   +6.5%  maxDD  0.2%  Sharpe  5.26  trades   11  avg held 1.0  funding +0.069 basis +0.001 costs -0.006  worst day -0.18%
+always on BTC+ETH (enter -inf)     CAGR  +5.2%  total  +14.9%  maxDD  0.3%  Sharpe 12.11  trades    2  avg held 2.0  funding +0.151 basis +0.001 costs -0.003  worst day -0.15%
+
+== 3. Whole period, by year (tuned rule) ==
+full period                        CAGR +15.8%  total +163.3%  maxDD  0.9%  Sharpe  5.75  trades  131  avg held 3.4  funding +1.744 basis +0.031 costs -0.142  worst day -0.80%
+   2020  +16.3%
+   2021  +88.5%
+   2022   +0.7%
+   2023   +4.6%
+   2024  +13.1%
+   2025   +1.2%
+   2026   -0.4%
+
+== 4. Cost stress and margin (unseen data) ==
+cost 0.30% round trip              CAGR  +3.4%  total   +9.5%  maxDD  0.2%  Sharpe  6.98  trades   40  avg held 2.4  funding +0.107 basis +0.002 costs -0.013  worst day -0.09%
+cost 0.50% round trip              CAGR  +3.1%  total   +8.7%  maxDD  0.5%  Sharpe  6.07  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.021  worst day -0.15%
+cost 0.80% round trip              CAGR  +2.6%  total   +7.4%  maxDD  1.0%  Sharpe  4.74  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.034  worst day -0.25%
+cost 1.20% round trip              CAGR  +2.1%  total   +5.7%  maxDD  1.7%  Sharpe  3.22  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.050  worst day -0.37%
+perp margin 1x                     CAGR  +3.1%  total   +8.7%  maxDD  0.5%  Sharpe  6.07  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.021  worst day -0.15%
+perp margin 2x                     CAGR  +4.1%  total  +11.7%  maxDD  0.7%  Sharpe  6.07  trades   40  avg held 2.4  funding +0.143 basis +0.002 costs -0.029  worst day -0.21%
+perp margin 3x                     CAGR  +4.6%  total  +13.2%  maxDD  0.8%  Sharpe  6.06  trades   40  avg held 2.4  funding +0.162 basis +0.002 costs -0.033  worst day -0.23%
+max 1 hedges                       CAGR  +2.8%  total   +7.9%  maxDD  0.6%  Sharpe  4.56  trades    9  avg held 0.5  funding +0.099 basis +0.001 costs -0.022  worst day -0.27%
+max 3 hedges                       CAGR  +3.3%  total   +9.5%  maxDD  0.5%  Sharpe  5.95  trades   24  avg held 1.5  funding +0.115 basis +0.001 costs -0.021  worst day -0.16%
+max 5 hedges                       CAGR  +3.1%  total   +8.7%  maxDD  0.5%  Sharpe  6.07  trades   40  avg held 2.4  funding +0.106 basis +0.002 costs -0.021  worst day -0.15%
+max 10 hedges                      CAGR  +3.3%  total   +9.3%  maxDD  0.3%  Sharpe  6.66  trades   68  avg held 4.7  funding +0.110 basis +0.001 costs -0.019  worst day -0.10%
+
+== 5. Recent months (what the opportunity looks like now) ==
+  BTC   last 90 days avg funding  +6.5%/yr   last 7 days  +2.8%/yr
+  ETH   last 90 days avg funding  +4.9%/yr   last 7 days  +5.8%/yr
+  BNB   last 90 days avg funding  +5.1%/yr   last 7 days  +1.7%/yr
+  XRP   last 90 days avg funding  +3.6%/yr   last 7 days  +4.0%/yr
+  ADA   last 90 days avg funding  +4.4%/yr   last 7 days  +8.8%/yr
+  DOGE  last 90 days avg funding  +6.6%/yr   last 7 days  +7.0%/yr
+  SOL   last 90 days avg funding  +3.3%/yr   last 7 days  +2.5%/yr
+  TRX   last 90 days avg funding  -9.7%/yr   last 7 days -24.1%/yr
+  LTC   last 90 days avg funding  +5.8%/yr   last 7 days  +8.4%/yr
+  BCH   last 90 days avg funding  +1.1%/yr   last 7 days  +9.3%/yr
+  LINK  last 90 days avg funding  +6.6%/yr   last 7 days  +6.5%/yr
+  DOT   last 90 days avg funding  +3.8%/yr   last 7 days  +8.9%/yr
+  AVAX  last 90 days avg funding  +4.4%/yr   last 7 days  +7.1%/yr
+  XLM   last 90 days avg funding  +3.9%/yr   last 7 days +10.3%/yr
+  ATOM  last 90 days avg funding  -4.9%/yr   last 7 days  +1.8%/yr
+  ETC   last 90 days avg funding  +5.9%/yr   last 7 days  +9.8%/yr
+  UNI   last 90 days avg funding  +7.1%/yr   last 7 days  +8.2%/yr
+  NEAR  last 90 days avg funding  +5.9%/yr   last 7 days  +8.7%/yr
+  FIL   last 90 days avg funding  +5.1%/yr   last 7 days  +6.5%/yr
+  AAVE  last 90 days avg funding  +4.8%/yr   last 7 days  +8.2%/yr
+tuned rule, last 90 days           CAGR  -1.4%  total   -0.4%  maxDD  0.4%  Sharpe -3.11  trades   12  avg held 1.5  funding +0.003 basis +0.000 costs -0.006  worst day -0.15%

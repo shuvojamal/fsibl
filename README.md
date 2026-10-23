@@ -86,6 +86,18 @@ trades a month. Full numbers in `docs/opportunity-backtest-2026-10-22.md`.
 It protects capital in bad markets; it does not keep up with buy-and-hold
 in good ones.
 
+## Funding-rate carry monitor (`funding`)
+
+```bash
+python -m tradebot funding                 # 15 big coins, OKX public data, no keys
+```
+
+Shows each coin's perpetual funding over the last 7 days, annualised, and
+flags any at 20% a year or more, where buying spot and shorting the
+perpetual (price-neutral) would beat holding stablecoins. It only watches;
+it places nothing. Round 13 found carry paid +88% in 2021 but only about 3%
+a year in 2024–26 (`docs/research-round13-2026-10-23.md`).
+
 ## Cross-exchange arbitrage (`arb`)
 
 ```bash

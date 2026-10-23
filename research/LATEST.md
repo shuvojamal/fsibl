@@ -1,17 +1,22 @@
 # Latest research report
 
-_Updated 2026-10-23 07:30 UTC by Claude (manual session)_
+_Updated 2026-10-24 00:05 UTC by Claude (manual session)_
 
-**Bots:** OKX demo is flat after the owner sold all 5 positions from the app
-(+76.61 USDT realised, +1.5%). All 5 buys matched the backtest exactly
-(live vs backtest check). The Binance testnet bot on the VPS isn't set up yet.
+**Settings now in use (rounds 28-30):** 8 positions, 6 of 8 checks.
+OKX demo = steady (0.5% risk per trade), Binance testnet on the VPS =
+growth (1%). The real account is off.
 
-**Research so far (22 rounds):** the live rules held up against every
-alternative tested: other timeframes, arbitrage, funding carry, rotation,
-the Kronos AI, CFD markets, order types, short selling, close-time tranching.
-Planning expectation: about +18% a year, drawdowns up to about 40%
-(round 21).
+**Backtest 2022-26:** steady about +16%/yr, worst drop -16%; growth about
++26%/yr, worst drop -28%. Realistic expectation is lower (steady ~12-15%,
+growth ~18-25%).
 
-**Next:** scheduled research every 3 hours. Each run checks the bots, tests
-one new idea under the same rules (written down before testing, tested on
-unseen data, counted against the luck bar), and updates this report.
+**Latest round (31): pyramiding, adding to winning positions. Rejected.**
+It raises return only by raising risk (Sharpe flat or lower, deeper drops);
+on the growth set-up it lowered 2022-26 return to about +19%/yr.
+
+**Rejected so far:** other timeframes, arbitrage, funding carry, rotation,
+the Kronos AI, CFD markets, short selling, limit entries, tranching,
+regime-based sizing, pyramiding. Kept: the 3xATR trailing stop.
+
+**Next:** daily scheduled research checks the bots and tests one new idea
+against a pass bar written down before running.

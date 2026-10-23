@@ -183,6 +183,14 @@ price the decision used, the real fill and the fee. `report` and the
 dashboard's Bot tab show average slippage per side against the backtest's
 assumption of 0.05% slippage plus a 0.10% fee.
 
+**Live vs backtest:** `python -m tradebot shadow <symbols> --state-dir demo_state`
+replays the backtest over the days the bot has traded (same coins, capital,
+slots and rules) and lists the trades both took, the trades only one took,
+and the average entry-price gap. Coins the exchange doesn't list are left
+out. The daily jobs write it to `shadow.txt`, and the app shows it on the
+Bot tab. Over the evaluation period it's the main evidence for whether live
+trading matches the research.
+
 **Risk guard** (on by default, between the strategy and the exchange):
 
 | Flag | Default | What it does |

@@ -49,6 +49,7 @@ ok=${PIPESTATUS[0]}
 set -e
 rm -f "$STATE/CLOSE" "$STATE/RESET_HALT" "$STATE/RUN_NOW"
 python3 -m tradebot report $SYMS --exchange binance --state-dir "$STATE" > "$STATE/report.txt" 2>&1 || true
+python3 -m tradebot shadow $SYMS --state-dir "$STATE" --max-open "$MAX_OPEN" > "$STATE/shadow.txt" 2>&1 || true
 python3 - <<PY
 import json, datetime
 from tradebot.control import read_controls

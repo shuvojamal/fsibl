@@ -86,6 +86,8 @@ jobs:
           rm -f demo_state/CLOSE demo_state/RESET_HALT   # one-shot requests, now done
           python -m tradebot report ${{ steps.coins.outputs.symbols }} \
             --exchange okx --state-dir demo_state | tee demo_state/report.txt
+          python -m tradebot shadow ${{ steps.coins.outputs.symbols }} --state-dir demo_state \
+            --max-open ${{ steps.ctl.outputs.max_open }} | tee demo_state/shadow.txt || true
           python - <<EOF
           import json, datetime
           from tradebot.control import read_controls

@@ -239,15 +239,15 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     if (!cfg.token || loading) return;
     loading = true; $("refresh").classList.add("spin");
     try {
-      const [state, trades, equity, report, last, log, paused, runs, fills, settings, closeReq, resetReq, wf] = await Promise.all([
+      const [state, trades, equity, report, last, log, paused, runs, fills, settings, closeReq, resetReq, shadow, wf] = await Promise.all([
         file("live_state.json"), file("live_trades.csv"), file("equity.csv"), file("report.txt"),
         file("last_run.json"), file("run.log"), file("PAUSED", false),
         ACCOUNTS[acct].gh ? gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : {}) : {},
-        file("fills.csv"), file("settings.json"), file("CLOSE"), file("RESET_HALT", false),
+        file("fills.csv"), file("settings.json"), file("CLOSE"), file("RESET_HALT", false), file("shadow.txt"),
         ACCOUNTS[acct].gh ? gh(`/actions/workflows/${WORKFLOW}`).then(r => r.ok ? r.json() : {}) : { state: "vps" },
       ]);
       data = { state: state ? JSON.parse(state) : { positions: {} }, trades: csv(trades), equity: csv(equity),
-               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills),
+               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills), shadow: shadow || "",
                settings: (() => { try { return JSON.parse(settings || "{}") } catch (e) { return {} } })(),
                closeReq: (closeReq || "").toUpperCase().split(/\s+/).filter(Boolean), resetPending: !!resetReq,
                schedule: wf.state || "active", runs: (runs.workflow_runs || []).map(r => ({
@@ -437,6 +437,15 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   }
 
   // Real fills vs the close each decision used. The backtest assumes 0.05% slippage + 0.10% fee per side.
+  // tradebot shadow: did the live bot do what the backtest would have done on the same days?
+  function shadowCard() {
+    const lines = (data.shadow || "").trim().split("\n").slice(1).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return `<div class="card note">Appears after the next run. It replays the backtest over the days the bot has traded and checks that the real trades match: the main test before any real money.</div>`;
+    const ok = lines.some(l => l.includes("exactly what the backtest"));
+    return `<div class="card"><div class="note" style="color:var(--fg)">${lines.map(l => esc(l)).join("<br>")}</div>
+      <div class="note" style="margin-top:8px">${ok ? "Matches so far." : "Small differences are normal: coins the exchange doesn't list, the daily re-ranking of the top 15, and fills at a different time of day. Many unexplained differences would be a warning sign."}</div></div>`;
+  }
+
   function fillsCard() {
     const f = data.fills || [];
     if (!f.length) return `<div class="card note">No fills recorded yet. Tracking starts with the next trade: each buy and sell is compared with the price the strategy decided on.</div>`;
@@ -508,6 +517,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div class="actions">${pausedSha ? `<button class="btn primary" data-act="resume">${I.play}Resume</button>` : `<button class="btn warn" data-act="pause">${I.pause}Pause</button>`}
         <button class="btn" data-act="run">${I.bolt}Run now</button></div>
       <h2>Recent runs</h2><div class="list">${runs}</div>
+      <h2>Live vs backtest</h2>${shadowCard()}
       <h2>Execution quality</h2>${fillsCard()}
       <h2>Bot log</h2><div class="card"><pre class="log">${esc(data.log.trim().split("\n").slice(-30).join("\n") || "No log yet.")}</pre></div>
       <h2>Daily schedule</h2>${scheduleCard()}

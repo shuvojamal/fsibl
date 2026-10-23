@@ -141,6 +141,13 @@ def main():
     fd.add_argument("symbols", nargs="*", help="coins to check (default: the scan pool's top names)")
     fd.add_argument("--flag-at", type=float, default=0.20, help="annualised funding that counts as an opportunity")
 
+    sh = sub.add_parser("shadow", help="compare the live trades with a backtest over the same days")
+    sh.add_argument("symbols", nargs="+")
+    sh.add_argument("--state-dir", default="demo_state")
+    sh.add_argument("--capital", type=float, default=5000.0)
+    sh.add_argument("--max-open", type=int, default=5)
+    sh.add_argument("--risk", type=float, default=0.01)
+
     ct = sub.add_parser("controls", help="read the dashboard's settings/requests and print the live flags")
     ct.add_argument("--state-dir", default="demo_state")
     ct.add_argument("--default-capital", type=float, default=5000.0)
@@ -220,6 +227,9 @@ def main():
         from tradebot.funding import format_funding, scan_funding
         coins = a.symbols or "BTC ETH SOL XRP BNB DOGE ADA LINK AVAX LTC DOT NEAR SUI TRX UNI".split()
         print("\n".join(format_funding(scan_funding(coins), a.flag_at)))
+    elif a.cmd == "shadow":
+        from tradebot.shadow import shadow_report
+        print("\n".join(shadow_report(a.state_dir, [x.upper() for x in a.symbols], a.capital, a.max_open, a.risk)))
     elif a.cmd == "controls":
         from tradebot.control import live_args, read_controls
         c = read_controls(a.state_dir, a.default_capital)

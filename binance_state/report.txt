@@ -1,0 +1,31 @@
+venue: https://testnet.binance.vision
+free USDT: 9,070.71
+
+open positions: 1
+  symbol               qty        entry          now         stop       P&L   P&L %  to stop
+  BTCUSDT         0.011360        81804        81798      77038.9     -0.07  -0.01%   -5.82%
+  unrealised total: -0.07 USDT
+
+closed trades: 0, realised P&L: +0.00 USDT
+  2026-10-23 17:20:47 UTC BUY  BTCUSDT   0.011360 @ 81804 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
+
+execution quality (1 fills; the backtest assumes 0.05% slippage + 0.10% fee per side):
+  BUY    1 fills  avg slippage +0.476%  worst +0.476%  avg fee 0.000%
+
+today's score (1d candles, need 5 of 8):
+     ADAUSDT   1/8  ema_aligned
+     AVAXUSDT  2/8  trend_up, ema_aligned
+  ** BNBUSDT   5/8  trend_up, ema_aligned, rsi_zone, volatility_ok, pullback
+  IN BTCUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+     DOGEUSDT  0/8  
+     ETHUSDT   4/8  trend_up, ema_aligned, volume, volatility_ok
+     LINKUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
+     NEARUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
+     PAXGUSDT  2/8  volume, volatility_ok
+  ** PEPEUSDT  5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
+     SOLUSDT   4/8  trend_up, ema_aligned, volatility_ok, pullback
+     SUIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+     TRXUSDT   3/8  trend_up, volume, volatility_ok
+  ** UNIUSDT   5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
+     XRPUSDT   3/8  rsi_zone, volatility_ok, pullback
+  ** ZECUSDT   6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback

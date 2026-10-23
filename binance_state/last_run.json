@@ -1,0 +1,33 @@
+{
+  "time": "2026-10-23 17:21:39 UTC",
+  "venue": "BINANCE TESTNET (VPS)",
+  "reason": "daily",
+  "ok": true,
+  "symbols": [
+    "ADAUSDT",
+    "AVAXUSDT",
+    "BNBUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT",
+    "LINKUSDT",
+    "NEARUSDT",
+    "PAXGUSDT",
+    "PEPEUSDT",
+    "SOLUSDT",
+    "SUIUSDT",
+    "TRXUSDT",
+    "UNIUSDT",
+    "XRPUSDT",
+    "ZECUSDT"
+  ],
+  "capital": 5000,
+  "risk_pct": 1.0,
+  "max_open": 5,
+  "backstop_pct": 20.0,
+  "max_drawdown_pct": 35.0,
+  "daily_loss_pct": 3.0,
+  "rebuy_wait_days": 7,
+  "gold": true,
+  "paused": false
+}

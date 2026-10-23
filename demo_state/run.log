@@ -30,3 +30,12 @@
 [2026-10-23 04:35:21 UTC] free USDT: 82,036.33; per-trade size: 5,000.00
 [2026-10-23 04:35:23 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
 [2026-10-23 04:35:24 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:13:27 UTC] connected to https://www.okx.com (clock offset -60 ms)
+[2026-10-23 06:13:27 UTC] free USDT: 82,036.33; per-trade size: 5,000.00
+[2026-10-23 06:13:29 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:13:30 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:13:39 UTC] BNBUSDT: backstop not placed (HTTP 400 code 51000: Parameter tgtCcy error); the daily-close stop still applies
+[2026-10-23 06:13:39 UTC] BTCUSDT: backstop not placed (HTTP 400 code 51000: Parameter tgtCcy error); the daily-close stop still applies
+[2026-10-23 06:13:40 UTC] ETHUSDT: backstop not placed (HTTP 400 code 51000: Parameter tgtCcy error); the daily-close stop still applies
+[2026-10-23 06:13:40 UTC] NEARUSDT: backstop not placed (HTTP 400 code 51000: Parameter tgtCcy error); the daily-close stop still applies
+[2026-10-23 06:13:40 UTC] PEPEUSDT: backstop not placed (HTTP 400 code 51000: Parameter tgtCcy error); the daily-close stop still applies

@@ -239,15 +239,16 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     if (!cfg.token || loading) return;
     loading = true; $("refresh").classList.add("spin");
     try {
-      const [state, trades, equity, report, last, log, paused, runs, fills, settings, closeReq, resetReq, shadow, wf] = await Promise.all([
+      const [state, trades, equity, report, last, log, paused, runs, fills, settings, closeReq, resetReq, shadow, wf, research] = await Promise.all([
         file("live_state.json"), file("live_trades.csv"), file("equity.csv"), file("report.txt"),
         file("last_run.json"), file("run.log"), file("PAUSED", false),
         ACCOUNTS[acct].gh ? gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : {}) : {},
         file("fills.csv"), file("settings.json"), file("CLOSE"), file("RESET_HALT", false), file("shadow.txt"),
         ACCOUNTS[acct].gh ? gh(`/actions/workflows/${WORKFLOW}`).then(r => r.ok ? r.json() : {}) : { state: "vps" },
+        gh(`/contents/research/LATEST.md?ref=main`, { accept: "application/vnd.github.raw+json" }).then(r => r.ok ? r.text() : ""),
       ]);
       data = { state: state ? JSON.parse(state) : { positions: {} }, trades: csv(trades), equity: csv(equity),
-               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills), shadow: shadow || "",
+               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills), shadow: shadow || "", research: research || "",
                settings: (() => { try { return JSON.parse(settings || "{}") } catch (e) { return {} } })(),
                closeReq: (closeReq || "").toUpperCase().split(/\s+/).filter(Boolean), resetPending: !!resetReq,
                schedule: wf.state || "active", runs: (runs.workflow_runs || []).map(r => ({
@@ -437,6 +438,16 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   }
 
   // Real fills vs the close each decision used. The backtest assumes 0.05% slippage + 0.10% fee per side.
+  // research/LATEST.md: written by the scheduled research sessions
+  function md(t) {
+    return esc(t).replace(/^#+ (.*)$/gm, "<b>$1</b>").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/_(.+?)_/g, "<i>$1</i>")
+      .replace(/^- /gm, "• ").replace(/\n{2,}/g, "<br><br>").replace(/\n/g, " ");
+  }
+  function researchCard() {
+    if (!data.research) return `<div class="card note">No research report yet.</div>`;
+    return `<div class="card note" style="color:var(--fg)">${md(data.research.trim())}</div>`;
+  }
+
   // tradebot shadow: did the live bot do what the backtest would have done on the same days?
   function shadowCard() {
     const lines = (data.shadow || "").trim().split("\n").slice(1).map(l => l.trim()).filter(Boolean);
@@ -517,6 +528,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div class="actions">${pausedSha ? `<button class="btn primary" data-act="resume">${I.play}Resume</button>` : `<button class="btn warn" data-act="pause">${I.pause}Pause</button>`}
         <button class="btn" data-act="run">${I.bolt}Run now</button></div>
       <h2>Recent runs</h2><div class="list">${runs}</div>
+      <h2>Research</h2>${researchCard()}
       <h2>Live vs backtest</h2>${shadowCard()}
       <h2>Execution quality</h2>${fillsCard()}
       <h2>Bot log</h2><div class="card"><pre class="log">${esc(data.log.trim().split("\n").slice(-30).join("\n") || "No log yet.")}</pre></div>

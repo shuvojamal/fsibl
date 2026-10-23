@@ -121,6 +121,13 @@
       "stop": 0.0,
       "target": 0.0,
       "last_candle": 0
+    },
+    "PAXGUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 0
     }
   },
   "equity_peak": 5043.588661906826

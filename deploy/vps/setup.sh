@@ -85,7 +85,9 @@ fi
 sudo -u "$BOT_USER" git -C "$DIR/repo" config user.name "tradebot-vps"
 sudo -u "$BOT_USER" git -C "$DIR/repo" config user.email "tradebot-vps@users.noreply.github.com"
 sudo -u "$BOT_USER" git -C "$DIR/repo" config core.sshCommand "ssh -F $DIR/.ssh/config"
-if sudo -u "$BOT_USER" sh -c "cd '$DIR/repo' && python3 -m unittest discover -s tests -t . >/dev/null 2>&1"; then
+# test scratch files go inside the bot's own directory, never into /tmp
+install -d -o "$BOT_USER" -g "$BOT_USER" -m 700 "$DIR/tmp"
+if sudo -u "$BOT_USER" sh -c "cd '$DIR/repo' && TMPDIR='$DIR/tmp' python3 -m unittest discover -s tests -t . >/dev/null 2>&1"; then
   echo "  tests pass"
 else
   echo "  WARNING: tests failed; check before trading"

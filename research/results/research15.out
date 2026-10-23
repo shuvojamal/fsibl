@@ -3,3 +3,27 @@
   forecast 2026-06-10 (21/149, 499s)
   forecast 2026-06-20 (31/149, 739s)
   forecast 2026-06-30 (41/149, 990s)
+  forecast 2026-07-10 (51/149, 1249s)
+  forecast 2026-07-20 (61/149, 1486s)
+  forecast 2026-07-30 (71/149, 1729s)
+  forecast 2026-08-09 (81/149, 1970s)
+  forecast 2026-08-19 (91/149, 2215s)
+  forecast 2026-08-29 (101/149, 2461s)
+  forecast 2026-09-08 (111/149, 2709s)
+  forecast 2026-09-18 (121/149, 2948s)
+  forecast 2026-09-28 (131/149, 3193s)
+  forecast 2026-10-08 (141/149, 3440s)
+  forecast 2026-10-16 (149/149, 3638s)
+Kronos-small, lookback 400, 3 samples, horizon 5 days; 15 coins; scored 2025-09-01 -> 2026-10-16 (411 daily forecast dates)
+
+Kronos                   mean IC +0.037  t-stat +1.09  (days with positive IC: 54%)  sign hit rate 52.7%
+naive (last 5d return)   mean IC +0.001  t-stat +0.03  (days with positive IC: 51%)  sign hit rate 49.0%
+share of 5-day returns that were positive (hit rate of always saying 'up'): 45.1%
+average forecast -0.28% vs average realised -0.34% per 5 days
+
+Portfolio every 5 days (top 3 forecasts above +1%, next-open to next-open, 0.15%/side), 5 start offsets:
+  Kronos top 3 > +1%         total -61.3%  -69.0%  -68.1%  -59.6%  -44.9%   | worst DD -79.5%  invested 98% of periods
+  Kronos top 3, no floor     total -60.3%  -63.3%  -58.2%  -54.4%  -49.6%   | worst DD -77.4%  invested 100% of periods
+  naive top 3 > +1%          total  +2.8%  -16.1%  -24.4%  -16.5%  -35.6%   | worst DD -66.9%  invested 85% of periods
+  all 15 equal weight        total -34.9%  -38.0%  -38.5%  -36.8%  -35.9%   | worst DD -64.9%  invested 100% of periods
+  BTC buy & hold over the scored window: -25.3%

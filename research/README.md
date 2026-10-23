@@ -31,6 +31,7 @@ research/
 | 12 | `research12.py`, `research12b.py` | `research12.out`, `research12b.out` | `docs/research-round12-…` | `196a899` | 9-year stress test (2017–2026), Sharpe/expectancy/regimes, Monte Carlo; ADX filter and top-10 checked on each half |
 | 13 | `research13.py` | `research13.out`, `research13-funding-now.out` | `docs/research-round13-2026-10-23.md` | `9373e95` | Funding-rate carry (spot long + perp short), 20 coins 2020–2026, tuned 2020–23, tested 2024–26; added `tradebot funding` monitor |
 | 14 | `research14.py` | `research14.out` | `docs/research-round14-2026-10-23.md` | `ae2293c` | Cross-sectional momentum rotation (64 settings, BTC filter), vs and blended with the trend bot |
+| 15 | `research15.py` | `research15.out` | `docs/research-round15-2026-10-23.md` | `bdf2b96` | Kronos-small forecasts on 15 coins, 2025-09 to 2026-10 (after the model's release): IC, hit rate, top-3 portfolio |
 | R1 | `review_jev.py` | `review_jev.out` | `docs/review-jev-trades-2026-10-23.md` | `2f76d15` | Review of github.com/zadescoxp/Jev-Trades: its own saved paper trades, re-priced with fees |
 | R2 | (reading only) | — | `docs/review-autotrader-2026-10-23.md` | `4a079f5` | Review of github.com/PkLavc/Autotrader (Kronos model on US stocks); led to round 15 |
 | 16 | `research16.py` | `research16.out` | `docs/research-round16-2026-10-23.md` | `3194d01` | Deflated Sharpe ratio of the live rules vs the number of variants tried |

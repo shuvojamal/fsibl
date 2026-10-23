@@ -1,0 +1,8 @@
+Regime-based risk per trade (BTC above/below its 200-day EMA); 8 slots, 6 checks, top 15; medians over six close times
+
+case                      2018-21 ret / Sh  2022-26 ret / Sh  DD 18-21  DD 22-26  wins vs flat 1% verdict
+flat 0.5%                  +29.5% / 1.57   +15.7% / 1.03    -12.8%    -16.4%          3 of 12 
+flat 1% (reference)        +61.7% / 1.66   +25.9% / 0.97    -21.8%    -28.3%                  REF
+bull 1% / bear 0.5%        +54.3% / 1.60   +23.6% / 0.94    -21.8%    -26.5%          1 of 12 
+bull 1.5% / bear 0.5%      +79.8% / 1.66   +17.8% / 0.73    -26.4%    -33.2%          3 of 12 
+bull 1% / bear 0.25%       +50.5% / 1.53   +22.0% / 0.91    -21.8%    -26.8%          1 of 12 

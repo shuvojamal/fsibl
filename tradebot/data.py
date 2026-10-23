@@ -42,6 +42,13 @@ def _get(params):
             time.sleep(2 ** attempt)
 
 
+def ticker_price(symbol):
+    """Binance's current price for a symbol (the same public data the signals use)."""
+    url = BASE_URL.replace("/klines", "/ticker/price") + "?" + urllib.parse.urlencode({"symbol": symbol.upper()})
+    with urllib.request.urlopen(url, timeout=15) as resp:
+        return float(json.load(resp)["price"])
+
+
 def fetch_candles(symbol, interval, count):
     """Return the most recent `count` *closed* candles, oldest first."""
     if interval not in INTERVAL_MS:

@@ -1,0 +1,37 @@
+30 coins, signals on the 00:00 UTC close, entry d hours later; scored from 2018-03
+
+## 1. Delay, no guard vs the live 2% guard
+   0 h late  no guard: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R
+            2% guard: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R   (buys skipped 0, taken 481)
+   4 h late  no guard: +23.2%/yr  DD -35.0%  Sh 0.97  trades 476  avg +0.47R
+            2% guard: +22.5%/yr  DD -35.4%  Sh 0.94  trades 483  avg +0.45R   (buys skipped 75, taken 488)
+   8 h late  no guard: +20.8%/yr  DD -34.3%  Sh 0.91  trades 476  avg +0.42R
+            2% guard: +19.6%/yr  DD -37.5%  Sh 0.84  trades 492  avg +0.40R   (buys skipped 141, taken 497)
+  12 h late  no guard: +20.9%/yr  DD -34.6%  Sh 0.90  trades 476  avg +0.43R
+            2% guard: +21.0%/yr  DD -37.1%  Sh 0.86  trades 491  avg +0.45R   (buys skipped 163, taken 496)
+  16 h late  no guard: +20.1%/yr  DD -36.9%  Sh 0.86  trades 475  avg +0.41R
+            2% guard: +20.5%/yr  DD -38.1%  Sh 0.84  trades 480  avg +0.43R   (buys skipped 190, taken 484)
+  20 h late  no guard: +22.9%/yr  DD -35.5%  Sh 0.97  trades 472  avg +0.60R
+            2% guard: +20.8%/yr  DD -39.8%  Sh 0.85  trades 475  avg +0.44R   (buys skipped 216, taken 479)
+
+## 2. Guard size at the live delays
+  0 h late, guard none: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R   skipped 0
+  0 h late, guard   1%: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R   skipped 0
+  0 h late, guard   2%: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R   skipped 0
+  0 h late, guard   3%: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R   skipped 0
+  0 h late, guard   5%: +25.4%/yr  DD -36.2%  Sh 1.03  trades 476  avg +0.50R   skipped 0
+  4 h late, guard none: +23.2%/yr  DD -35.0%  Sh 0.97  trades 476  avg +0.47R   skipped 0
+  4 h late, guard   1%: +21.0%/yr  DD -40.4%  Sh 0.88  trades 488  avg +0.42R   skipped 158
+  4 h late, guard   2%: +22.5%/yr  DD -35.4%  Sh 0.94  trades 483  avg +0.45R   skipped 75
+  4 h late, guard   3%: +22.3%/yr  DD -35.3%  Sh 0.94  trades 484  avg +0.45R   skipped 35
+  4 h late, guard   5%: +23.1%/yr  DD -35.0%  Sh 0.98  trades 475  avg +0.47R   skipped 8
+
+## 3. Split halves, live delays, no guard vs 2%
+  0 h, guard none  2018-21: +35.2%/yr  DD -24.5%  Sh 1.35  trades 186  avg +0.75R
+                    2022-26: +18.5%/yr  DD -27.5%  Sh 0.80  trades 287  avg +0.35R
+  0 h, guard   2%  2018-21: +35.2%/yr  DD -24.5%  Sh 1.35  trades 186  avg +0.75R
+                    2022-26: +18.5%/yr  DD -27.5%  Sh 0.80  trades 287  avg +0.35R
+  4 h, guard none  2018-21: +33.6%/yr  DD -24.0%  Sh 1.31  trades 186  avg +0.72R
+                    2022-26: +15.9%/yr  DD -26.6%  Sh 0.72  trades 287  avg +0.31R
+  4 h, guard   2%  2018-21: +34.0%/yr  DD -25.2%  Sh 1.29  trades 190  avg +0.72R
+                    2022-26: +14.5%/yr  DD -26.1%  Sh 0.67  trades 290  avg +0.28R

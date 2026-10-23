@@ -382,20 +382,25 @@ class DataGuardTests(unittest.TestCase):
         self.dir = tempfile.mkdtemp()
         self.candles = trending_candles()                 # last close 38.4
 
-    def run_once(self, price, candles, **kw):
+    def run_once(self, price, candles, ref=None, **kw):
         self.fake = FakeBinance(price=price)
         t = LiveTrader(client(self.fake), ["BTCUSDT"], "1h", Params(fast=3, slow=10, rsi_max=101, take_profit=10),
                        trade_usdt=20, guard_args=(50, 20, os.path.join(self.dir, "STOP")), state_dir=self.dir, **kw)
-        with mock.patch("tradebot.live.fetch_candles", return_value=candles):
+        with mock.patch("tradebot.live.fetch_candles", return_value=candles), \
+                mock.patch("tradebot.live.ticker_price", return_value=price if ref is None else ref):
             t.preflight()
             t.step()
         return [o["side"] for o in self.fake.orders]
 
-    def test_buy_skipped_when_exchange_price_disagrees_with_signal_candle(self):
-        self.assertEqual(self.run_once(100.0, self.candles, max_price_gap=0.02), [])
+    def test_buy_skipped_when_exchange_disagrees_with_binance(self):
+        self.assertEqual(self.run_once(100.0, self.candles, ref=38.5, max_price_gap=0.02), [])
 
     def test_buy_goes_ahead_when_prices_agree(self):
-        self.assertEqual(self.run_once(38.6, self.candles, max_price_gap=0.02), ["BUY"])
+        self.assertEqual(self.run_once(38.6, self.candles, ref=38.5, max_price_gap=0.02), ["BUY"])
+
+    def test_a_coin_that_kept_rising_since_the_close_is_not_bad_data(self):
+        # signal close 38.4, both venues now at 41 (+7%): buy anyway (research round 23)
+        self.assertEqual(self.run_once(41.0, self.candles, ref=41.0, max_price_gap=0.02), ["BUY"])
 
     def test_buy_skipped_on_stale_candles_but_not_on_fresh_ones(self):
         self.assertEqual(self.run_once(38.4, self.candles, require_fresh=True), [])
@@ -410,7 +415,8 @@ class DataGuardTests(unittest.TestCase):
                        guard_args=(50, 20, os.path.join(self.dir, "STOP")), state_dir=self.dir, adopt=False,
                        max_price_gap=0.02, require_fresh=True)
         t.state["positions"]["BTCUSDT"] = {"qty": 1.0, "entry": 150.0, "stop": 140.0, "target": 1e9, "last_candle": 0}
-        with mock.patch("tradebot.live.fetch_candles", return_value=self.candles):
+        with mock.patch("tradebot.live.fetch_candles", return_value=self.candles), \
+                mock.patch("tradebot.live.ticker_price", return_value=100.0):
             t.preflight()
             t.step()
         self.assertEqual([o["side"] for o in self.fake.orders], ["SELL"])

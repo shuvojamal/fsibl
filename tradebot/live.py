@@ -13,7 +13,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 
 from tradebot.binance_client import BinanceClient, BinanceError, fill_summary
-from tradebot.data import INTERVAL_MS, fetch_candles
+from tradebot.data import INTERVAL_MS, fetch_candles, ticker_price
 from tradebot.engines import EmaEngine
 
 
@@ -80,9 +80,10 @@ class LiveTrader:
         # Paused from the dashboard: no new positions, but stops and exits run.
         self.pause_entries = pause_entries
         # Bad-data guard, for buys only (exits never wait on it): skip a buy when
-        # the exchange price is more than this fraction away from the candle the
-        # signal came from (prices come from Binance, orders go to OKX), or, with
-        # require_fresh, when the latest closed candle is older than one interval.
+        # the exchange's price is more than this fraction away from Binance's
+        # live price (signals come from Binance data, orders may go to OKX or a
+        # testnet), or, with require_fresh, when the latest closed candle is
+        # older than one interval.
         self.max_price_gap = max_price_gap
         self.require_fresh = require_fresh
         # Emergency backstop (research round 19): a real stop order resting on the
@@ -238,11 +239,20 @@ class LiveTrader:
             if age > INTERVAL_MS[self.interval] * 1.05:
                 return f"latest closed candle is {age / 3_600_000:.1f} h old (stale data)"
         if self.max_price_gap:
+            # Compare the exchange with Binance's live price (where the signals come
+            # from), not with the signal close: a coin that simply kept rising since
+            # the close is not bad data, and research round 23 found that skipping
+            # such "late" buys costs money.
             now = self.client.price(sym)
-            gap = now / last.close - 1
+            try:
+                ref = ticker_price(sym)
+            except (OSError, ValueError, KeyError) as e:
+                print(f"[{_now()}] {sym}: reference price unavailable ({e}); price check skipped")
+                return None
+            gap = now / ref - 1
             if abs(gap) > self.max_price_gap:
-                return (f"exchange price {now:.6g} is {gap:+.1%} from the signal candle's close "
-                        f"{last.close:.6g} (limit {self.max_price_gap:.0%})")
+                return (f"exchange price {now:.6g} is {gap:+.1%} away from Binance's price {ref:.6g} "
+                        f"(limit {self.max_price_gap:.0%}); the price data disagrees")
         return None
 
     def _record_equity(self):

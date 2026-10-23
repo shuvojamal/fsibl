@@ -165,9 +165,11 @@ held, and no more positions are open than the cap. The daily workflow runs
 it after saving, so a broken ledger shows up as a failed run.
 
 **Bad-data guard** (on by default, buys only): `live` skips a buy when the
-exchange price is more than `--max-price-gap` (2%) away from the close of the
-candle the signal came from (prices come from Binance, orders go to OKX), or
-when the latest closed candle is older than one interval
+exchange price is more than `--max-price-gap` (2%) away from Binance's live
+price (signals come from Binance data; orders may go to OKX or a testnet),
+or when the latest closed candle is older than one interval. It does not
+skip a coin just because it rose since the close; research round 23 found
+that costs money
 (`--no-fresh-check` turns that off). Stop-loss and exit sales never wait on it.
 
 **Emergency backstop** (`--backstop 0.20`, OKX): besides the daily-close

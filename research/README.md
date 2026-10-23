@@ -41,6 +41,7 @@ research/
 | 20 | `research20.py` | `research20.out` | `docs/research-round20-2026-10-23.md` | `f87647f` | Short side: mirrored rules on inverted prices with real funding, alone and sharing slots with the longs |
 | 21 | `research21.py` | `research21.out` | `docs/research-round21-2026-10-23.md` | `34ce28a` | Robustness: the same rules on daily candles closing at 00/04/08/12/16/20 UTC (rebuilt from hourly data) |
 | 22 | `research22.py` | `research22.out` | `docs/research-round22-2026-10-23.md` | `1730dcc` | Tranching: equal sub-books on different daily close times vs the single 00:00 close |
+| 23 | `research23.py` | `research23.out` | `docs/research-round23-2026-10-23.md` | `659060b` | Cost of entering 0-20 h after the close, and the 2% price guard (failed as an anti-chase rule; now compares against Binance's live price) |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

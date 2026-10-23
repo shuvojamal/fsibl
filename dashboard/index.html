@@ -28,6 +28,10 @@ body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -we
   padding: calc(env(safe-area-inset-top, 0px) + 12px) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
   display: flex; align-items: center; gap: 10px }
 .brand { font-weight: 700; font-size: 17px; letter-spacing: -.01em }
+.acct { border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 600 12px var(--sans); padding: 5px 10px; border-radius: 999px; cursor: pointer }
+.acct::after { content: " ▾"; color: var(--muted) }
+.choice { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; text-align: left; font: inherit; color: var(--fg); width: 100% }
+.choice[aria-current="true"] { border-color: var(--accent); background: var(--accent-bg) }
 .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted) }
 .status i { width: 7px; height: 7px; border-radius: 50%; background: currentColor }
 .status.run { background: var(--up-bg); color: var(--up) } .status.pause { background: var(--warn-bg); color: var(--warn) }
@@ -137,6 +141,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
 
 <header class="top">
   <span class="brand">Tradebot</span>
+  <button id="acct" class="acct" aria-label="Switch account"></button>
   <span id="status" class="status"><i></i><span>Connecting</span></span>
   <span class="spacer"></span>
   <button id="refresh" class="icon-btn" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
@@ -162,10 +167,21 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     get(k) { try { return localStorage.getItem(k) } catch (e) { return null } },
     set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} },
   };
-  const WORKFLOW = "demo-bot.yml", DIR = "demo_state";
+  // Two bots, one app: the OKX demo run by GitHub Actions, and the Binance
+  // testnet run by the owner's VPS (deploy/vps/). Each keeps its own folder.
+  const ACCOUNTS = {
+    demo: { dir: "demo_state", name: "OKX demo", short: "OKX", gh: true },
+    vps: { dir: "binance_state", name: "Binance testnet (VPS)", short: "VPS", gh: false },
+  };
+  const WORKFLOW = "demo-bot.yml";
+  let acct = ACCOUNTS[S.get("tb_acct")] ? S.get("tb_acct") : "demo", DIR = ACCOUNTS[acct].dir;
   let cfg = { token: S.get("tb_token"), repo: S.get("tb_repo") || "shuvojamal/binancebot" };
   let data = null, prices = {}, pausedSha = null, tab = S.get("tb_tab") || "home", loading = false;
-  try { const c = JSON.parse(S.get("tb_cache") || "null"); if (c) { data = c.data; prices = c.prices || {}; pausedSha = c.pausedSha } } catch (e) {}
+  function loadCache() {
+    data = null; prices = {}; pausedSha = null;
+    try { const c = JSON.parse(S.get("tb_cache_" + acct) || "null"); if (c) { data = c.data; prices = c.prices || {}; pausedSha = c.pausedSha } } catch (e) {}
+  }
+  loadCache();
 
   // ---------- formatting ----------
   const nf = d => new Intl.NumberFormat("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -204,7 +220,12 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const r = await gh(`/contents/${DIR}/${name}`, { method: "PUT", body: JSON.stringify(body) });
     if (!r.ok) throw new Error(`Couldn't save ${name} (HTTP ${r.status}).`);
   }
-  async function dispatch() {
+  async function dispatch(request) {
+    if (!ACCOUNTS[acct].gh) {                       // the VPS checks for requests every 10 minutes
+      if (!request) await putFile("RUN_NOW", "run requested from the app\n", "dashboard: run now (VPS)");
+      setTimeout(load, 11 * 60000);
+      return;
+    }
     if (data && data.schedule && data.schedule !== "active") throw new Error("The daily schedule is stopped. Turn it on in the Bot tab first.");
     const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main" }) });
     if (r.status !== 204) throw new Error("Couldn't start a run (HTTP " + r.status + ").");
@@ -221,9 +242,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       const [state, trades, equity, report, last, log, paused, runs, fills, settings, closeReq, resetReq, wf] = await Promise.all([
         file("live_state.json"), file("live_trades.csv"), file("equity.csv"), file("report.txt"),
         file("last_run.json"), file("run.log"), file("PAUSED", false),
-        gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : {}),
+        ACCOUNTS[acct].gh ? gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : {}) : {},
         file("fills.csv"), file("settings.json"), file("CLOSE"), file("RESET_HALT", false),
-        gh(`/actions/workflows/${WORKFLOW}`).then(r => r.ok ? r.json() : {}),
+        ACCOUNTS[acct].gh ? gh(`/actions/workflows/${WORKFLOW}`).then(r => r.ok ? r.json() : {}) : { state: "vps" },
       ]);
       data = { state: state ? JSON.parse(state) : { positions: {} }, trades: csv(trades), equity: csv(equity),
                report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills),
@@ -231,6 +252,8 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
                closeReq: (closeReq || "").toUpperCase().split(/\s+/).filter(Boolean), resetPending: !!resetReq,
                schedule: wf.state || "active", runs: (runs.workflow_runs || []).map(r => ({
                  t: r.created_at, ev: r.event, st: r.status, c: r.conclusion, url: r.html_url })), loadedAt: Date.now() };
+      if (!ACCOUNTS[acct].gh && data.last.time) data.runs = [{ t: parseT(data.last.time), ev: data.last.reason === "daily" ? "schedule" : "vps",
+        st: "completed", c: data.last.ok === false ? "failure" : "success", url: `https://github.com/${cfg.repo}/commits/main/${DIR}` }];
       pausedSha = paused ? paused.sha : null;
       render();
       await refreshPrices();
@@ -244,7 +267,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       const r = await fetch("https://data-api.binance.vision/api/v3/ticker/price?symbols=" + encodeURIComponent(JSON.stringify(h.map(([s]) => s))));
       if (r.ok) for (const t of await r.json()) prices[t.symbol] = +t.price;
       prices._at = Date.now();
-      S.set("tb_cache", JSON.stringify({ data, prices, pausedSha }));
+      S.set("tb_cache_" + acct, JSON.stringify({ data, prices, pausedSha }));
       if (tab === "home" || tab === "positions") render();
     } catch (e) {}
   }
@@ -264,7 +287,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   function setStatus(kind, text) { const s = $("status"); s.className = "status " + kind; s.lastElementChild.textContent = text }
   function statusFromData() {
     if (!data) return;
-    if (data.schedule && data.schedule !== "active") setStatus("halt", "Stopped");
+    const lastT = data.last.time ? parseT(data.last.time) : 0;
+    if (data.schedule === "vps" && (!lastT || Date.now() - lastT > 26 * 3600000)) setStatus("halt", lastT ? "VPS silent" : "Not set up");
+    else if (data.schedule !== "vps" && data.schedule && data.schedule !== "active") setStatus("halt", "Stopped");
     else if (data.state.halted) setStatus("halt", "Breaker tripped");
     else if (pausedSha) setStatus("pause", "Paused");
     else setStatus("run", "Running");
@@ -328,7 +353,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
           <div class="pos-pnl"><div class="a num ${tone(pnl)}">${sgn(pnl)}</div><div class="p num ${tone(r)}">${pct(r)}</div></div></div>
         <div class="risk"><div class="track"><div class="fill" style="width:${(room * 100).toFixed(0)}%;background:${col}"></div></div>
           <div class="row3 num"><span>Stop ${px(p.stop)}</span><span>${toStop == null ? "" : F[1].format(toStop * 100) + "% above stop"}</span><span>Now ${px(now)}</span></div>
-          ${p.backstop_px ? `<div class="num" style="font-size:12px">Emergency backstop on OKX at ${px(p.backstop_px)}</div>` : ""}</div>
+          ${p.backstop_px ? `<div class="num" style="font-size:12px">Emergency backstop on the exchange at ${px(p.backstop_px)}</div>` : ""}</div>
         ${data.closeReq.includes(s) || data.closeReq.includes("ALL")
           ? `<div class="pending">Sell requested · happens in the next run</div>`
           : `<button class="btn danger sm" data-act="sell" data-sym="${esc(s)}">Sell ${esc(coin(s))} now</button>`}
@@ -386,6 +411,12 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   }
 
   function scheduleCard() {
+    if (data.schedule === "vps") {
+      const t = data.last.time ? parseT(data.last.time) : 0;
+      return `<div class="card note">${t ? `Runs on your VPS. Last run ${ago(t)} (${esc(data.last.reason || "")}).` : "No run from the VPS yet. Set it up with <b>deploy/vps/setup.sh</b> (see deploy/vps/README.md)."}
+        It trades once a day after the daily close and checks for your requests (Sell, Run now, Reset) every 10 minutes.
+        To stop it, run <b>systemctl stop tradebot.timer</b> on the VPS; Pause here stops new buys.</div>`;
+    }
     const on = data.schedule === "active";
     return `<div class="list"><div class="item"><div class="side ${on ? "buy" : "sell"}" style="${on ? "background:var(--up-bg);color:var(--up)" : ""}">${on ? "ON" : "OFF"}</div>
       <div class="main"><div class="t">${on ? "Runs every day after the daily close" : "Stopped: the bot does not run"}</div>
@@ -431,7 +462,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       return `<div class="item"><div class="side ${res === "success" ? "buy" : res === "failure" ? "sell" : ""}" style="${res === "success" ? "background:var(--up-bg);color:var(--up)" : ""}">${res === "success" ? "OK" : res === "failure" ? "ERR" : "…"}</div>
         <div class="main"><div class="t">${r.ev === "schedule" ? "Daily run" : "Manual run"}</div><div class="s">${new Date(r.t).toLocaleString()}</div></div>
         <div class="r"><a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;text-decoration:none">Log ›</a></div></div>`;
-    }).join("") : `<div class="empty">No runs visible. The token needs Actions access.</div>`;
+    }).join("") : `<div class="empty">${ACCOUNTS[acct].gh ? "No runs visible. The token needs Actions access." : "No run from the VPS yet."}</div>`;
     return `
       <div class="actions">${pausedSha ? `<button class="btn primary" data-act="resume">${I.play}Resume</button>` : `<button class="btn warn" data-act="pause">${I.pause}Pause</button>`}
         <button class="btn" data-act="run">${I.bolt}Run now</button></div>
@@ -492,8 +523,10 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       if (!r.ok) throw new Error("Resume failed (HTTP " + r.status + ").");
       pausedSha = null; render(); toast("Resumed.");
     }),
-    run: () => confirmSheet("Run the bot now?", "It checks every coin on the OKX demo account and acts on any signals or stops. Takes about a minute.", "Run now", "primary", async () => {
-      await dispatch(); toast("Run started. Results in about a minute.");
+    run: () => confirmSheet("Run the bot now?", ACCOUNTS[acct].gh
+        ? "It checks every coin on the OKX demo account and acts on any signals or stops. Takes about a minute."
+        : "Your VPS picks this up within 10 minutes, checks every coin on the Binance testnet and acts on any signals or stops.", "Run now", "primary", async () => {
+      await dispatch(); toast(ACCOUNTS[acct].gh ? "Run started. Results in about a minute." : "Requested. The VPS runs it within 10 minutes.");
     }),
     settings: () => openSettings(false),
     strategy: () => openStrategy(),
@@ -501,12 +534,12 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       "It sells at the market price in a run that starts now (about a minute), which locks in the current profit or loss. The bot won't buy it back for 7 days.",
       "Sell now", "danger", async () => {
         await putFile("CLOSE", [...new Set([...data.closeReq, s])].join("\n") + "\n", `dashboard: sell ${s}`);
-        data.closeReq = [...new Set([...data.closeReq, s])]; await dispatch(); render(); toast(`Selling ${coin(s)}… results in about a minute.`) }) },
+        data.closeReq = [...new Set([...data.closeReq, s])]; await dispatch(true); render(); toast(`Selling ${coin(s)}… results in about a minute.`) }) },
     sellall: () => confirmSheet("Sell every position now?", "Everything is sold at market price in a run that starts now. None of these coins will be bought back for 7 days. To also stop new buys, press Pause.",
       "Sell all", "danger", async () => {
-        await putFile("CLOSE", "ALL\n", "dashboard: sell all"); data.closeReq = ["ALL"]; await dispatch(); render(); toast("Selling everything… results in about a minute.") }),
+        await putFile("CLOSE", "ALL\n", "dashboard: sell all"); data.closeReq = ["ALL"]; await dispatch(true); render(); toast("Selling everything… results in about a minute.") }),
     resethalt: () => confirmSheet("Reset the circuit breaker?", "Only do this after you've looked at why the account fell this far. The bot can open new positions again from the run that starts now.",
-      "Reset", "warn", async () => { await putFile("RESET_HALT", "reset from the app\n", "dashboard: reset circuit breaker"); data.resetPending = true; await dispatch(); render(); toast("Reset requested.") }),
+      "Reset", "warn", async () => { await putFile("RESET_HALT", "reset from the app\n", "dashboard: reset circuit breaker"); data.resetPending = true; await dispatch(true); render(); toast("Reset requested.") }),
     schedule: () => data.schedule === "active"
       ? confirmSheet("Stop the daily bot?", "The bot stops running completely: no stop-loss checks, no new trades, and Run now and Sell won't work until you start it again. Open positions stay open, protected only by the emergency backstops on OKX. To just stop new buys, use Pause instead.",
           "Stop bot", "danger", async () => {
@@ -524,6 +557,16 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const t = e.target.closest(".tab"); if (t) { tab = t.dataset.tab; S.set("tb_tab", tab); scrollTo(0, 0); render() }
   });
   $("refresh").onclick = load;
+  $("acct").textContent = ACCOUNTS[acct].short;
+  $("acct").onclick = () => {
+    sheet(`<h3>Account</h3>${Object.entries(ACCOUNTS).map(([k, a]) => `<button class="choice" data-acct="${k}" aria-current="${k === acct}">
+      <div class="coin">${a.short}</div><div><div style="font-weight:700">${a.name}</div>
+      <div class="muted" style="font-size:12px">${a.gh ? "Runs on GitHub every day · test money" : "Runs on your VPS (Germany) · test money"}</div></div></button>`).join("")}`);
+    for (const b of document.querySelectorAll("[data-acct]")) b.onclick = () => {
+      acct = b.dataset.acct; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); $("acct").textContent = ACCOUNTS[acct].short;
+      close(); loadCache(); render(); load();
+    };
+  };
   document.addEventListener("visibilitychange", () => { if (!document.hidden && data && Date.now() - (data.loadedAt || 0) > 60000) load() });
 
   const I = {

@@ -1,7 +1,7 @@
 {
-  "time": "2026-10-23 17:42:58 UTC",
+  "time": "2026-10-23 17:57:12 UTC",
   "venue": "BINANCE REAL (VPS)",
-  "reason": "daily",
+  "reason": "request (RUN_NOW)",
   "ok": true,
   "symbols": [
     "ADAUSDT",
@@ -21,7 +21,7 @@
     "XRPUSDT",
     "ZECUSDT"
   ],
-  "capital": 300,
+  "capital": 5000,
   "risk_pct": 1.0,
   "max_open": 5,
   "backstop_pct": 20.0,
@@ -29,6 +29,6 @@
   "daily_loss_pct": 3.0,
   "rebuy_wait_days": 7,
   "gold": true,
-  "mode": "test",
+  "mode": "live",
   "paused": false
 }

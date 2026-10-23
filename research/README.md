@@ -45,6 +45,7 @@ research/
 | 24 | `research24.py` | `research24.out` | `docs/research-round24-2026-10-24.md` | `b3b6d74` | min_score 4/5/6/7 on 6 close times x 2 halves: 6 wins Sharpe in 11 of 12 cells but loses the live cell; fails the pre-set bar; made a setting |
 | 25 | `research25.py` | `research25.out` | `docs/research-round25-2026-10-24.md` | `0dba740` | Financial model: 300 USDT (and +50/month) over 1-5 years, 4,000 block-bootstrap paths from six close-time backtests; backtest / realistic / half-size vs holding BTC and savings |
 | 26 | `research26.py` | `research26.out` | `docs/research-round26-2026-10-24.md` | `95ccd22` | Hold vs trade, coin by coin (55 coins): holding made money on 20, median -37%, median worst drop -96%; trend rule made money on 48, smaller drop on all 55 |
+| 27 | `research27.py` | `research27.out` | `docs/research-round27-2026-10-24.md` | `061e450` | Trailing-stop distance: ATR x2-5 and 10-25% trails on 6 close times x 2 halves; trail good, best width market-dependent; 25% "beats" 3xATR 11/12 but ties in 2022-26; no change |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

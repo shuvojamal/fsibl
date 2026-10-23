@@ -1,0 +1,29 @@
+Exit rules on six close times x two halves (30 coins, costs included).
+Per half: median over the six close times (return/yr, Sharpe); then wins vs the live trail over all 12 cells.
+
+exit                     2018-21 ret / Sh   2022-26 ret / Sh  DD 22-26  trades 22-26  wins vs live
+ATR x2                    +36.9% / 1.40     +13.3% / 0.65    -28.0%           460 7/12 (3/6 recent)
+ATR x2.5                  +41.9% / 1.51     +11.2% / 0.56    -28.5%           358 9/12 (3/6 recent)
+ATR x3 (live)             +35.2% / 1.28     +10.8% / 0.54    -30.4%           302              
+ATR x3.5                  +57.7% / 1.72      +7.7% / 0.43    -31.0%           257 7/12 (1/6 recent)
+ATR x4                    +62.8% / 1.68      +6.6% / 0.37    -34.7%           225 7/12 (1/6 recent)
+ATR x5                    +63.5% / 1.49      +6.2% / 0.36    -36.7%           183 7/12 (1/6 recent)
+10% below high            +36.9% / 1.47     +11.2% / 0.60    -28.1%           420 9/12 (3/6 recent)
+15% below high            +46.8% / 1.60      +9.4% / 0.48    -29.3%           262 8/12 (2/6 recent)
+20% below high            +43.8% / 1.51      +8.6% / 0.44    -32.2%           194 9/12 (3/6 recent)
+25% below high            +51.6% / 1.55     +11.4% / 0.55    -31.2%           156 11/12 (5/6 recent)
+
+Median over all 12 cells (dominated by the 2018-21 bull market; read with the table above):
+exit                          return/yr  Sharpe   max DD  trades  avg R   win  beats live (Sharpe)
+ATR x2                           +30.8%    1.23   -25.6%     445  +0.36   42%              7 of 12
+ATR x2.5                         +34.5%    1.37   -27.3%     352  +0.54   40%              9 of 12
+ATR x3 (live)                    +28.3%    1.09   -28.6%     287  +0.55   39%                     
+ATR x3.5                         +49.1%    1.52   -32.4%     248  +1.22   36%              7 of 12
+ATR x4                           +57.9%    1.64   -34.3%     209  +1.71   35%              7 of 12
+ATR x5                           +49.4%    1.38   -37.3%     177  +2.14   33%              7 of 12
+10% below high                   +31.1%    1.28   -25.2%     454  +0.26   39%              9 of 12
+15% below high                   +42.0%    1.49   -28.9%     272  +0.57   38%              8 of 12
+20% below high                   +39.9%    1.40   -32.2%     194  +0.79   38%              9 of 12
+25% below high                   +44.9%    1.48   -33.3%     151  +1.42   34%             11 of 12
+
+strongest challenger: 25% below high, beats the live trail in 11 of 12 cells -> live trail BEATEN (recommend a change to the owner)

@@ -44,15 +44,20 @@ def audit(state_dir, max_open=0):
     tpath = os.path.join(state_dir, "live_trades.csv")
     if os.path.exists(tpath):
         trades = _read(tpath, rows=True)
-    net, realised = {}, 0.0
+    net, bought, realised = {}, {}, 0.0
     for r in trades:
         q = float(r["qty"])
         net[r["symbol"]] = net.get(r["symbol"], 0.0) + (q if r["side"] == "BUY" else -q)
+        if r["side"] == "BUY":
+            bought[r["symbol"]] = bought.get(r["symbol"], 0.0) + q
         if r["side"] == "SELL" and r.get("pnl_usdt"):
             realised += float(r["pnl_usdt"])
     for s in set(net) | set(held):
         logged, tracked = net.get(s, 0.0), held.get(s, {}).get("qty", 0.0)
-        if abs(logged - tracked) > 1e-6 * max(abs(logged), abs(tracked), 1e-12) + 1e-12:
+        # Sells are rounded down to the exchange's lot size, which can leave a
+        # crumb of the coin behind ("dust"). Up to 0.001% of what was bought is fine.
+        dust = 1e-5 * bought.get(s, 0.0)
+        if abs(logged - tracked) > max(1e-6 * max(abs(logged), abs(tracked)), dust) + 1e-12:
             problems.append(f"{s}: trade log nets to {logged:g} but the state holds {tracked:g}")
     if abs(realised - state.get("realised", 0.0)) > 0.01 + 1e-4 * len(trades):
         problems.append(f"realised P&L in state {state.get('realised', 0.0):.4f} != sum of SELL rows {realised:.4f}")

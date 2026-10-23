@@ -45,6 +45,12 @@ class Audit(unittest.TestCase):
         write(self.d, {"BTCUSDT": {**BTC, "qty": 0.0}}, [BUY, sell], realised=-2.04)
         self.assertTrue(any("nets to 0.1" in p for p in audit(self.d)))
 
+    def test_lot_size_dust_after_a_full_sale_is_not_a_problem(self):
+        pepe_buy = ["2026-10-22 19:26:50 UTC", "PEPEUSDT", "BUY", 226274065.434, 0.00000442, 1.0, "signal", "", 1]
+        pepe_sell = ["2026-10-23 06:45:11 UTC", "PEPEUSDT", "SELL", 226274065.0, 0.00000462, 1.04, "manual", "+44.2665", 2]
+        write(self.d, {"PEPEUSDT": {"qty": 0.0, "entry": 0.0, "stop": 0.0}}, [pepe_buy, pepe_sell], realised=44.2665)
+        self.assertEqual(audit(self.d), [])
+
     def test_stop_above_highest_price_is_flagged(self):
         write(self.d, {"BTCUSDT": {**BTC, "stop": 120.0}}, [BUY])
         self.assertTrue(any("stop 120" in p for p in audit(self.d)))

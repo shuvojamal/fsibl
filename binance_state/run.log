@@ -7,3 +7,7 @@
 [2026-10-23 17:20:46 UTC] ZECUSDT: BUY skipped, data check failed: exchange price 1255.93 is +3.0% from the signal candle's close 1219.19 (limit 2%)
 [2026-10-23 17:20:47 UTC] BUY BTCUSDT 0.01136 @ 81804 fee 0.0000 (trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback)  order 6247436
 audit passed: binance_state is consistent
+[2026-10-23 18:00:09 UTC] run: request (RUN_NOW)
+[2026-10-23 18:01:09 UTC] connected to https://testnet.binance.vision (clock offset -114 ms)
+[2026-10-23 18:01:09 UTC] free USDT: 9,070.71; per-trade size: 5,000.00
+audit passed: binance_state is consistent

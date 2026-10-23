@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
-data/
+/data/
 paper_state/
 arb_logs/
 live_state/

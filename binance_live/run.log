@@ -1,0 +1,10 @@
+[2026-10-23 17:41:04 UTC] run: daily (REAL ACCOUNT, mode test)
+[2026-10-23 17:42:03 UTC] connected to https://api.binance.com (clock offset -117 ms)
+[2026-10-23 17:42:03 UTC] free USDT: 0.00; per-trade size: 300.00
+[2026-10-23 17:42:03 UTC] WARNING: not enough USDT for one trade
+[2026-10-23 17:42:23 UTC] PEPEUSDT: BUY skipped, data check failed: exchange price 4.79e-06 is +8.9% from the signal candle's close 4.4e-06 (limit 2%)
+[2026-10-23 17:42:30 UTC] UNIUSDT: BUY skipped, data check failed: exchange price 7.152 is +2.0% from the signal candle's close 7.01 (limit 2%)
+[2026-10-23 17:42:33 UTC] ZECUSDT: BUY skipped, data check failed: exchange price 1249.54 is +2.5% from the signal candle's close 1219.19 (limit 2%)
+[2026-10-23 17:42:33 UTC] DRY RUN would BUY 55.80 USDT of BTCUSDT at ~81416.0900 stop 77038.8704 target 81416090.0000 (trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback)
+[2026-10-23 17:42:33 UTC] DRY RUN would BUY 53.88 USDT of BNBUSDT at ~731.2800 stop 690.5643 target 731280.0000 (trend_up+ema_aligned+rsi_zone+volatility_ok+pullback)
+audit passed: binance_live is consistent

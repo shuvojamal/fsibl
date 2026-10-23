@@ -1,0 +1,2 @@
+live vs backtest (same coins, dates, capital and rules):
+  no live trades yet

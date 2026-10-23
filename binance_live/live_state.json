@@ -1,0 +1,129 @@
+{
+  "risk": {
+    "day": "2026-10-23",
+    "day_pnl": 0.0
+  },
+  "params": {
+    "fast": 12,
+    "slow": 26,
+    "rsi_period": 14,
+    "rsi_max": 70,
+    "stop_loss": 0.03,
+    "take_profit": 0.06
+  },
+  "positions": {
+    "ADAUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "AVAXUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "BNBUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "BTCUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "DOGEUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "ETHUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "LINKUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "NEARUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "PAXGUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "PEPEUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "SOLUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "SUIUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "TRXUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "UNIUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "XRPUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    },
+    "ZECUSDT": {
+      "qty": 0.0,
+      "entry": 0.0,
+      "stop": 0.0,
+      "target": 0.0,
+      "last_candle": 1792627200000
+    }
+  },
+  "equity_peak": 300.0
+}

@@ -1,1 +1,5 @@
-{"mode": "test", "capital": 300}
+{
+  "mode": "live",
+  "capital": 300,
+  "confirm": "I ACCEPT THE RISK"
+}

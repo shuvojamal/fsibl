@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Called by tradebot.timer every 10 minutes, as the "tradebot" user, with the
-# keys from /etc/tradebot.env. Trades the Binance Spot TESTNET (test money).
+# keys from tradebot.env. Trades the Binance Spot TESTNET (test money).
 #
 # It does a full run once a day after the 00:00 UTC candle closes, and in
 # between only when the dashboard app left a request in binance_state/
@@ -24,7 +24,7 @@ for f in CLOSE RESET_HALT RUN_NOW; do
   if [ -f "$STATE/$f" ] && [ -z "$reason" ]; then reason="request ($f)"; fi
 done
 [ -n "$reason" ] || exit 0
-[ -n "${BINANCE_API_KEY:-}" ] || { echo "BINANCE_API_KEY is empty: put the testnet keys in /etc/tradebot.env"; exit 1; }
+[ -n "${BINANCE_API_KEY:-}" ] || { echo "BINANCE_API_KEY is empty: put the testnet keys in tradebot.env in the install directory"; exit 1; }
 echo "[$(date -u '+%F %T') UTC] run: $reason" | tee -a "$STATE/run.log"
 
 # settings and requests from the app, validated and clamped
@@ -64,5 +64,5 @@ python3 -m tradebot audit --state-dir "$STATE" --max-open "$MAX_OPEN" | tee -a "
 
 git add -A "$STATE"
 git diff --cached --quiet || git commit -q -m "vps-bot: $reason $(date -u +%F)"
-for i in 1 2 3; do git pull -q --rebase && git push -q && break || sleep 5; done
+for _ in 1 2 3; do git pull -q --rebase && git push -q && break || sleep 5; done
 exit "$ok"

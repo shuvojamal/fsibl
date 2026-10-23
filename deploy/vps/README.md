@@ -16,33 +16,53 @@ at the top: **OKX** / **VPS**).
 
 ## Setup (about 5 minutes)
 
-On the VPS, as root:
+**It stays out of the way of your other sites and apps:**
+
+- Everything lives in **one directory**, `/opt/tradebot` by default, owned
+  by its own `tradebot` system user, which has no login shell. That covers
+  the code, its results, the SSH key and the API keys file.
+- The only files outside it are two systemd units, `tradebot.service` and
+  `tradebot.timer`. The script refuses to overwrite units with those names
+  if they aren't its own.
+- No ports are opened, and no web server, database or firewall is touched.
+- Packages are installed only if missing (git, python3, curl, ssh), never
+  upgraded.
+- The bot runs with systemd hardening: it can write only its own
+  directory, can't see other users' homes, and runs at lower CPU priority
+  than your sites.
+
+On the VPS, as root, copy `deploy/vps/setup.sh` from the repo over (the
+repo is private, so use `scp` or paste it), then:
 
 ```bash
-curl -fsSL -o setup.sh https://raw.githubusercontent.com/shuvojamal/binancebot/main/deploy/vps/setup.sh
-# (the repo is private: if that download fails, copy deploy/vps/setup.sh over with scp)
-bash setup.sh git@github.com:shuvojamal/binancebot.git
+bash setup.sh git@github.com:shuvojamal/binancebot.git            # installs into /opt/tradebot
+bash setup.sh git@github.com:shuvojamal/binancebot.git /srv/bot   # or pick another directory
 ```
 
 The script:
 
-1. installs git and python3, and checks that this server can reach Binance;
-2. creates a `tradebot` user with no login shell;
+1. checks the tools and that this server can reach Binance;
+2. creates the `tradebot` user and the directory;
 3. prints an SSH **deploy key**. Add it on GitHub under *repo > Settings >
    Deploy keys > Add deploy key*, tick **Allow write access**, and press
-   Enter in the script. The key only opens this one repo.
-4. clones the repo and runs the tests;
-5. creates `/etc/tradebot.env` (readable only by root and the bot). Paste
-   your testnet keys there: `nano /etc/tradebot.env`;
-6. installs a systemd timer that runs `deploy/vps/run.sh` every 10 minutes.
+   Enter in the script. The key opens only this repo, and its SSH settings
+   live inside the bot's directory;
+4. clones the repo into `<dir>/repo` and runs the tests;
+5. creates `<dir>/tradebot.env` (readable only by root and the bot). Paste
+   your testnet keys there: `nano /opt/tradebot/tradebot.env`;
+6. installs the timer, which runs `deploy/vps/run.sh` every 10 minutes.
 
 First run now instead of waiting:
 
 ```bash
+sudo -u tradebot mkdir -p /opt/tradebot/repo/binance_state
 sudo -u tradebot touch /opt/tradebot/repo/binance_state/RUN_NOW
 systemctl start tradebot
 journalctl -u tradebot -f
 ```
+
+Then open the app, tap the account chip at the top, and pick
+**Binance testnet (VPS)**.
 
 ## How it runs
 
@@ -66,7 +86,9 @@ journalctl -u tradebot -f
 | Watch the log | `journalctl -u tradebot -f` |
 | Stop the bot completely | `systemctl stop tradebot.timer` |
 | Start it again | `systemctl start tradebot.timer` |
+| Health check (timer, last run, positions, log) | `bash /opt/tradebot/repo/deploy/vps/status.sh` |
 | Update the code | it pulls `main` before every run by itself |
+| Remove everything | `bash /opt/tradebot/repo/deploy/vps/uninstall.sh` (asks first; removes only the bot's directory, user and units) |
 
 ## Notes
 

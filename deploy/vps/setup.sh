@@ -1,67 +1,93 @@
 #!/usr/bin/env bash
-# One-time setup of the trading bot on a Debian/Ubuntu VPS, against the
-# Binance Spot TESTNET (test money). Run as root:
+# One-time setup of the trading bot on a Debian/Ubuntu VPS that already runs
+# other sites and apps. Everything lives in ONE directory (default
+# /opt/tradebot) owned by its own system user; the only files outside it are
+# two systemd units named tradebot.service / tradebot.timer. No ports are
+# opened, no web server is touched, nothing is upgraded.
 #
-#   curl -fsSLO https://raw.githubusercontent.com/OWNER/REPO/main/deploy/vps/setup.sh   (or copy it over)
-#   bash setup.sh git@github.com:OWNER/REPO.git
+#   bash setup.sh git@github.com:OWNER/REPO.git [/opt/tradebot]
 #
-# What it does:
-#   1. installs git + python3 and checks that Binance answers from this server
-#   2. creates a locked-down "tradebot" user (no login shell)
-#   3. makes an SSH deploy key so the VPS can pull the code and push its state
-#      (you add the key to the GitHub repo with write access; nothing else can
-#      be reached with it)
-#   4. creates /etc/tradebot.env for the Binance testnet keys (readable only by
-#      root and the bot)
-#   5. installs a systemd timer that runs deploy/vps/run.sh every 10 minutes;
-#      run.sh trades once a day after the daily close, and in between only acts
-#      on requests from the dashboard app (sell, reset breaker, run now)
+# Trades the Binance Spot TESTNET (test money). Undo everything with
+# uninstall.sh.
 set -euo pipefail
 
-REPO="${1:?usage: bash setup.sh git@github.com:OWNER/REPO.git}"
-HOME_DIR=/opt/tradebot
-ENV_FILE=/etc/tradebot.env
+REPO="${1:?usage: bash setup.sh git@github.com:OWNER/REPO.git [install dir]}"
+DIR="${2:-/opt/tradebot}"
+BOT_USER=tradebot
+ENV_FILE="$DIR/tradebot.env"
 
-[ "$(id -u)" = 0 ] || { echo "run as root"; exit 1; }
-
-echo "== 1. packages"
-apt-get update -q
-apt-get install -y -q git python3 ca-certificates curl openssh-client
-
-echo "== 2. can this server reach Binance?"
-for url in https://testnet.binance.vision/api/v3/time https://api.binance.com/api/v3/time https://data-api.binance.vision/api/v3/time; do
-  printf '  %-48s ' "$url"
-  if curl -fsS -m 15 "$url" | grep -q serverTime; then echo OK; else echo "BLOCKED or unreachable"; fi
+[ "$(id -u)" = 0 ] || { echo "run as root (sudo bash setup.sh ...)"; exit 1; }
+case "$DIR" in /*) ;; *) echo "install dir must be an absolute path"; exit 1 ;; esac
+for unit in tradebot.service tradebot.timer; do
+  if [ -f "/etc/systemd/system/$unit" ] && ! grep -q "deploy/vps/run.sh" "/etc/systemd/system/$unit"; then
+    echo "/etc/systemd/system/$unit already exists and isn't ours; stopping so nothing is overwritten"; exit 1
+  fi
 done
 
-echo "== 3. bot user"
-id tradebot >/dev/null 2>&1 || useradd --system --create-home --home-dir "$HOME_DIR" --shell /usr/sbin/nologin tradebot
-install -d -o tradebot -g tradebot -m 700 "$HOME_DIR/.ssh"
-
-echo "== 4. deploy key"
-if [ ! -f "$HOME_DIR/.ssh/id_ed25519" ]; then
-  sudo -u tradebot ssh-keygen -q -t ed25519 -N "" -C "tradebot-vps" -f "$HOME_DIR/.ssh/id_ed25519"
+echo "== 1. tools (only installed if missing; nothing is upgraded)"
+missing=""
+for cmd in git python3 curl ssh; do command -v "$cmd" >/dev/null || missing="$missing $cmd"; done
+if [ -n "$missing" ]; then
+  echo "  installing:$missing"
+  apt-get update -q
+  apt-get install -y -q --no-upgrade git python3 curl openssh-client ca-certificates
 fi
-echo
-echo "Add this public key to GitHub: repo > Settings > Deploy keys > Add deploy key,"
-echo "title 'tradebot-vps', and TICK 'Allow write access' (the VPS pushes its state):"
-echo
-cat "$HOME_DIR/.ssh/id_ed25519.pub"
-echo
-read -r -p "Press Enter once the deploy key is added... "
-sudo -u tradebot ssh -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 | grep -q "successfully authenticated" \
-  || { echo "GitHub did not accept the key yet; add it and run this script again"; exit 1; }
+python3 -c 'import sys; assert sys.version_info >= (3, 9), sys.version' \
+  || { echo "python3 is older than 3.9; the bot needs 3.9+"; exit 1; }
+echo "  python $(python3 -c 'import platform; print(platform.python_version())'), $(git --version)"
+
+echo "== 2. can this server reach Binance?"
+for url in https://testnet.binance.vision/api/v3/time https://data-api.binance.vision/api/v3/time https://api.binance.com/api/v3/time; do
+  printf '  %-48s ' "$url"
+  if curl -fsS -m 15 "$url" 2>/dev/null | grep -q serverTime; then echo OK; else echo "BLOCKED or unreachable"; fi
+done
+
+echo "== 3. bot user and directory ($DIR)"
+id "$BOT_USER" >/dev/null 2>&1 || useradd --system --home-dir "$DIR" --shell /usr/sbin/nologin "$BOT_USER"
+install -d -o "$BOT_USER" -g "$BOT_USER" -m 750 "$DIR"
+install -d -o "$BOT_USER" -g "$BOT_USER" -m 700 "$DIR/.ssh"
+
+echo "== 4. deploy key (opens only this one GitHub repo)"
+if [ ! -f "$DIR/.ssh/id_ed25519" ]; then
+  sudo -u "$BOT_USER" ssh-keygen -q -t ed25519 -N "" -C "tradebot-vps" -f "$DIR/.ssh/id_ed25519"
+fi
+# keep the bot's SSH settings inside its own directory
+cat > "$DIR/.ssh/config" <<SSH
+Host github.com
+  IdentityFile $DIR/.ssh/id_ed25519
+  IdentitiesOnly yes
+  UserKnownHostsFile $DIR/.ssh/known_hosts
+  StrictHostKeyChecking accept-new
+SSH
+chown "$BOT_USER:$BOT_USER" "$DIR/.ssh/config"; chmod 600 "$DIR/.ssh/config"
+export GIT_SSH_COMMAND="ssh -F $DIR/.ssh/config"
+if ! sudo -u "$BOT_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" ssh -F "$DIR/.ssh/config" -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+  echo
+  echo "Add this public key on GitHub: repo > Settings > Deploy keys > Add deploy key,"
+  echo "title 'tradebot-vps', and TICK 'Allow write access' (the VPS pushes its results):"
+  echo
+  cat "$DIR/.ssh/id_ed25519.pub"
+  echo
+  read -r -p "Press Enter once the deploy key is added... "
+  sudo -u "$BOT_USER" ssh -F "$DIR/.ssh/config" -T git@github.com 2>&1 | grep -q "successfully authenticated" \
+    || { echo "GitHub did not accept the key yet; add it and run this script again"; exit 1; }
+fi
+echo "  GitHub accepts the key"
 
 echo "== 5. code"
-if [ ! -d "$HOME_DIR/repo/.git" ]; then
-  sudo -u tradebot git clone -q "$REPO" "$HOME_DIR/repo"
+if [ ! -d "$DIR/repo/.git" ]; then
+  sudo -u "$BOT_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git clone -q "$REPO" "$DIR/repo"
 fi
-sudo -u tradebot git -C "$HOME_DIR/repo" config user.name "tradebot-vps"
-sudo -u tradebot git -C "$HOME_DIR/repo" config user.email "tradebot-vps@users.noreply.github.com"
-sudo -u tradebot python3 -m unittest discover -s "$HOME_DIR/repo/tests" -t "$HOME_DIR/repo" >/dev/null 2>&1 \
-  && echo "  tests pass" || echo "  WARNING: tests failed; check before trading"
+sudo -u "$BOT_USER" git -C "$DIR/repo" config user.name "tradebot-vps"
+sudo -u "$BOT_USER" git -C "$DIR/repo" config user.email "tradebot-vps@users.noreply.github.com"
+sudo -u "$BOT_USER" git -C "$DIR/repo" config core.sshCommand "ssh -F $DIR/.ssh/config"
+if sudo -u "$BOT_USER" sh -c "cd '$DIR/repo' && python3 -m unittest discover -s tests -t . >/dev/null 2>&1"; then
+  echo "  tests pass"
+else
+  echo "  WARNING: tests failed; check before trading"
+fi
 
-echo "== 6. API keys"
+echo "== 6. API keys file ($ENV_FILE)"
 if [ ! -f "$ENV_FILE" ]; then
   cat > "$ENV_FILE" <<'KEYS'
 # Binance Spot TESTNET keys (test money): https://testnet.binance.vision
@@ -70,20 +96,39 @@ BINANCE_API_KEY=
 BINANCE_API_SECRET=
 KEYS
 fi
-chown root:tradebot "$ENV_FILE"
+chown "root:$BOT_USER" "$ENV_FILE"
 chmod 640 "$ENV_FILE"
-echo "  edit $ENV_FILE and paste the testnet keys:  nano $ENV_FILE"
 
-echo "== 7. timer"
-install -m 644 "$HOME_DIR/repo/deploy/vps/tradebot.service" /etc/systemd/system/tradebot.service
-install -m 644 "$HOME_DIR/repo/deploy/vps/tradebot.timer" /etc/systemd/system/tradebot.timer
+echo "== 7. systemd timer (every 10 minutes)"
+cat > /etc/systemd/system/tradebot.service <<UNIT
+[Unit]
+Description=Trading bot, one pass (Binance Spot testnet) - $DIR
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=$BOT_USER
+Group=$BOT_USER
+EnvironmentFile=$ENV_FILE
+ExecStart=$DIR/repo/deploy/vps/run.sh
+TimeoutStartSec=15min
+Nice=10
+# hardening: the bot can write only its own directory, and sees no other home
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=$DIR
+PrivateTmp=yes
+ProtectHome=yes
+UNIT
+install -m 644 "$DIR/repo/deploy/vps/tradebot.timer" /etc/systemd/system/tradebot.timer
 systemctl daemon-reload
 systemctl enable --now tradebot.timer
 
 echo
-echo "Done. Next:"
-echo "  1. nano $ENV_FILE            # paste the Binance testnet keys"
-echo "  2. sudo -u tradebot touch $HOME_DIR/repo/binance_state/RUN_NOW 2>/dev/null || true"
-echo "     systemctl start tradebot   # first run now instead of waiting"
-echo "  3. journalctl -u tradebot -f  # watch it"
-echo "In the app, switch the account to 'Binance testnet (VPS)'."
+echo "Done. Everything is in $DIR. Next:"
+echo "  1. nano $ENV_FILE                                   # paste the Binance testnet keys"
+echo "  2. sudo -u $BOT_USER mkdir -p $DIR/repo/binance_state && sudo -u $BOT_USER touch $DIR/repo/binance_state/RUN_NOW"
+echo "     systemctl start tradebot                         # first run now"
+echo "  3. journalctl -u tradebot -f                         # watch it"
+echo "In the app, tap the account chip at the top and pick 'Binance testnet (VPS)'."

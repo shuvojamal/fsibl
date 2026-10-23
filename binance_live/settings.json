@@ -1,7 +1,6 @@
 {
-  "mode": "live",
+  "mode": "off",
   "capital": 100,
-  "confirm": "I ACCEPT THE RISK",
   "risk_pct": 1,
   "max_open": 5,
   "backstop_pct": 20,

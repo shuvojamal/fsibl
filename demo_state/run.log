@@ -56,3 +56,21 @@
 [2026-10-23 06:22:23 UTC] free USDT: 82,036.33; per-trade size: 5,000.00
 [2026-10-23 06:22:25 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
 [2026-10-23 06:22:27 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:42:47 UTC] connected to https://www.okx.com (clock offset -61 ms)
+[2026-10-23 06:42:47 UTC] free USDT: 82,036.33; per-trade size: 5,000.00
+[2026-10-23 06:42:49 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:42:50 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:42:50 UTC] BNBUSDT: SELL requested from the dashboard
+[2026-10-23 06:42:51 UTC] SELL BNBUSDT 1.363388 @ 744.1 fee 1.0145 (manual) +14.4831 order 4034429586147168256
+[2026-10-23 06:45:05 UTC] connected to https://www.okx.com (clock offset -62 ms)
+[2026-10-23 06:45:05 UTC] free USDT: 84,063.16; per-trade size: 5,000.00
+[2026-10-23 06:45:07 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:45:08 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:45:08 UTC] BTCUSDT: SELL requested from the dashboard
+[2026-10-23 06:45:09 UTC] SELL BTCUSDT 0.01225942 @ 81880 fee 1.0038 (manual) +3.7978 order 4034434220752424960
+[2026-10-23 06:45:09 UTC] ETHUSDT: SELL requested from the dashboard
+[2026-10-23 06:45:10 UTC] SELL ETHUSDT 0.417883 @ 2406.85 fee 1.0058 (manual) +5.7784 order 4034434247830851584
+[2026-10-23 06:45:10 UTC] NEARUSDT: SELL requested from the dashboard
+[2026-10-23 06:45:11 UTC] SELL NEARUSDT 201.94057003 @ 4.993 fee 1.0083 (manual) +8.2810 order 4034434275110604800
+[2026-10-23 06:45:11 UTC] PEPEUSDT: SELL requested from the dashboard
+[2026-10-23 06:45:11 UTC] SELL PEPEUSDT 226274065.0 @ 4.61525e-06 fee 1.0443 (manual) +44.2665 order 4034434301585051648

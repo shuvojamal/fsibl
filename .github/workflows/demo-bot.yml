@@ -48,6 +48,7 @@ jobs:
           echo "args=$(sed -n 1p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
           echo "gold=$(sed -n 2p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
           echo "$(sed -n 3p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
+          echo "$(sed -n 5p /tmp/ctl.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Pick coins (top 15 by 90-day volume, gold, plus anything still held)
         id: coins
@@ -87,7 +88,7 @@ jobs:
           python -m tradebot report ${{ steps.coins.outputs.symbols }} \
             --exchange okx --state-dir demo_state | tee demo_state/report.txt
           python -m tradebot shadow ${{ steps.coins.outputs.symbols }} --state-dir demo_state \
-            --max-open ${{ steps.ctl.outputs.max_open }} | tee demo_state/shadow.txt || true
+            --max-open ${{ steps.ctl.outputs.max_open }} --min-score ${{ steps.ctl.outputs.min_score }} | tee demo_state/shadow.txt || true
           python - <<EOF
           import json, datetime
           from tradebot.control import read_controls

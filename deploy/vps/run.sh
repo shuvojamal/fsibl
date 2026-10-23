@@ -48,6 +48,7 @@ ARGS=$(sed -n 1p /tmp/tradebot-ctl.txt)
 GOLD=""; [ "$(sed -n 2p /tmp/tradebot-ctl.txt)" = gold ] && GOLD=PAXGUSDT
 MAX_OPEN=$(sed -n 3p /tmp/tradebot-ctl.txt | cut -d= -f2)
 MODE=$(sed -n 4p /tmp/tradebot-ctl.txt | cut -d= -f2)
+MIN_SCORE=$(sed -n 5p /tmp/tradebot-ctl.txt | cut -d= -f2)
 REAL=""; REPORT_REAL=""
 if [ "$MODE_ARG" = real ]; then
   case "$MODE" in
@@ -90,7 +91,7 @@ if s.pop("stop_after_close", False):
 PY
 fi
 python3 -m tradebot report $SYMS --exchange binance $REPORT_REAL --state-dir "$STATE" > "$STATE/report.txt" 2>&1 || true
-python3 -m tradebot shadow $SYMS --state-dir "$STATE" --max-open "$MAX_OPEN" > "$STATE/shadow.txt" 2>&1 || true
+python3 -m tradebot shadow $SYMS --state-dir "$STATE" --max-open "$MAX_OPEN" --min-score "$MIN_SCORE" > "$STATE/shadow.txt" 2>&1 || true
 python3 - <<PY
 import json, datetime
 from tradebot.control import read_controls

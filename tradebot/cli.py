@@ -149,6 +149,7 @@ def main():
     sh.add_argument("--capital", type=float, default=5000.0)
     sh.add_argument("--max-open", type=int, default=5)
     sh.add_argument("--risk", type=float, default=0.01)
+    sh.add_argument("--min-score", type=int, default=5)
 
     ct = sub.add_parser("controls", help="read the dashboard's settings/requests and print the live flags")
     ct.add_argument("--state-dir", default="demo_state")
@@ -231,7 +232,8 @@ def main():
         print("\n".join(format_funding(scan_funding(coins), a.flag_at)))
     elif a.cmd == "shadow":
         from tradebot.shadow import shadow_report
-        print("\n".join(shadow_report(a.state_dir, [x.upper() for x in a.symbols], a.capital, a.max_open, a.risk)))
+        print("\n".join(shadow_report(a.state_dir, [x.upper() for x in a.symbols], a.capital, a.max_open, a.risk,
+                                       min_score=a.min_score)))
     elif a.cmd == "controls":
         from tradebot.control import live_args, read_controls
         c = read_controls(a.state_dir, a.default_capital)
@@ -241,6 +243,7 @@ def main():
         print("gold" if c["gold"] else "nogold")
         print(f"max_open={c['max_open']}")
         print(f"mode={c['mode']}")
+        print(f"min_score={c['min_score']}")
     elif a.cmd == "audit":
         from tradebot.audit import audit
         problems = audit(a.state_dir, a.max_open)

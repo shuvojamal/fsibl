@@ -4,7 +4,8 @@ The app can't edit code, so it writes small files into the state directory
 through GitHub's contents API:
 
     settings.json   capital, risk per trade, max positions, backstop, limits, gold,
-                    days before a coin sold by hand may be bought again
+                    days before a coin sold by hand may be bought again, checks
+                    required to buy (min_score, 4-7; research round 24)
                     (alert_pct is read only by the app)
     CLOSE           symbols to sell at market on the next run, or ALL
     RESET_HALT      clear a tripped circuit breaker
@@ -34,6 +35,7 @@ LIMITS = {
     "max_drawdown_pct": (35.0, 10.0, 60.0),
     "daily_loss_pct": (3.0, 1.0, 10.0),
     "rebuy_wait_days": (7, 0, 30),
+    "min_score": (5, 4, 7),
 }
 
 
@@ -98,7 +100,7 @@ def live_args(c):
             "--max-daily-loss", f"{cap * c['daily_loss_pct'] / 100:.2f}",
             "--max-drawdown", f"{c['max_drawdown_pct'] / 100:.4f}",
             "--max-open", str(c["max_open"]), "--backstop", f"{c['backstop_pct'] / 100:.4f}",
-            "--rebuy-wait-days", str(c["rebuy_wait_days"])]
+            "--rebuy-wait-days", str(c["rebuy_wait_days"]), "--min-score", str(c["min_score"])]
     if c["paused"]:
         args.append("--pause-entries")
     if c["reset_halt"]:

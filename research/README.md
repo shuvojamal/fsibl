@@ -43,6 +43,7 @@ research/
 | 22 | `research22.py` | `research22.out` | `docs/research-round22-2026-10-23.md` | `1730dcc` | Tranching: equal sub-books on different daily close times vs the single 00:00 close |
 | 23 | `research23.py` | `research23.out` | `docs/research-round23-2026-10-23.md` | `659060b` | Cost of entering 0-20 h after the close, and the 2% price guard (failed as an anti-chase rule; now compares against Binance's live price) |
 | 24 | `research24.py` | `research24.out` | `docs/research-round24-2026-10-24.md` | `b3b6d74` | min_score 4/5/6/7 on 6 close times x 2 halves: 6 wins Sharpe in 11 of 12 cells but loses the live cell; fails the pre-set bar; made a setting |
+| 25 | `research25.py` | `research25.out` | `docs/research-round25-2026-10-24.md` | `0dba740` | Financial model: 300 USDT (and +50/month) over 1-5 years, 4,000 block-bootstrap paths from six close-time backtests; backtest / realistic / half-size vs holding BTC and savings |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

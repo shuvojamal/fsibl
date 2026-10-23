@@ -1,0 +1,34 @@
+check: round 12 simulator +22.67%/yr 487 trades; this one, longs only: +22.67%/yr 487 trades
+
+whole period 2017-08 -> 2026-10
+  longs only (LIVE)                          +22.7%/yr  maxDD -31.4%  Sharpe 0.97  trades 487  win  34%  avg +0.46R
+  shorts only                                 -5.0%/yr  maxDD -63.9%  Sharpe -0.20  trades 450  win  36%  avg -0.08R   short trades: 450  win  36%  avg -0.08R  funding received +292
+  shorts only, BTC below 200-EMA              -1.7%/yr  maxDD -49.7%  Sharpe -0.05  trades 276  win  34%  avg -0.01R   short trades: 276  win  34%  avg -0.01R  funding received -120
+  longs + shorts                             +23.5%/yr  maxDD -30.1%  Sharpe 1.00  trades 648  win  38%  avg +0.33R   short trades: 295  win  37%  avg +0.02R  funding received -137
+  longs + shorts (shorts only in BTC bear)   +21.9%/yr  maxDD -35.6%  Sharpe 0.91  trades 659  win  34%  avg +0.33R   short trades: 240  win  33%  avg +0.01R  funding received -486
+
+by year
+                                                2017    2018    2019    2020    2021    2022    2023    2024    2025    2026
+  longs only (LIVE)                            +0.0%  -13.6%  +32.4%  +61.5%  +53.5%  -27.6%  +76.8%  +33.4%  -10.8%  +43.0%
+  shorts only                                  +0.0%  +31.5%  -11.6%  -22.3%  -16.3%  +33.0%  -32.7%  -17.2%  +10.4%   +5.3%
+  shorts only, BTC below 200-EMA               +0.0%  +30.9%  -11.8%   -6.4%  -11.1%  +33.2%  -27.7%  -15.0%   -3.2%  +15.0%
+  longs + shorts                               +0.0%  +21.7%  +26.3%  +65.2%  +70.4%   -6.3%  +17.1%  +10.0%  -13.4%  +52.0%
+  longs + shorts (shorts only in BTC bear)     +0.0%  +21.2%  +32.2%  +43.3%  +58.6%   -6.1%  +26.4%   +3.2%   -8.7%  +49.1%
+
+split halves
+  longs only (LIVE)                          2017-21: +26.9%/yr  maxDD -23.0%  Sharpe 1.17  trades 197  win  38%  avg +0.62R
+                                             2022-26: +19.3%/yr  maxDD -27.6%  Sharpe 0.83  trades 287  win  32%  avg +0.35R
+  shorts only                                2017-21:  -6.4%/yr  maxDD -48.8%  Sharpe -0.35  trades 180  win  33%  avg -0.17R
+                                             2022-26:  -3.5%/yr  maxDD -49.7%  Sharpe -0.08  trades 270  win  37%  avg -0.04R
+  shorts only, BTC below 200-EMA             2017-21:  -1.1%/yr  maxDD -31.8%  Sharpe -0.02  trades 106  win  34%  avg -0.02R
+                                             2022-26:  -2.0%/yr  maxDD -45.3%  Sharpe -0.06  trades 170  win  34%  avg -0.01R
+  longs + shorts                             2017-21: +39.5%/yr  maxDD -20.6%  Sharpe 1.54  trades 269  win  42%  avg +0.59R
+                                             2022-26: +10.7%/yr  maxDD -30.1%  Sharpe 0.54  trades 377  win  36%  avg +0.14R
+  longs + shorts (shorts only in BTC bear)   2017-21: +34.0%/yr  maxDD -21.0%  Sharpe 1.36  trades 263  win  39%  avg +0.55R
+                                             2022-26: +12.0%/yr  maxDD -35.6%  Sharpe 0.56  trades 394  win  31%  avg +0.18R
+
+shorts without funding income (if funding had been zero)
+  shorts only                                 -5.5%/yr  maxDD -65.3%  Sharpe -0.23  trades 450  win  36%  avg -0.08R
+  shorts only, BTC below 200-EMA              -1.7%/yr  maxDD -49.1%  Sharpe -0.05  trades 276  win  34%  avg -0.01R
+  longs + shorts                             +23.5%/yr  maxDD -30.3%  Sharpe 1.00  trades 648  win  38%  avg +0.33R
+  longs + shorts (shorts only in BTC bear)   +22.1%/yr  maxDD -35.5%  Sharpe 0.92  trades 659  win  34%  avg +0.33R

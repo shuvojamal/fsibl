@@ -74,3 +74,7 @@
 [2026-10-23 06:45:11 UTC] SELL NEARUSDT 201.94057003 @ 4.993 fee 1.0083 (manual) +8.2810 order 4034434275110604800
 [2026-10-23 06:45:11 UTC] PEPEUSDT: SELL requested from the dashboard
 [2026-10-23 06:45:11 UTC] SELL PEPEUSDT 226274065.0 @ 4.61525e-06 fee 1.0443 (manual) +44.2665 order 4034434301585051648
+[2026-10-23 06:48:13 UTC] connected to https://www.okx.com (clock offset -76 ms)
+[2026-10-23 06:48:13 UTC] free USDT: 88,187.25; per-trade size: 5,000.00
+[2026-10-23 06:48:14 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-23 06:48:16 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)

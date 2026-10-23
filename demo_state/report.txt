@@ -1,5 +1,5 @@
 venue: OKX DEMO
-free USDT: 88,121.28
+free USDT: 88,187.25
 
 open positions: 0
 

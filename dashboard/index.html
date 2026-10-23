@@ -48,6 +48,7 @@ body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -we
 /* views */
 main { padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(96px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-width: 720px; margin: 0 auto }
 .view { display: grid; gap: 14px }
+.view > * { min-width: 0 }   /* long single-line text must shrink, not widen the page */
 .card { background: var(--surface); border-radius: var(--r); padding: 16px; min-width: 0; box-shadow: var(--shadow) }
 h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; letter-spacing: .02em }
 
@@ -354,7 +355,40 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <h2>Open positions · ${held().length} of ${maxOpen()}</h2>
       ${posCards(3)}
       ${held().length > 3 ? `<button class="btn" data-goto="positions">See all positions</button>` : ""}
+      <h2>All accounts</h2><div id="overview">${overviewHtml()}</div>
       <div class="note">Prices live from Binance${prices._at ? " · updated " + ago(prices._at) : ""}. The bot trades once a day at 6:07 am (Bangladesh)${last ? " · last run " + ago(last) : ""}.${data.state.halted ? " Circuit breaker: " + esc(data.state.halted) : ""}</div>`;
+  }
+
+  // ---------- all accounts side by side (the 90-day comparison) ----------
+  let overview = null, overviewAt = 0;
+  async function loadOverview() {
+    if (overview && Date.now() - overviewAt < 120000) return;
+    const raw = (dir, name) => gh(`/contents/${dir}/${name}?ref=main`, { accept: "application/vnd.github.raw+json" }).then(r => r.ok ? r.text() : "");
+    overview = await Promise.all(Object.entries(ACCOUNTS).map(async ([k, a]) => {
+      const [eq, st, set, last] = await Promise.all([raw(a.dir, "equity.csv"), raw(a.dir, "live_state.json"), raw(a.dir, "settings.json"), raw(a.dir, "last_run.json")]);
+      const rows = csv(eq), J = t => { try { return JSON.parse(t || "{}") } catch (e) { return {} } };
+      const state = J(st), settings = J(set), lastRun = J(last);
+      // the capital the last run used, so its equity is compared like with like
+      const capital = +(lastRun.capital || settings.capital || (a.real ? 300 : 5000));
+      const open = Object.values(state.positions || {}).filter(p => p.qty > 0).length;
+      return { k, a, has: !!(rows.length || st), equity: rows.length ? +rows[rows.length - 1].equity : null, capital,
+               realised: +(state.realised || 0), open, score: +(settings.min_score || 5), mode: settings.mode,
+               last: lastRun.time ? parseT(lastRun.time) : 0 };
+    }));
+    overviewAt = Date.now();
+    const el = $("overview"); if (el) el.innerHTML = overviewHtml();
+  }
+  function overviewHtml() {
+    if (!overview) { loadOverview().catch(() => {}); return `<div class="card note">Loading…</div>`; }
+    return `<div class="list">${overview.map(o => {
+      const pnl = o.equity != null ? o.equity - o.capital : null;
+      const tag = o.a.real ? (o.mode === "live" ? "LIVE" : o.mode === "test" ? "no-orders test" : "off") : "test money";
+      return `<div class="item" data-acct-go="${o.k}" style="cursor:pointer"><div class="coin" style="${o.a.real ? "background:var(--down-bg);color:var(--down)" : ""}">${o.a.short}</div>
+        <div class="main"><div class="t">${esc(o.a.name)}</div>
+          <div class="s">${o.has ? `${o.open} open · ${o.score} of 8 checks · ${tag}${o.last ? " · ran " + ago(o.last) : ""}` : "not set up yet"}</div></div>
+        <div class="r"><div class="t num ${tone(pnl)}">${o.equity != null ? money(o.equity, 0) : "–"}</div>
+          <div class="s num ${tone(pnl)}">${pnl != null ? pct(pnl / o.capital) : ""}</div></div></div>`;
+    }).join("")}</div><div class="note">Balance at each bot's last run (live prices only for the account you're viewing). Tap a row to open that account.</div>`;
   }
 
   // What the current stop already protects: selling at the stop keeps (stop - entry) x qty, before fees.
@@ -385,7 +419,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         ${alertPct() && r != null && r >= alertPct() / 100 ? `<div class="pending" style="color:var(--up);background:var(--up-bg)">Up ${pct(r)}: your +${alertPct()}% alert. Sell now to take it, or let the trailing stop keep riding.</div>` : ""}
         ${data.closeReq.includes(s) || data.closeReq.includes("ALL")
           ? `<div class="pending">Sell requested · happens in the next run</div>`
-          : `<button class="btn danger sm" data-act="sell" data-sym="${esc(s)}">Sell ${esc(coin(s))} now</button>`}
+          : `<div class="actions"><button class="btn sm" data-act="chart" data-sym="${esc(s)}">${I.chart}Chart</button><button class="btn danger sm" data-act="sell" data-sym="${esc(s)}">Sell ${esc(coin(s))} now</button></div>`}
       </div>`;
     }).join("");
   }
@@ -536,6 +570,31 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div class="actions"><button class="btn" data-act="strategy">${I.gear}Edit settings</button>
       ${data.state.halted ? (data.resetPending ? `<div class="pending">Reset requested</div>` : `<button class="btn warn" data-act="resethalt">Reset breaker</button>`) : `<button class="btn" data-act="run">${I.bolt}Run now</button>`}</div>`;
   }
+  // 90 daily closes from Binance with entry, stop and backstop drawn across
+  async function openChart(sym) {
+    const p = data.state.positions[sym];
+    sheet(`<h3>${esc(coin(sym))} · last 90 days</h3><div id="chartbox" class="chart" style="height:220px"><div class="skel" style="height:100%"></div></div><div id="chartnote" class="note"></div>
+      <button class="btn" id="no">Close</button>`);
+    $("no").onclick = close;
+    try {
+      const r = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${encodeURIComponent(sym)}&interval=1d&limit=90`);
+      const k = (await r.json()).map(x => ({ t: x[0], c: +x[4] }));
+      const now = prices[sym] || k[k.length - 1].c;
+      const levels = [["Entry", p.entry, "var(--accent)", ""], ["Stop", p.stop, "var(--down)", ""]];
+      if (p.backstop_px) levels.push(["Backstop", p.backstop_px, "var(--down)", "4 4"]);
+      const vals = k.map(x => x.c).concat(levels.map(l => l[1]), [now]);
+      let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * .08; lo -= pad; hi += pad;
+      const W = 600, Hh = 220, x = i => i / (k.length - 1) * W, y = v => Hh - (v - lo) / (hi - lo) * Hh;
+      const path = k.map((q, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(q.c).toFixed(1)).join(" ");
+      const lines = levels.map(([n, v, c, dash]) => `<line x1="0" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${c}" stroke-width="1.5" stroke-dasharray="${dash}" vector-effect="non-scaling-stroke"/>
+        <text x="4" y="${y(v) - 4}" font-size="12" fill="${c}" font-family="system-ui">${n} ${px(v)}</text>`).join("");
+      $("chartbox").innerHTML = `<svg viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none" aria-label="${esc(coin(sym))} price">${lines}
+        <path d="${path}" fill="none" stroke="var(--fg)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        <circle cx="${W}" cy="${y(now)}" r="5" fill="${now >= p.entry ? "var(--up)" : "var(--down)"}"/></svg>`;
+      $("chartnote").innerHTML = `Now ${px(now)} (${pct(now / p.entry - 1)} from entry). The stop follows the highest close minus 3 × the average daily range, and never moves down.`;
+    } catch (e) { $("chartbox").innerHTML = `<div class="empty">Couldn't load prices.</div>` }
+  }
+
   function openStrategy() {
     const c = { ...DEFAULTS(), ...data.settings };
     const opt = (vals, cur, fmt) => vals.map(v => `<option value="${v}" ${+cur === v ? "selected" : ""}>${fmt(v)}</option>`).join("");
@@ -642,6 +701,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     }),
     settings: () => openSettings(false),
     strategy: () => openStrategy(),
+    chart: el => openChart(el.dataset.sym),
     realmode: el => {
       const mode = el.dataset.mode;
       const save = async (extra) => {
@@ -695,6 +755,8 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   };
   document.addEventListener("click", e => {
     const a = e.target.closest("[data-act]"); if (a) return ACTS[a.dataset.act](a);
+    const ag = e.target.closest("[data-acct-go]");
+    if (ag && ag.dataset.acctGo !== acct) { acct = ag.dataset.acctGo; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); chip(); loadCache(); render(); load(); return }
     const g = e.target.closest("[data-goto]"); if (g) { tab = g.dataset.goto; S.set("tb_tab", tab); scrollTo(0, 0); render() }
     const t = e.target.closest(".tab"); if (t) { tab = t.dataset.tab; S.set("tb_tab", tab); scrollTo(0, 0); render() }
   });
@@ -716,6 +778,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
     bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
     gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   };
 

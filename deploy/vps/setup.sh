@@ -61,7 +61,10 @@ Host github.com
 SSH
 chown "$BOT_USER:$BOT_USER" "$DIR/.ssh/config"; chmod 600 "$DIR/.ssh/config"
 export GIT_SSH_COMMAND="ssh -F $DIR/.ssh/config"
-if ! sudo -u "$BOT_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" ssh -F "$DIR/.ssh/config" -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+# `ssh -T git@github.com` exits 1 even when the key works (GitHub gives no
+# shell), so judge by its message, not its exit code (pipefail would fail it).
+gh_says=$(sudo -u "$BOT_USER" ssh -F "$DIR/.ssh/config" -T git@github.com 2>&1 || true)
+if ! printf '%s' "$gh_says" | grep -q "successfully authenticated"; then
   echo
   echo "Add this public key on GitHub: repo > Settings > Deploy keys > Add deploy key,"
   echo "title 'tradebot-vps', and TICK 'Allow write access' (the VPS pushes its results):"
@@ -69,8 +72,9 @@ if ! sudo -u "$BOT_USER" env GIT_SSH_COMMAND="$GIT_SSH_COMMAND" ssh -F "$DIR/.ss
   cat "$DIR/.ssh/id_ed25519.pub"
   echo
   read -r -p "Press Enter once the deploy key is added... "
-  sudo -u "$BOT_USER" ssh -F "$DIR/.ssh/config" -T git@github.com 2>&1 | grep -q "successfully authenticated" \
-    || { echo "GitHub did not accept the key yet; add it and run this script again"; exit 1; }
+  gh_says=$(sudo -u "$BOT_USER" ssh -F "$DIR/.ssh/config" -T git@github.com 2>&1 || true)
+  printf '%s' "$gh_says" | grep -q "successfully authenticated" \
+    || { echo "GitHub did not accept the key yet ($gh_says); add it and run this script again"; exit 1; }
 fi
 echo "  GitHub accepts the key"
 

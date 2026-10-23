@@ -37,7 +37,7 @@ jobs:
       - name: Tests
         run: python -m unittest discover -s tests -t .
 
-      - name: Pick coins (top 15 by 90-day volume, plus anything still held)
+      - name: Pick coins (top 15 by 90-day volume, gold, plus anything still held)
         id: coins
         run: |
           TOP=$(python -m tradebot scan --top 15 --symbols-only)
@@ -49,7 +49,9 @@ jobs:
               print(" ".join(s for s, q in pos.items() if q.get("qty", 0) > 0))
           EOF
           )
-          SYMS=$(echo $TOP $HELD | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          # PAXGUSDT (tokenised gold) is always included: it never makes the top 15
+          # by volume, but it diversifies the book (research round 17).
+          SYMS=$(echo $TOP $HELD PAXGUSDT | tr ' ' '\n' | sort -u | tr '\n' ' ')
           echo "symbols=$SYMS" >> "$GITHUB_OUTPUT"
           echo "trading: $SYMS"
 

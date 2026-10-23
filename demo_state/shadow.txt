@@ -1,0 +1,4 @@
+live vs backtest (same coins, dates, capital and rules):
+  since 2026-10-22: 5 trades matched, 0 only live, 0 only in the backtest
+  matched trades: live price -3.85% vs backtest on average (positive = live filled worse)
+  the live bot did exactly what the backtest would have done

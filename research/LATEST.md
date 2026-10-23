@@ -14,6 +14,11 @@ growth ~18-25%).
 It raises return only by raising risk (Sharpe flat or lower, deeper drops);
 on the growth set-up it lowered 2022-26 return to about +19%/yr.
 
+**Round 32: interest on idle USDT. Passes.** Most of the account sits in
+cash (steady ~80%, growth ~63%). At 4% a year flexible-savings interest,
+2022-26 return rises to about +19% (steady) and +29% (growth), with
+slightly shallower drops. Real-account only; automatic savings not built yet.
+
 **Rejected so far:** other timeframes, arbitrage, funding carry, rotation,
 the Kronos AI, CFD markets, short selling, limit entries, tranching,
 regime-based sizing, pyramiding. Kept: the 3xATR trailing stop.

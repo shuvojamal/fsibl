@@ -599,7 +599,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const c = { ...DEFAULTS(), ...data.settings };
     const opt = (vals, cur, fmt) => vals.map(v => `<option value="${v}" ${+cur === v ? "selected" : ""}>${fmt(v)}</option>`).join("");
     sheet(`<h3>Strategy settings</h3>
-      <p>Used from the next run. The tested defaults are 1% risk, 5 positions, 20% backstop. Higher risk means bigger swings both ways.</p>
+      <p>Used from the next run. Research rounds 28–30 recommend 8 positions and 6 of 8 checks; pick the risk level you can live with.</p>
+      <div class="actions"><button class="btn sm" id="p-steady">Steady: 8 × 0.5%</button><button class="btn sm" id="p-growth">Growth: 8 × 1%</button></div>
+      <div class="note" style="margin-top:-6px">Steady: backtest about +16%/yr in 2022–26, worst drop −16%. Growth: about +26%/yr, worst drop −28%. Realistic is lower.</div>
       <div class="field-row">
         <label>Capital (USDT)<input id="s-cap" type="number" min="100" step="100" value="${esc(c.capital)}"></label>
         <label>Risk per trade<select id="s-risk">${opt([0.25, 0.5, 0.75, 1, 1.5, 2], c.risk_pct, v => v + "%")}</select></label>
@@ -614,6 +616,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <label class="check"><input id="s-gold" type="checkbox" ${c.gold ? "checked" : ""}> Include gold (PAXG) when the exchange lists it</label>
       <div class="actions"><button class="btn" id="no">Cancel</button><button class="btn primary" id="save">Save</button></div>`);
     $("no").onclick = close;
+    const preset = risk => { $("s-open").value = "8"; $("s-risk").value = String(risk); $("s-ms").value = "6"; toast(`Preset filled: 8 positions, ${risk}% risk, 6 of 8 checks. Tap Save.`) };
+    $("p-steady").onclick = () => preset(0.5);
+    $("p-growth").onclick = () => preset(1);
     $("save").onclick = async () => {
       const v = { capital: Math.max(100, +$("s-cap").value || 5000), risk_pct: +$("s-risk").value, max_open: +$("s-open").value,
                   backstop_pct: +$("s-bs").value, daily_loss_pct: +$("s-dl").value, max_drawdown_pct: +$("s-dd").value, gold: $("s-gold").checked,

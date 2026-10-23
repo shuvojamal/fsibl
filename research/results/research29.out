@@ -1,0 +1,12 @@
+Universe size x checks, with 8 slots at 0.5% risk; medians over six close times
+
+case                              2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26 trades 22-26 wins vs base verdict
+LIVE: top15, 5 checks, 5 x 1%      +35.2% / 1.28   +10.8% / 0.54    -30.4%          302      0 of 12 
+top10, 5 checks, 8 x 0.5%          +26.3% / 1.37   +16.2% / 0.92    -18.6%          363      7 of 12 
+top15, 5 checks, 8 x 0.5%          +30.7% / 1.46   +13.5% / 0.76    -21.7%          415              BASE
+top20, 5 checks, 8 x 0.5%          +32.7% / 1.50   +14.7% / 0.80    -22.2%          447      8 of 12 
+top25, 5 checks, 8 x 0.5%          +41.9% / 1.71   +12.0% / 0.68    -20.6%          471      6 of 12 
+top10, 6 checks, 8 x 0.5%          +22.6% / 1.39   +12.9% / 0.96    -15.4%          219      5 of 12 
+top15, 6 checks, 8 x 0.5%          +29.5% / 1.57   +15.7% / 1.03    -16.4%          253      9 of 12 PASS
+top20, 6 checks, 8 x 0.5%          +36.4% / 1.72   +15.6% / 1.00    -18.2%          286     12 of 12 PASS
+top25, 6 checks, 8 x 0.5%          +44.9% / 1.89   +14.6% / 0.92    -17.4%          307     11 of 12 PASS

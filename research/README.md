@@ -47,6 +47,7 @@ research/
 | 26 | `research26.py` | `research26.out` | `docs/research-round26-2026-10-24.md` | `95ccd22` | Hold vs trade, coin by coin (55 coins): holding made money on 20, median -37%, median worst drop -96%; trend rule made money on 48, smaller drop on all 55 |
 | 27 | `research27.py` | `research27.out` | `docs/research-round27-2026-10-24.md` | `061e450` | Trailing-stop distance: ATR x2-5 and 10-25% trails on 6 close times x 2 halves; trail good, best width market-dependent; 25% "beats" 3xATR 11/12 but ties in 2022-26; no change |
 | 28 | `research28.py` | `research28.out` | `docs/research-round28-2026-10-24.md` | `066476b` | Max positions 3/5/8/10 x risk 0.5/1/1.5% on 12 cells: 8 slots at 0.5% beats live 12/12 (2022-26 +13.5% vs +10.8%, DD -21.7% vs -30.4%); recommended to the owner |
+| 29 | `research29.py` | `research29.out` | `docs/research-round29-2026-10-24.md` | `0a8b18b` | With 8 x 0.5%: universe top 10/15/20/25 x 5/6 checks; 6 checks now passes (top 15: 2022-26 +15.7% vs +13.5%, DD -16% vs -22%); wider lists pass but are hindsight-prone |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

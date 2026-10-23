@@ -367,10 +367,51 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div class="note">The bar shows how far the price is above its stop-loss. Green is comfortable, amber is getting close, red is near the stop. Stops rise automatically as prices go up and never move down. The stop is checked once a day at the close; the emergency backstop is a real order resting on OKX 20% lower, which only fires in a crash or if the bot can't run.</div>`;
   }
 
+  // Closed round trips: each SELL matched to the BUY of the same coin before it.
+  function roundTrips() {
+    const open = {}, out = [];
+    for (const r of data.trades) {
+      if (r.side === "BUY") open[r.symbol] = r;
+      else if (r.side === "SELL" && open[r.symbol]) {
+        const b = open[r.symbol]; delete open[r.symbol];
+        out.push({ sym: r.symbol, pnl: +r.pnl_usdt || 0, ret: +r.price / +b.price - 1, why: r.reason,
+                   days: (parseT(r.time) - parseT(b.time)) / 86400000, month: (r.time || "").slice(0, 7) });
+      }
+    }
+    return out;
+  }
+  function perfCard() {
+    const rt = roundTrips();
+    if (!rt.length) return `<div class="card note"><b>Performance</b> appears once the first position closes.
+      The backtest's expectation to compare against: about 1 in 3 trades wins, winners are about 3.5&times; the size of losers,
+      profit factor about 1.9, and roughly 1 to 2 closed trades a month.</div>`;
+    const wins = rt.filter(x => x.pnl > 0), losses = rt.filter(x => x.pnl <= 0);
+    const gw = wins.reduce((a, x) => a + x.pnl, 0), gl = -losses.reduce((a, x) => a + x.pnl, 0);
+    const avg = xs => xs.length ? xs.reduce((a, x) => a + x.ret, 0) / xs.length : null;
+    const months = {};
+    for (const x of rt) months[x.month] = (months[x.month] || 0) + x.pnl;
+    const best = rt.reduce((a, x) => x.pnl > a.pnl ? x : a), worst = rt.reduce((a, x) => x.pnl < a.pnl ? x : a);
+    const stat = (k, v, cls = "") => `<div class="stat"><div class="k">${k}</div><div class="v num ${cls}">${v}</div></div>`;
+    return `<div class="stats">
+        ${stat("Closed trades", rt.length)}
+        ${stat("Win rate", Math.round(wins.length / rt.length * 100) + "%")}
+        ${stat("Profit factor", gl ? (gw / gl).toFixed(2) : "–", gl && gw / gl >= 1 ? "up" : "down")}
+      </div>
+      <div class="stats">
+        ${stat("Avg win", wins.length ? pct(avg(wins)) : "–", "up")}
+        ${stat("Avg loss", losses.length ? pct(avg(losses)) : "–", "down")}
+        ${stat("Avg hold", (rt.reduce((a, x) => a + x.days, 0) / rt.length).toFixed(0) + " d")}
+      </div>
+      <div class="list">${Object.entries(months).sort().reverse().map(([m, v]) => `<div class="item"><div class="main"><div class="t">${m}</div></div>
+        <div class="r"><div class="t num ${tone(v)}">${sgn(v)}</div><div class="s">realised</div></div></div>`).join("")}</div>
+      <div class="note">Best ${esc(coin(best.sym))} ${sgn(best.pnl)}, worst ${esc(coin(worst.sym))} ${sgn(worst.pnl)}.
+        Backtest expectation: about 1 in 3 trades wins, profit factor about 1.9. With fewer than 30 closed trades, these numbers are mostly luck.</div>`;
+  }
+
   function vTrades() {
     const t = data.trades.slice().reverse();
-    if (!t.length) return `<div class="card empty">No trades yet.</div>`;
-    return `<h2>${t.length} trades</h2><div class="list">${t.map(r => {
+    if (!t.length) return `<h2>Performance</h2>${perfCard()}<div class="card empty">No trades yet.</div>`;
+    return `<h2>Performance</h2>${perfCard()}<h2>${t.length} trades</h2><div class="list">${t.map(r => {
       const sell = r.side === "SELL", pnl = r.pnl_usdt ? +r.pnl_usdt : null, val = +r.qty * +r.price;
       const why = (r.reason || "").includes("+") ? (r.reason.split("+").length + " of 8 checks") : (r.reason || "").replace("_", " ");
       return `<div class="item"><div class="side ${sell ? "sell" : "buy"}">${sell ? "SELL" : "BUY"}</div>

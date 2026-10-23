@@ -39,6 +39,7 @@ research/
 | 18 | `research18.py` | `research18.out` | `docs/research-round18-2026-10-23.md` | `1102fa9` | Live rules on XM-style CFD markets (gold, silver, oil, 4 indices, 4 FX pairs) with overnight swap costs |
 | 19 | `research19.py` | `research19.out` | `docs/research-round19-2026-10-23.md` | `0a12bf6` | Execution: exchange stop orders vs daily-close stops, backstops, limit entries |
 | 20 | `research20.py` | `research20.out` | `docs/research-round20-2026-10-23.md` | `f87647f` | Short side: mirrored rules on inverted prices with real funding, alone and sharing slots with the longs |
+| 21 | `research21.py` | `research21.out` | `docs/research-round21-2026-10-23.md` | `34ce28a` | Robustness: the same rules on daily candles closing at 00/04/08/12/16/20 UTC (rebuilt from hourly data) |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

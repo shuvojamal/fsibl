@@ -97,6 +97,12 @@ range. Expect live results below the backtest.
 
 ## 7. Expectation, honestly
 
-About +15–25% a year over a full cycle, with drawdowns of 20–30% along the
+About +15–25% a year over a full cycle, with drawdowns of 20–40% along the
 way, roughly one losing year in three, and about two in three trades losing.
 These are backtest estimates, not promises; live trading usually does worse.
+
+The headline backtest (+22.7%/yr, −31%) uses daily candles that close at
+00:00 UTC, which turned out to be the best of six possible close times.
+Across all six (research round 21), the same rules made +13% to +25% a
+year, median about +18%, with drawdowns of −36% to −43%. Plan around the
+median, not the headline.

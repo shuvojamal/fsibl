@@ -1,0 +1,50 @@
+  BTC: 80370 hourly candles
+  ETH: 80370 hourly candles
+  BNB: 78433 hourly candles
+  XRP: 74166 hourly candles
+  ADA: 74578 hourly candles
+  TRX: 73251 hourly candles
+  LTC: 77545 hourly candles
+  DOGE: 63958 hourly candles
+  LINK: 68024 hourly candles
+  SOL: 54316 hourly candles
+  AVAX: 53308 hourly candles
+  MATIC: 47070 hourly candles
+  EOS: 61230 hourly candles
+  XLM: 73517 hourly candles
+  SHIB: 47796 hourly candles
+  PEPE: 30396 hourly candles
+  SUI: 30450 hourly candles
+  ETC: 73236 hourly candles
+  VET: 72220 hourly candles
+  NEAR: 52781 hourly candles
+  BCH: 60468 hourly candles
+  NEO: 78097 hourly candles
+  DOT: 54131 hourly candles
+  FTM: 48987 hourly candles
+  ONT: 73327 hourly candles
+  ZEC: 66500 hourly candles
+  UNI: 53431 hourly candles
+  ARB: 31430 hourly candles
+  OP: 38517 hourly candles
+  RUNE: 53740 hourly candles
+30 coins with enough history; daily candles rebuilt from hourly data
+
+close (UTC)   return/yr   max DD  Sharpe  trades   win  avg R
+00:00           +25.4%   -36.2%    1.03     476   37%  +0.50
+04:00           +18.3%   -39.6%    0.79     504   34%  +0.38
+08:00           +18.8%   -41.6%    0.83     495   34%  +0.38
+12:00           +12.8%   -43.1%    0.63     504   35%  +0.25
+16:00           +18.2%   -41.2%    0.79     511   35%  +0.35
+20:00           +19.7%   -36.0%    0.87     502   37%  +0.38
+
+across close times: return/yr +12.8% to +25.4% (median +18.5%), Sharpe 0.63 to 1.03
+live close (00:00) ranks 1 of 6 by return
+
+by year     2018    2019    2020    2021    2022    2023    2024    2025    2026
+00:00     -15.5%  +43.1%  +80.9%  +44.7%  -28.1%  +78.7%  +33.7%  -11.4%  +39.1%
+04:00     -17.3%  +24.8%  +86.3%  +69.3%  -30.9%  +60.3%  +25.3%  -17.1%  +10.2%
+08:00     -14.1%  +17.9% +101.7%  +57.2%  -31.9%  +63.9%   +8.2%  -14.9%  +27.7%
+12:00     -17.4%   +8.3%  +87.1%  +59.5%  -34.4%  +33.5%  +15.1%  -15.8%  +19.9%
+16:00     -17.3%  +25.5%  +95.7%  +28.1%  -31.0%  +26.3%  +67.1%  -11.7%  +23.1%
+20:00     -15.0%  +26.7%  +93.6%  +35.7%  -26.6%  +62.4%  +15.7%  -10.5%  +30.8%

@@ -1,9 +1,11 @@
 """Exercise the signed client and the live trader against an in-memory fake exchange."""
 import hashlib
 import hmac
+import csv
 import json
 import os
 import tempfile
+import time
 import unittest
 import urllib.parse
 from unittest import mock
@@ -367,3 +369,73 @@ class RiskGuardTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def shifted(candles, end_ms):
+    """Same candles, moved in time so the last one closes at end_ms."""
+    off = end_ms - candles[-1].close_time
+    return [Candle(c.open_time + off, c.open, c.high, c.low, c.close, c.volume, c.close_time + off) for c in candles]
+
+
+class DataGuardTests(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.candles = trending_candles()                 # last close 38.4
+
+    def run_once(self, price, candles, **kw):
+        self.fake = FakeBinance(price=price)
+        t = LiveTrader(client(self.fake), ["BTCUSDT"], "1h", Params(fast=3, slow=10, rsi_max=101, take_profit=10),
+                       trade_usdt=20, guard_args=(50, 20, os.path.join(self.dir, "STOP")), state_dir=self.dir, **kw)
+        with mock.patch("tradebot.live.fetch_candles", return_value=candles):
+            t.preflight()
+            t.step()
+        return [o["side"] for o in self.fake.orders]
+
+    def test_buy_skipped_when_exchange_price_disagrees_with_signal_candle(self):
+        self.assertEqual(self.run_once(100.0, self.candles, max_price_gap=0.02), [])
+
+    def test_buy_goes_ahead_when_prices_agree(self):
+        self.assertEqual(self.run_once(38.6, self.candles, max_price_gap=0.02), ["BUY"])
+
+    def test_buy_skipped_on_stale_candles_but_not_on_fresh_ones(self):
+        self.assertEqual(self.run_once(38.4, self.candles, require_fresh=True), [])
+        fresh = shifted(self.candles, int(time.time() * 1000) - 60_000)
+        self.dir = tempfile.mkdtemp()
+        self.assertEqual(self.run_once(38.4, fresh, require_fresh=True), ["BUY"])
+
+    def test_guard_never_blocks_a_stop_loss_sale(self):
+        self.fake = FakeBinance(price=100.0)
+        self.fake.btc = 1.0
+        t = LiveTrader(client(self.fake), ["BTCUSDT"], "1h", Params(), trade_usdt=20,
+                       guard_args=(50, 20, os.path.join(self.dir, "STOP")), state_dir=self.dir, adopt=False,
+                       max_price_gap=0.02, require_fresh=True)
+        t.state["positions"]["BTCUSDT"] = {"qty": 1.0, "entry": 150.0, "stop": 140.0, "target": 1e9, "last_candle": 0}
+        with mock.patch("tradebot.live.fetch_candles", return_value=self.candles):
+            t.preflight()
+            t.step()
+        self.assertEqual([o["side"] for o in self.fake.orders], ["SELL"])
+
+
+class FillLogTests(unittest.TestCase):
+    def test_buy_and_sell_fills_record_slippage_against_the_signal_close(self):
+        d = tempfile.mkdtemp()
+        fake = FakeBinance(price=38.8)                    # signal close 38.4: buy fills 1.04% worse
+        t = LiveTrader(client(fake), ["BTCUSDT"], "1h", Params(fast=3, slow=10, rsi_max=101, take_profit=10),
+                       trade_usdt=20, guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d)
+        with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+            t.preflight()
+            t.step()
+        pos = t.state["positions"]["BTCUSDT"]
+        pos["stop"] = 1e9                                 # force a stop-out on the next candle
+        pos["qty"] = fake.btc                             # the fake keeps 0.1% of the coin as its fee
+        nxt = trending_candles(n=321)
+        fake.price = 38.0
+        with mock.patch("tradebot.live.fetch_candles", return_value=nxt):
+            t.step()
+        with open(os.path.join(d, "fills.csv")) as f:
+            rows = list(csv.DictReader(f))
+        self.assertEqual([r["side"] for r in rows], ["BUY", "SELL"])
+        self.assertAlmostEqual(float(rows[0]["slippage_pct"]), (38.8 / 38.4 - 1) * 100, places=3)
+        ref = nxt[-1].close
+        self.assertAlmostEqual(float(rows[1]["slippage_pct"]), (1 - 38.0 / ref) * 100, places=3)
+        self.assertAlmostEqual(float(rows[0]["fee_pct"]), 0.1, places=2)

@@ -198,13 +198,14 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     if (!cfg.token || loading) return;
     loading = true; $("refresh").classList.add("spin");
     try {
-      const [state, trades, equity, report, last, log, paused, runs] = await Promise.all([
+      const [state, trades, equity, report, last, log, paused, runs, fills] = await Promise.all([
         file("live_state.json"), file("live_trades.csv"), file("equity.csv"), file("report.txt"),
         file("last_run.json"), file("run.log"), file("PAUSED", false),
         gh(`/actions/workflows/${WORKFLOW}/runs?per_page=6`).then(r => r.ok ? r.json() : {}),
+        file("fills.csv"),
       ]);
       data = { state: state ? JSON.parse(state) : { positions: {} }, trades: csv(trades), equity: csv(equity),
-               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", runs: (runs.workflow_runs || []).map(r => ({
+               report: report || "", last: last ? JSON.parse(last) : {}, log: log || "", fills: csv(fills), runs: (runs.workflow_runs || []).map(r => ({
                  t: r.created_at, ev: r.event, st: r.status, c: r.conclusion, url: r.html_url })), loadedAt: Date.now() };
       pausedSha = paused ? paused.sha : null;
       render();
@@ -339,6 +340,21 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     <div class="note">Each dot is one of the 8 checks (trend, moving averages, momentum, RSI, volume, volatility, breakout, pullback). When more coins signal than there are free slots, the bot takes the highest scores first.</div>`;
   }
 
+  // Real fills vs the close each decision used. The backtest assumes 0.05% slippage + 0.10% fee per side.
+  function fillsCard() {
+    const f = data.fills || [];
+    if (!f.length) return `<div class="card note">No fills recorded yet. Tracking starts with the next trade: each buy and sell is compared with the price the strategy decided on.</div>`;
+    const rows = ["BUY", "SELL"].map(side => {
+      const r = f.filter(x => x.side === side); if (!r.length) return "";
+      const avg = k => r.reduce((a, x) => a + +x[k], 0) / r.length;
+      const slip = avg("slippage_pct"), fee = avg("fee_pct"), worse = slip > 0.05 || fee > 0.1;
+      return `<div class="item"><div class="side ${side === "BUY" ? "buy" : "sell"}">${side}</div>
+        <div class="main"><div class="t">${r.length} fill${r.length > 1 ? "s" : ""}</div><div class="s">assumed: 0.05% slippage, 0.10% fee</div></div>
+        <div class="r"><div class="t num ${worse ? "down" : "up"}">${slip >= 0 ? "+" : ""}${slip.toFixed(3)}%</div><div class="s">fee ${fee.toFixed(2)}%</div></div></div>`;
+    }).join("");
+    return `<div class="list">${rows}</div>`;
+  }
+
   function vBot() {
     const runs = data.runs.length ? data.runs.map(r => {
       const res = r.st !== "completed" ? r.st.replace("_", " ") : r.c;
@@ -350,6 +366,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div class="actions">${pausedSha ? `<button class="btn primary" data-act="resume">${I.play}Resume</button>` : `<button class="btn warn" data-act="pause">${I.pause}Pause</button>`}
         <button class="btn" data-act="run">${I.bolt}Run now</button></div>
       <h2>Recent runs</h2><div class="list">${runs}</div>
+      <h2>Execution quality</h2>${fillsCard()}
       <h2>Bot log</h2><div class="card"><pre class="log">${esc(data.log.trim().split("\n").slice(-30).join("\n") || "No log yet.")}</pre></div>
       <h2>Safety limits</h2><div class="card note">1% of capital risked per trade · at most 5 positions · daily loss limit 3% · circuit breaker stops new trades at 35% below peak · demo account only.</div>
       <button class="btn" data-act="settings">${I.gear}Settings</button>`;

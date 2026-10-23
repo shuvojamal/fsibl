@@ -27,6 +27,26 @@ def realised(state_dir):
     return len(sells), sum(float(r["pnl_usdt"]) for r in sells), rows
 
 
+def fills_summary(state_dir):
+    """Lines describing real fills vs the prices the decisions used (fills.csv), or []."""
+    path = os.path.join(state_dir, "fills.csv")
+    if not os.path.exists(path):
+        return []
+    with open(path) as f:
+        rows = list(csv.DictReader(f))
+    if not rows:
+        return []
+    out = [f"\nexecution quality ({len(rows)} fills; the backtest assumes 0.05% slippage + 0.10% fee per side):"]
+    for side in ("BUY", "SELL"):
+        rs = [r for r in rows if r["side"] == side]
+        if rs:
+            slip = [float(r["slippage_pct"]) for r in rs]
+            fee = [float(r["fee_pct"]) for r in rs]
+            out.append(f"  {side:4} {len(rs):3} fills  avg slippage {sum(slip) / len(slip):+.3f}%  "
+                       f"worst {max(slip):+.3f}%  avg fee {sum(fee) / len(fee):.3f}%")
+    return out
+
+
 def report(client, state_dir, symbols, interval="1d", params=None, lines=None):
     """Build the report as a list of lines. `client` may be None (no account section)."""
     out = lines if lines is not None else []
@@ -60,6 +80,8 @@ def report(client, state_dir, symbols, interval="1d", params=None, lines=None):
     for r in rows[-10:]:
         out.append(f"  {r['time']} {r['side']:4} {r['symbol']:9} {float(r['qty']):.6f} @ {float(r['price']):.6g} "
                    f"{r['reason']} {r.get('pnl_usdt', '')}")
+
+    out.extend(fills_summary(state_dir))
 
     out.append(f"\ntoday's score ({interval} candles, need {p.min_score} of {Opportunity.CHECKS}):")
     for s in symbols:

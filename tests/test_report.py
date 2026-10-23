@@ -7,7 +7,7 @@ from unittest import mock
 from tests.test_live import SECRET, FakeBinance
 from tests.test_opportunity import uptrend
 from tradebot.binance_client import BinanceClient
-from tradebot.report import report
+from tradebot.report import fills_summary, report
 
 
 class ReportTests(unittest.TestCase):
@@ -45,3 +45,18 @@ class ReportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FillsSummaryTests(unittest.TestCase):
+    def test_summarises_slippage_and_fees_per_side(self):
+        d = tempfile.mkdtemp()
+        self.assertEqual(fills_summary(d), [])
+        with open(os.path.join(d, "fills.csv"), "w") as f:
+            f.write("time,symbol,side,signal_price,fill_price,slippage_pct,fee_pct\n"
+                    "t1,BTCUSDT,BUY,100,100.1,0.1000,0.1000\n"
+                    "t2,ETHUSDT,BUY,10,10.03,0.3000,0.1000\n"
+                    "t3,BTCUSDT,SELL,110,109.89,0.1000,0.1000\n")
+        out = "\n".join(fills_summary(d))
+        self.assertIn("3 fills", out)
+        self.assertIn("BUY    2 fills  avg slippage +0.200%  worst +0.300%", out)
+        self.assertIn("SELL   1 fills", out)

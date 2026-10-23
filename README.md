@@ -164,6 +164,17 @@ realised P&L matches the SELL rows, every stop sits below the highest price
 held, and no more positions are open than the cap. The daily workflow runs
 it after saving, so a broken ledger shows up as a failed run.
 
+**Bad-data guard** (on by default, buys only): `live` skips a buy when the
+exchange price is more than `--max-price-gap` (2%) away from the close of the
+candle the signal came from (prices come from Binance, orders go to OKX), or
+when the latest closed candle is older than one interval
+(`--no-fresh-check` turns that off). Stop-loss and exit sales never wait on it.
+
+**Fill tracking:** every buy and sell is logged to `fills.csv` with the
+price the decision used, the real fill and the fee. `report` and the
+dashboard's Bot tab show average slippage per side against the backtest's
+assumption of 0.05% slippage plus a 0.10% fee.
+
 **Risk guard** (on by default, between the strategy and the exchange):
 
 | Flag | Default | What it does |

@@ -64,7 +64,8 @@ class RiskGuard:
 class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
                  guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
-                 capital=0.0, max_drawdown=0.0, pause_entries=False):
+                 capital=0.0, max_drawdown=0.0, pause_entries=False, max_price_gap=0.0,
+                 require_fresh=False):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
@@ -78,11 +79,18 @@ class LiveTrader:
         self.max_drawdown = max_drawdown
         # Paused from the dashboard: no new positions, but stops and exits run.
         self.pause_entries = pause_entries
+        # Bad-data guard, for buys only (exits never wait on it): skip a buy when
+        # the exchange price is more than this fraction away from the candle the
+        # signal came from (prices come from Binance, orders go to OKX), or, with
+        # require_fresh, when the latest closed candle is older than one interval.
+        self.max_price_gap = max_price_gap
+        self.require_fresh = require_fresh
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
         self.state_path = os.path.join(state_dir, "live_state.json")
         self.trades_path = os.path.join(state_dir, "live_trades.csv")
+        self.fills_path = os.path.join(state_dir, "fills.csv")
         self.state = self._load()
         self.guard = RiskGuard(*guard_args, state=self.state.setdefault("risk", {}))
         self.state.setdefault("params", asdict(params))
@@ -183,10 +191,10 @@ class LiveTrader:
 
         if pos["qty"] > 0:
             if last.low <= pos["stop"]:
-                self._close(sym, pos, "stop_loss")
+                self._close(sym, pos, "stop_loss", ref=last.close)
                 return None
             if last.high >= pos["target"]:
-                self._close(sym, pos, "take_profit")
+                self._close(sym, pos, "take_profit", ref=last.close)
                 return None
             if hasattr(self.engine, "trail_stop"):
                 new_stop = self.engine.trail_stop(candles, pos)
@@ -196,9 +204,27 @@ class LiveTrader:
 
         action = self.engine.decide(candles, pos["qty"] > 0)
         if action and action[0] == "buy":
+            problem = self._bad_data(sym, last)
+            if problem:
+                print(f"[{_now()}] {sym}: BUY skipped, data check failed: {problem}")
+                return None
             return (sym, pos, action[1], last.close)  # opened by step(), best score first
         if action and action[0] == "sell":
-            self._close(sym, pos, action[1])
+            self._close(sym, pos, action[1], ref=last.close)
+        return None
+
+    def _bad_data(self, sym, last):
+        """Why the data behind a buy signal can't be trusted, or None if it looks fine."""
+        if self.require_fresh:
+            age = time.time() * 1000 - last.close_time
+            if age > INTERVAL_MS[self.interval] * 1.05:
+                return f"latest closed candle is {age / 3_600_000:.1f} h old (stale data)"
+        if self.max_price_gap:
+            now = self.client.price(sym)
+            gap = now / last.close - 1
+            if abs(gap) > self.max_price_gap:
+                return (f"exchange price {now:.6g} is {gap:+.1%} from the signal candle's close "
+                        f"{last.close:.6g} (limit {self.max_price_gap:.0%})")
         return None
 
     def _record_equity(self):
@@ -305,8 +331,9 @@ class LiveTrader:
         pos["qty"], pos["entry"] = qty, avg
         pos["stop"], pos["target"] = plan.stop, plan.target
         self._log(sym, "BUY", qty, avg, fee, why_buy, None, order.get("orderId"))
+        self._log_fill(sym, "BUY", price, avg, qty * avg, fee)
 
-    def _close(self, sym, pos, reason):
+    def _close(self, sym, pos, reason, ref=None):
         ok, why = self.guard.can_close()
         if not ok:
             print(f"[{_now()}] {sym}: SELL blocked: {why}")
@@ -325,7 +352,25 @@ class LiveTrader:
         self.guard.record(pnl)
         self.state["realised"] = self.state.get("realised", 0.0) + pnl
         self._log(sym, "SELL", qty, avg, fee, reason, pnl, order.get("orderId"))
+        if ref:
+            self._log_fill(sym, "SELL", ref, avg, qty * avg, fee)
         pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
+
+    def _log_fill(self, sym, side, ref, fill, notional, fee):
+        """Execution quality: how far the real fill was from the close the decision used.
+
+        The backtest assumes fills at that price (plus 0.05% slippage and the
+        0.1% fee), so a growing gap here means live results will trail it.
+        Positive slippage is a worse price: paid more on a buy, got less on a sell.
+        """
+        slip = fill / ref - 1 if side == "BUY" else 1 - fill / ref
+        new = not os.path.exists(self.fills_path)
+        with open(self.fills_path, "a", newline="") as f:
+            w = csv.writer(f)
+            if new:
+                w.writerow(["time", "symbol", "side", "signal_price", "fill_price", "slippage_pct", "fee_pct"])
+            w.writerow([_now(), sym, side, f"{ref:.8g}", f"{fill:.8g}", f"{slip * 100:.4f}",
+                        f"{fee / notional * 100 if notional else 0:.4f}"])
 
     def _log(self, sym, side, qty, price, fee, reason, pnl, order_id):
         pnl_s = "" if pnl is None else f"{pnl:+.4f}"

@@ -1,0 +1,74 @@
+Pool 55 coins, 2017-08-17 -> 2026-10-21; top 15 by 90-day volume; split at 2022-01-01
+
+## 1. Grid: lookback x holdings x rebalance, first half (tuning) and second half (unseen)
+  look 14d hold 3 every  7d             train +182.5%/yr DD -68.1% Sh 1.61  |  unseen   +3.1%/yr DD -77.8% Sh 0.41
+  look 14d hold 3 every  7d BTC-filter  train  +88.6%/yr DD -72.2% Sh 1.24  |  unseen  +17.8%/yr DD -55.9% Sh 0.57
+  look 14d hold 3 every 14d             train +167.8%/yr DD -89.6% Sh 1.52  |  unseen  -13.9%/yr DD -79.4% Sh 0.16
+  look 14d hold 3 every 14d BTC-filter  train +132.0%/yr DD -72.8% Sh 1.47  |  unseen   +6.0%/yr DD -68.0% Sh 0.39
+  look 14d hold 5 every  7d             train +189.0%/yr DD -59.9% Sh 1.78  |  unseen   -3.2%/yr DD -76.8% Sh 0.27
+  look 14d hold 5 every  7d BTC-filter  train +122.9%/yr DD -58.1% Sh 1.58  |  unseen  +12.9%/yr DD -59.1% Sh 0.49
+  look 14d hold 5 every 14d             train +134.7%/yr DD -82.2% Sh 1.49  |  unseen  -12.8%/yr DD -78.8% Sh 0.11
+  look 14d hold 5 every 14d BTC-filter  train +122.5%/yr DD -63.7% Sh 1.56  |  unseen   +5.8%/yr DD -55.1% Sh 0.36
+  look 30d hold 3 every  7d             train +217.3%/yr DD -75.5% Sh 1.69  |  unseen   -4.7%/yr DD -83.4% Sh 0.29
+  look 30d hold 3 every  7d BTC-filter  train +102.2%/yr DD -79.4% Sh 1.29  |  unseen  +23.2%/yr DD -58.6% Sh 0.65
+  look 30d hold 3 every 14d             train +151.2%/yr DD -81.5% Sh 1.45  |  unseen   -5.3%/yr DD -82.8% Sh 0.28
+  look 30d hold 3 every 14d BTC-filter  train  +89.1%/yr DD -78.0% Sh 1.21  |  unseen   +9.4%/yr DD -62.7% Sh 0.44
+  look 30d hold 5 every  7d             train +191.1%/yr DD -61.5% Sh 1.76  |  unseen   -4.5%/yr DD -73.1% Sh 0.23
+  look 30d hold 5 every  7d BTC-filter  train  +92.1%/yr DD -72.6% Sh 1.31  |  unseen  +16.0%/yr DD -53.2% Sh 0.55
+  look 30d hold 5 every 14d             train +125.8%/yr DD -69.9% Sh 1.43  |  unseen   -6.1%/yr DD -76.1% Sh 0.21
+  look 30d hold 5 every 14d BTC-filter  train  +74.5%/yr DD -74.5% Sh 1.16  |  unseen   +9.8%/yr DD -56.6% Sh 0.44
+  look 60d hold 3 every  7d             train  +84.1%/yr DD -76.4% Sh 1.15  |  unseen  -21.2%/yr DD -91.0% Sh 0.02
+  look 60d hold 3 every  7d BTC-filter  train  +65.0%/yr DD -75.2% Sh 1.07  |  unseen  +20.2%/yr DD -61.7% Sh 0.60
+  look 60d hold 3 every 14d             train  +55.5%/yr DD -82.1% Sh 0.96  |  unseen  -26.9%/yr DD -95.3% Sh -0.08
+  look 60d hold 3 every 14d BTC-filter  train  +47.1%/yr DD -82.7% Sh 0.90  |  unseen  +12.8%/yr DD -64.7% Sh 0.50
+  look 60d hold 5 every  7d             train  +75.6%/yr DD -74.6% Sh 1.13  |  unseen   -7.4%/yr DD -81.2% Sh 0.17
+  look 60d hold 5 every  7d BTC-filter  train  +65.1%/yr DD -70.4% Sh 1.10  |  unseen  +21.9%/yr DD -52.1% Sh 0.64
+  look 60d hold 5 every 14d             train  +51.7%/yr DD -79.0% Sh 0.94  |  unseen  -14.1%/yr DD -88.1% Sh 0.05
+  look 60d hold 5 every 14d BTC-filter  train  +53.2%/yr DD -78.8% Sh 0.99  |  unseen  +17.1%/yr DD -50.4% Sh 0.56
+  look 90d hold 3 every  7d             train  +51.5%/yr DD -79.2% Sh 0.93  |  unseen  -16.1%/yr DD -89.7% Sh 0.09
+  look 90d hold 3 every  7d BTC-filter  train  +41.2%/yr DD -70.6% Sh 0.85  |  unseen  +21.3%/yr DD -55.8% Sh 0.62
+  look 90d hold 3 every 14d             train  +23.5%/yr DD -85.2% Sh 0.69  |  unseen  -12.5%/yr DD -86.4% Sh 0.15
+  look 90d hold 3 every 14d BTC-filter  train  +32.4%/yr DD -80.3% Sh 0.77  |  unseen  +14.1%/yr DD -57.1% Sh 0.51
+  look 90d hold 5 every  7d             train  +54.3%/yr DD -79.7% Sh 0.97  |  unseen  -21.2%/yr DD -87.0% Sh -0.12
+  look 90d hold 5 every  7d BTC-filter  train  +49.0%/yr DD -72.3% Sh 0.95  |  unseen   +7.4%/yr DD -56.4% Sh 0.39
+  look 90d hold 5 every 14d             train  +30.0%/yr DD -83.7% Sh 0.74  |  unseen  -16.6%/yr DD -85.3% Sh -0.01
+  look 90d hold 5 every 14d BTC-filter  train  +36.3%/yr DD -80.5% Sh 0.82  |  unseen   +8.1%/yr DD -55.8% Sh 0.41
+
+Best on training by Sharpe: look 14d, hold 5, every 7d, BTC filter False
+  training                                 +189.0%/yr  maxDD -59.9%  Sharpe 1.78  Calmar 3.15
+  unseen                                     -3.2%/yr  maxDD -76.8%  Sharpe 0.27  Calmar -0.04
+  all 64 settings: unseen Sharpe median 0.39, 29 of 64 positive; training median 1.16
+  rank correlation train vs unseen Sharpe: +0.04
+
+## 2. Whole period: rotation vs the trend bot vs BTC
+rotation (look 14, hold 5, every 7, filter False)  +84.3%/yr  maxDD -67.2%  Sharpe 1.22  Calmar 1.25  traded 343x its average equity
+trend bot (current live rules)              +22.7%/yr  maxDD -31.4%  Sharpe 0.97  Calmar 0.72
+buy & hold BTC                              +38.3%/yr  maxDD -83.2%  Sharpe 0.82  Calmar 0.46
+  year   rotation   trend bot   BTC
+  2017    +101.2%      +0.0%    +220.1%
+  2018     -31.3%     -13.6%     -72.3%
+  2019     +10.2%     +32.4%     +89.5%
+  2020    +401.5%     +61.5%    +301.7%
+  2021   +1246.9%     +53.5%     +57.6%
+  2022     -57.9%     -27.6%     -65.3%
+  2023    +138.6%     +76.8%    +154.5%
+  2024    +166.1%     +33.4%    +111.8%
+  2025     -45.8%     -10.8%      -7.3%
+  2026     +57.0%     +43.0%      -5.3%
+
+## 3. Running both: 50/50, rebalanced daily
+correlation of daily returns, rotation vs trend bot: +0.71
+  0% rotation / 100% trend bot              +22.7%/yr  maxDD -31.4%  Sharpe 0.97  Calmar 0.72
+  25% rotation / 75% trend bot              +39.8%/yr  maxDD -39.8%  Sharpe 1.19  Calmar 1.00
+  50% rotation / 50% trend bot              +56.3%/yr  maxDD -49.1%  Sharpe 1.23  Calmar 1.15
+  75% rotation / 25% trend bot              +71.4%/yr  maxDD -58.4%  Sharpe 1.23  Calmar 1.22
+  100% rotation / 0% trend bot              +84.3%/yr  maxDD -67.2%  Sharpe 1.22  Calmar 1.25
+  first half: 0% rotation                   +26.9%/yr  maxDD -23.0%  Sharpe 1.17  Calmar 1.17
+  first half: 50% rotation                 +101.1%/yr  maxDD -43.7%  Sharpe 1.73  Calmar 2.31
+  second half: 0% rotation                  +18.8%/yr  maxDD -27.7%  Sharpe 0.81  Calmar 0.68
+  second half: 50% rotation                 +23.2%/yr  maxDD -44.3%  Sharpe 0.71  Calmar 0.52
+
+## 4. Cost stress on the chosen rotation (unseen half)
+  cost 0.15% per side                        -3.2%/yr  maxDD -76.8%  Sharpe 0.27  Calmar -0.04
+  cost 0.30% per side                        -8.7%/yr  maxDD -79.1%  Sharpe 0.18  Calmar -0.11
+  cost 0.45% per side                       -13.9%/yr  maxDD -81.2%  Sharpe 0.09  Calmar -0.17

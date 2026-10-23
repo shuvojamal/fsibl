@@ -65,7 +65,7 @@ class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
                  guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
                  capital=0.0, max_drawdown=0.0, pause_entries=False, max_price_gap=0.0,
-                 require_fresh=False):
+                 require_fresh=False, backstop=0.0):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
@@ -85,6 +85,12 @@ class LiveTrader:
         # require_fresh, when the latest closed candle is older than one interval.
         self.max_price_gap = max_price_gap
         self.require_fresh = require_fresh
+        # Emergency backstop (research round 19): a real stop order resting on the
+        # exchange this fraction below each position's stop, raised as the stop
+        # trails. The daily-close stop still does the normal work; the backstop
+        # only fires in a crash or if the bot doesn't run. 0 = off, and off on
+        # clients without resting stop orders.
+        self.backstop = backstop if hasattr(client, "place_stop") else 0.0
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -135,7 +141,8 @@ class LiveTrader:
             if self.trade_usdt < f["min_notional"]:
                 raise SystemExit(f"{sym}: per-trade size {self.trade_usdt} is below the exchange "
                                  f"minimum {f['min_notional']}")
-            self._reconcile(sym, bal)
+            if not self._backstop_filled(sym, self.state["positions"][sym]):
+                self._reconcile(sym, bal)
         self._save()
 
     def _reconcile(self, sym, balances):
@@ -178,11 +185,14 @@ class LiveTrader:
                 self._open(sym, pos, plan, price)
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
+        self._sync_backstops()
         self._record_equity()
         self._save()
 
     def _step_symbol(self, sym):
         pos = self.state["positions"][sym]
+        if self._backstop_filled(sym, pos):
+            return None
         candles = fetch_candles(sym, self.interval, self.engine.history)
         last = candles[-1]
         if last.open_time == pos["last_candle"]:
@@ -338,6 +348,11 @@ class LiveTrader:
         if not ok:
             print(f"[{_now()}] {sym}: SELL blocked: {why}")
             return
+        if not self.dry_run and pos.get("backstop_id"):
+            if self._backstop_filled(sym, pos):      # the exchange already sold it
+                return
+            self.client.cancel_stop(sym, pos["backstop_id"])   # frees the coins for the sell
+            pos.pop("backstop_id", None); pos.pop("backstop_px", None)
         if self.dry_run:
             price = self.client.price(sym)
             print(f"[{_now()}] DRY RUN would SELL {pos['qty']} {sym} at ~{price:.4f} ({reason})")
@@ -355,6 +370,63 @@ class LiveTrader:
         if ref:
             self._log_fill(sym, "SELL", ref, avg, qty * avg, fee)
         pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
+
+    # -- emergency backstop ----------------------------------------------
+
+    def _backstop_filled(self, sym, pos):
+        """If this position's resting backstop has fired, book the sale and return True."""
+        algo = pos.get("backstop_id")
+        if not algo or self.dry_run:
+            return False
+        try:
+            state, order = self.client.stop_status(sym, algo)
+        except (OSError, BinanceError) as e:
+            print(f"[{_now()}] {sym}: backstop status unknown ({e}); will retry next run")
+            return False
+        if state == "live":
+            return False
+        trigger = pos.pop("backstop_px", None)
+        pos.pop("backstop_id", None)
+        if state != "filled":
+            print(f"[{_now()}] {sym}: backstop order {algo} no longer resting; a new one will be placed")
+            return False
+        qty, avg, fee = fill_summary(order)
+        pnl = qty * (avg - pos["entry"]) - fee
+        self.guard.record(pnl)
+        self.state["realised"] = self.state.get("realised", 0.0) + pnl
+        print(f"[{_now()}] {sym}: EMERGENCY BACKSTOP fired on the exchange")
+        self._log(sym, "SELL", qty, avg, fee, "backstop", pnl, order.get("orderId"))
+        if trigger:
+            self._log_fill(sym, "SELL", trigger, avg, qty * avg, fee)
+        left = pos["qty"] - qty
+        if left > 1e-12 and left * avg >= self.client.symbol_filters(sym)["min_notional"]:
+            pos["qty"] = left                       # partial fill: keep managing the rest
+            return False
+        pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
+        return True
+
+    def _sync_backstops(self):
+        """Place a backstop for every open position, and raise it when the stop rose."""
+        if not self.backstop or self.dry_run:
+            return
+        for sym in self.symbols:
+            pos = self.state["positions"][sym]
+            if pos["qty"] <= 0 or pos.get("stop", 0) <= 0:
+                continue
+            want = pos["stop"] * (1 - self.backstop)
+            have = pos.get("backstop_px")
+            if have and want <= have * 1.001:
+                continue                            # unchanged (stops only ever rise)
+            try:
+                if pos.get("backstop_id"):
+                    self.client.cancel_stop(sym, pos["backstop_id"])
+                    pos.pop("backstop_id"); pos.pop("backstop_px", None)
+                pos["backstop_id"] = self.client.place_stop(sym, pos["qty"], want)
+                pos["backstop_px"] = want
+                print(f"[{_now()}] {sym}: backstop {'raised' if have else 'placed'} at {want:.6g} "
+                      f"({self.backstop:.0%} below the stop {pos['stop']:.6g})")
+            except (OSError, BinanceError) as e:
+                print(f"[{_now()}] {sym}: backstop not placed ({e}); the daily-close stop still applies")
 
     def _log_fill(self, sym, side, ref, fill, notional, fee):
         """Execution quality: how far the real fill was from the close the decision used.

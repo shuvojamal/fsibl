@@ -170,6 +170,14 @@ candle the signal came from (prices come from Binance, orders go to OKX), or
 when the latest closed candle is older than one interval
 (`--no-fresh-check` turns that off). Stop-loss and exit sales never wait on it.
 
+**Emergency backstop** (`--backstop 0.20`, OKX): besides the daily-close
+stop, a real conditional sell order rests on the exchange 20% below each
+position's stop and is raised as the stop trails. It only fires in a crash,
+or if the bot doesn't run for days. The next run books the sale (reason
+`backstop`). The bot cancels it before any sale of its own. Research
+round 19: checking stops at the close beats resting stop orders in crypto
+(intraday wicks), and a backstop this far down costs about 0.6%/yr.
+
 **Fill tracking:** every buy and sell is logged to `fills.csv` with the
 price the decision used, the real fill and the fee. `report` and the
 dashboard's Bot tab show average slippage per side against the backtest's

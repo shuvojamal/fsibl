@@ -302,14 +302,15 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
           <div><div class="pos-name">${esc(coin(s))}</div><div class="pos-sub num">${money(p.entry * p.qty)} USDT · entry ${px(p.entry)}</div></div>
           <div class="pos-pnl"><div class="a num ${tone(pnl)}">${sgn(pnl)}</div><div class="p num ${tone(r)}">${pct(r)}</div></div></div>
         <div class="risk"><div class="track"><div class="fill" style="width:${(room * 100).toFixed(0)}%;background:${col}"></div></div>
-          <div class="row3 num"><span>Stop ${px(p.stop)}</span><span>${toStop == null ? "" : F[1].format(toStop * 100) + "% above stop"}</span><span>Now ${px(now)}</span></div></div>
+          <div class="row3 num"><span>Stop ${px(p.stop)}</span><span>${toStop == null ? "" : F[1].format(toStop * 100) + "% above stop"}</span><span>Now ${px(now)}</span></div>
+          ${p.backstop_px ? `<div class="num" style="font-size:12px">Emergency backstop on OKX at ${px(p.backstop_px)}</div>` : ""}</div>
       </div>`;
     }).join("");
   }
 
   function vPositions() {
     return `<h2>Open positions · ${held().length} of 5</h2>${posCards()}
-      <div class="note">The bar shows how far the price is above its stop-loss. Green is comfortable, amber is getting close, red is near the stop. Stops rise automatically as prices go up and never move down.</div>`;
+      <div class="note">The bar shows how far the price is above its stop-loss. Green is comfortable, amber is getting close, red is near the stop. Stops rise automatically as prices go up and never move down. The stop is checked once a day at the close; the emergency backstop is a real order resting on OKX 20% lower, which only fires in a crash or if the bot can't run.</div>`;
   }
 
   function vTrades() {

@@ -116,6 +116,8 @@ def main():
                     help="bad-data guard: skip a buy if the exchange price is this far from the signal close (0 = off)")
     lv.add_argument("--no-fresh-check", action="store_true",
                     help="allow buys even when the latest closed candle is older than one interval")
+    lv.add_argument("--backstop", type=float, default=0.0,
+                    help="rest a real stop order on the exchange this fraction below each stop, e.g. 0.20 (OKX only; 0 = off)")
     lv.add_argument("--once", action="store_true",
                     help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
@@ -189,7 +191,7 @@ def main():
                             dry_run=a.dry_run, engine=_engine(a), adopt=not a.no_adopt,
                             max_open=a.max_open, capital=a.capital, max_drawdown=a.max_drawdown,
                             pause_entries=a.pause_entries, max_price_gap=a.max_price_gap,
-                            require_fresh=not a.no_fresh_check)
+                            require_fresh=not a.no_fresh_check, backstop=a.backstop)
         if a.reset_halt and trader.state.pop("halted", None):
             trader.state.pop("equity_peak", None)
             print("circuit breaker reset")

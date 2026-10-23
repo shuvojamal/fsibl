@@ -127,8 +127,19 @@ class OKXClient:
     # -- account ----------------------------------------------------------
 
     def balances(self):
+        """Free USDT/USDC, and the full amount of every other coin.
+
+        Coins count frozen amounts too (cashBal): a resting backstop order
+        freezes the coin it would sell, and the position is still ours.
+        """
         details = self._request("GET", "/api/v5/account/balance", signed=True)[0]["details"]
-        return {d["ccy"]: float(d["availBal"]) for d in details if float(d["availBal"]) > 0}
+        out = {}
+        for d in details:
+            key = "availBal" if d["ccy"] in ("USDT", "USDC") else "cashBal"
+            v = float(d.get(key) or d.get("availBal") or 0)
+            if v > 0:
+                out[d["ccy"]] = v
+        return out
 
     # -- orders -----------------------------------------------------------
 
@@ -152,6 +163,37 @@ class OKXClient:
                 break
             time.sleep(0.5)
         return self._as_binance(symbol, detail)
+
+    # -- backstop: a resting stop order on the exchange ---------------------
+
+    def round_price(self, symbol, price):
+        tick = self.symbol_filters(symbol)["tick"]
+        decimals = max(0, -int(math.floor(math.log10(tick)))) if tick < 1 else 0
+        return f"{math.floor(price / tick) * tick:.{decimals}f}"
+
+    def place_stop(self, symbol, qty, trigger):
+        """Rest a conditional market sell of `qty` that fires when the last price
+        touches `trigger`. Returns the algo order id."""
+        body = {"instId": inst_id(symbol), "tdMode": "cash", "side": "sell", "ordType": "conditional",
+                "sz": self.round_qty(symbol, qty), "tgtCcy": "base_ccy",
+                "slTriggerPx": self.round_price(symbol, trigger), "slOrdPx": "-1", "slTriggerPxType": "last"}
+        return self._request("POST", "/api/v5/trade/order-algo", body=body, signed=True)[0]["algoId"]
+
+    def cancel_stop(self, symbol, algo_id):
+        self._request("POST", "/api/v5/trade/cancel-algos",
+                      body=[{"algoId": algo_id, "instId": inst_id(symbol)}], signed=True)
+
+    def stop_status(self, symbol, algo_id):
+        """('live' | 'filled' | 'gone', fill in Binance's order shape or None)."""
+        d = self._request("GET", "/api/v5/trade/order-algo", {"algoId": algo_id}, signed=True)[0]
+        state = d.get("state")
+        if state in ("live", "pause", "partially_effective"):
+            return "live", None
+        if state == "effective" and d.get("ordId"):
+            detail = self._request("GET", "/api/v5/trade/order",
+                                   {"instId": inst_id(symbol), "ordId": d["ordId"]}, signed=True)[0]
+            return "filled", self._as_binance(symbol, detail)
+        return "gone", None
 
     @staticmethod
     def _as_binance(symbol, d):

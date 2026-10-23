@@ -18,7 +18,8 @@ class Controls(unittest.TestCase):
         a = live_args(read_controls(self.d, 5000))
         self.assertEqual(a, ["--risk", "0.0100", "--capital", "5000.00", "--trade-usdt", "5000.00",
                              "--max-trade-usdt", "5000.00", "--max-daily-loss", "150.00",
-                             "--max-drawdown", "0.3500", "--max-open", "5", "--backstop", "0.2000"])
+                             "--max-drawdown", "0.3500", "--max-open", "5", "--backstop", "0.2000",
+                             "--rebuy-wait-days", "7"])
 
     def test_settings_are_clamped_and_bad_values_ignored(self):
         self.put("settings.json", json.dumps({"risk_pct": 9, "max_open": 0, "capital": "abc", "gold": False}))

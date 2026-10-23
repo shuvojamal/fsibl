@@ -232,6 +232,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     setTimeout(load, 75000);
   }
   const maxOpen = () => +((data && data.settings.max_open) || 5);
+  const DEFAULTS = () => ({ capital: (data && data.last.capital) || 5000, risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3,
+                            max_drawdown_pct: 35, gold: true, rebuy_wait_days: 7, alert_pct: 20 });
+  const alertPct = () => +({ ...DEFAULTS(), ...((data && data.settings) || {}) }.alert_pct);
   const csv = t => { if (!t) return []; const [h, ...rows] = t.trim().split(/\r?\n/); const k = h.split(",");
     return rows.filter(Boolean).map(l => { const v = l.split(","); return Object.fromEntries(k.map((x, i) => [x, v[i]])) }) };
 
@@ -314,6 +317,14 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <circle cx="${x(e.t)}" cy="${y(e.v)}" r="5" fill="${c}" vector-effect="non-scaling-stroke"/></svg>`;
   }
 
+  function alertBanner() {
+    const a = alertPct(); if (!a) return "";
+    const up = held().filter(([s, p]) => prices[s] != null && prices[s] / p.entry - 1 >= a / 100);
+    if (!up.length) return "";
+    return `<div class="pending" style="color:var(--up);background:var(--up-bg);font-size:13px" data-goto="positions">
+      Profit alert: ${up.map(([s, p]) => `${esc(coin(s))} ${pct(prices[s] / p.entry - 1)}`).join(", ")}. Tap to review.</div>`;
+  }
+
   function vHome() {
     const a = account();
     const pauseBtn = pausedSha
@@ -332,11 +343,20 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         <div class="stat"><div class="k">Realised</div><div class="v num ${tone(a.realised)}">${sgn(a.realised)}</div></div>
         <div class="stat"><div class="k">Win rate</div><div class="v num">${a.closed ? Math.round(a.wins / a.closed * 100) + "%" : "–"}</div></div>
       </div>
+      ${alertBanner()}
       <div class="actions">${pauseBtn}<button class="btn" data-act="run">${I.bolt}Run now</button></div>
       <h2>Open positions · ${held().length} of ${maxOpen()}</h2>
       ${posCards(3)}
       ${held().length > 3 ? `<button class="btn" data-goto="positions">See all positions</button>` : ""}
       <div class="note">Prices live from Binance${prices._at ? " · updated " + ago(prices._at) : ""}. The bot trades once a day at 6:07 am (Bangladesh)${last ? " · last run " + ago(last) : ""}.${data.state.halted ? " Circuit breaker: " + esc(data.state.halted) : ""}</div>`;
+  }
+
+  // What the current stop already protects: selling at the stop keeps (stop - entry) x qty, before fees.
+  function lockLine(p) {
+    const lock = (p.stop - p.entry) * p.qty;
+    return lock > 0
+      ? `<div class="num" style="font-size:12px;color:var(--up);font-weight:600">Stop is above your entry: at least ${sgn(lock)} USDT locked in</div>`
+      : `<div class="num" style="font-size:12px">If the stop is hit: ${sgn(lock)} USDT (the trade's risk)</div>`;
   }
 
   function posCards(limit) {
@@ -354,7 +374,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
           <div class="pos-pnl"><div class="a num ${tone(pnl)}">${sgn(pnl)}</div><div class="p num ${tone(r)}">${pct(r)}</div></div></div>
         <div class="risk"><div class="track"><div class="fill" style="width:${(room * 100).toFixed(0)}%;background:${col}"></div></div>
           <div class="row3 num"><span>Stop ${px(p.stop)}</span><span>${toStop == null ? "" : F[1].format(toStop * 100) + "% above stop"}</span><span>Now ${px(now)}</span></div>
+          ${lockLine(p)}
           ${p.backstop_px ? `<div class="num" style="font-size:12px">Emergency backstop on the exchange at ${px(p.backstop_px)}</div>` : ""}</div>
+        ${alertPct() && r != null && r >= alertPct() / 100 ? `<div class="pending" style="color:var(--up);background:var(--up-bg)">Up ${pct(r)}: your +${alertPct()}% alert. Sell now to take it, or let the trailing stop keep riding.</div>` : ""}
         ${data.closeReq.includes(s) || data.closeReq.includes("ALL")
           ? `<div class="pending">Sell requested · happens in the next run</div>`
           : `<button class="btn danger sm" data-act="sell" data-sym="${esc(s)}">Sell ${esc(coin(s))} now</button>`}
@@ -485,15 +507,15 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div class="r"><button class="btn sm ${on ? "danger" : "primary"}" data-act="schedule" style="padding:0 14px">${on ? "Stop" : "Start"}</button></div></div></div>`;
   }
   function settingsCard() {
-    const c = { capital: data.last.capital || 5000, risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3, max_drawdown_pct: 35, gold: true, ...data.settings };
+    const c = { ...DEFAULTS(), ...data.settings };
     return `<div class="card note">Capital ${money(+c.capital, 0)} USDT · risk ${c.risk_pct}% per trade · up to ${c.max_open} positions ·
-      backstop ${+c.backstop_pct ? c.backstop_pct + "% below stops" : "off"} · daily loss limit ${c.daily_loss_pct}% · circuit breaker at ${c.max_drawdown_pct}% below peak · gold ${c.gold ? "on" : "off"} · demo account only.
+      backstop ${+c.backstop_pct ? c.backstop_pct + "% below stops" : "off"} · daily loss limit ${c.daily_loss_pct}% · circuit breaker at ${c.max_drawdown_pct}% below peak · gold ${c.gold ? "on" : "off"} · re-buy wait after a manual sell ${+c.rebuy_wait_days ? c.rebuy_wait_days + " days" : "none"} · profit alert ${+c.alert_pct ? "at +" + c.alert_pct + "%" : "off"} · demo account only.
       ${data.state.halted ? `<br><b style="color:var(--down)">Circuit breaker tripped:</b> ${esc(data.state.halted)}` : ""}</div>
       <div class="actions"><button class="btn" data-act="strategy">${I.gear}Edit settings</button>
       ${data.state.halted ? (data.resetPending ? `<div class="pending">Reset requested</div>` : `<button class="btn warn" data-act="resethalt">Reset breaker</button>`) : `<button class="btn" data-act="run">${I.bolt}Run now</button>`}</div>`;
   }
   function openStrategy() {
-    const c = { capital: data.last.capital || 5000, risk_pct: 1, max_open: 5, backstop_pct: 20, daily_loss_pct: 3, max_drawdown_pct: 35, gold: true, ...data.settings };
+    const c = { ...DEFAULTS(), ...data.settings };
     const opt = (vals, cur, fmt) => vals.map(v => `<option value="${v}" ${+cur === v ? "selected" : ""}>${fmt(v)}</option>`).join("");
     sheet(`<h3>Strategy settings</h3>
       <p>Used from the next run. The tested defaults are 1% risk, 5 positions, 20% backstop. Higher risk means bigger swings both ways.</p>
@@ -504,13 +526,16 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         <label>Emergency backstop<select id="s-bs">${opt([0, 10, 20, 30], c.backstop_pct, v => v ? v + "% below stop" : "Off")}</select></label>
         <label>Daily loss limit<select id="s-dl">${opt([1, 2, 3, 5, 10], c.daily_loss_pct, v => v + "% of capital")}</select></label>
         <label>Circuit breaker<select id="s-dd">${opt([20, 25, 30, 35, 40, 50], c.max_drawdown_pct, v => v + "% below peak")}</select></label>
+        <label>Re-buy wait after Sell<select id="s-rb">${opt([0, 1, 3, 7, 14], c.rebuy_wait_days, v => v ? v + (v > 1 ? " days" : " day") : "No wait")}</select></label>
+        <label>Profit alert<select id="s-al">${opt([0, 10, 20, 30, 50], c.alert_pct, v => v ? "at +" + v + "%" : "Off")}</select></label>
       </div>
       <label class="check"><input id="s-gold" type="checkbox" ${c.gold ? "checked" : ""}> Include gold (PAXG) when the exchange lists it</label>
       <div class="actions"><button class="btn" id="no">Cancel</button><button class="btn primary" id="save">Save</button></div>`);
     $("no").onclick = close;
     $("save").onclick = async () => {
       const v = { capital: Math.max(100, +$("s-cap").value || 5000), risk_pct: +$("s-risk").value, max_open: +$("s-open").value,
-                  backstop_pct: +$("s-bs").value, daily_loss_pct: +$("s-dl").value, max_drawdown_pct: +$("s-dd").value, gold: $("s-gold").checked };
+                  backstop_pct: +$("s-bs").value, daily_loss_pct: +$("s-dl").value, max_drawdown_pct: +$("s-dd").value, gold: $("s-gold").checked,
+                  rebuy_wait_days: +$("s-rb").value, alert_pct: +$("s-al").value };
       $("save").disabled = true;
       try { await putFile("settings.json", JSON.stringify(v, null, 2) + "\n", "dashboard: strategy settings"); data.settings = v; close(); render(); toast("Saved. Used from the next run.") }
       catch (e) { close(); toast(e.message, true) }

@@ -176,7 +176,7 @@ class LiveTrader:
     def step(self):
         # Exits first, then buys: when more coins signal than there are free
         # slots, the highest-scoring ones get them (research round 11).
-        self._manual_closes()
+        freed = self._manual_closes()
         buys = []
         for sym in self.symbols:
             try:
@@ -185,6 +185,8 @@ class LiveTrader:
                     buys.append(buy)
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
+        if freed:
+            buys += self._refill_candidates({b[0] for b in buys})
         buys.sort(key=lambda b: -b[2].score)
         for sym, pos, plan, price in buys:
             try:
@@ -317,7 +319,8 @@ class LiveTrader:
     def _manual_closes(self):
         """Sell what the owner asked to sell from the dashboard, at market, now."""
         if not self.close_now:
-            return
+            return 0
+        freed = 0
         want = self.symbols if "ALL" in self.close_now else self.close_now
         for sym in want:
             pos = self.state["positions"].get(sym)
@@ -327,10 +330,38 @@ class LiveTrader:
                 print(f"[{_now()}] {sym}: SELL requested from the dashboard")
                 self._close(sym, pos, "manual", ref=self.client.price(sym))
                 if pos["qty"] == 0:
+                    freed += 1
                     until = time.time() * 1000 + self.rebuy_block_days * 86_400_000
                     self.state.setdefault("rebuy_blocked", {})[sym] = until
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: manual SELL failed: {type(e).__name__}: {e}")
+        return freed
+
+    def _refill_candidates(self, already):
+        """After a sale by hand, today's buy signals can use the freed slots now.
+
+        Coins whose latest daily candle was already processed earlier today are
+        normally skipped until tomorrow's candle; this looks at them again, for
+        buys only, so a freed slot doesn't sit empty for a day. The signal is
+        the same one the strategy would have acted on this morning.
+        """
+        out = []
+        for sym in self.symbols:
+            pos = self.state["positions"][sym]
+            if sym in already or pos["qty"] > 0:
+                continue
+            try:
+                candles = fetch_candles(sym, self.interval, self.engine.history)
+                last = candles[-1]
+                if last.open_time != pos["last_candle"]:
+                    continue                       # not processed yet: the normal pass handles it
+                action = self.engine.decide(candles, False)
+                if action and action[0] == "buy" and not self._bad_data(sym, last):
+                    print(f"[{_now()}] {sym}: today's buy signal considered for a freed slot")
+                    out.append((sym, pos, action[1], last.close))
+            except (OSError, BinanceError) as e:
+                print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
+        return out
 
     def _open(self, sym, pos, plan, price):
         until = self.state.get("rebuy_blocked", {}).get(sym, 0)

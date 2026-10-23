@@ -228,9 +228,11 @@ moment it is touched; expect fills somewhat worse than the backtest's.
 priced every 15 s), all trades, today's signals, recent runs and the log,
 with **Pause / Resume** (no new trades; stops keep running) and **Run now**.
 From the app you can also **sell a position (or all of them) now** at market,
-not bought back for 7 days; **stop or start the daily schedule**; **edit the
+not bought back for the re-buy wait you choose (default 7 days; the freed
+slot can take one of today's other buy signals in the same run); **stop or
+start the daily schedule**; **edit the
 strategy settings** (capital, risk per trade, max positions, backstop, daily
-loss limit, circuit breaker, gold); and **reset a tripped circuit breaker**.
+loss limit, circuit breaker, gold, re-buy wait, profit alert); and **reset a tripped circuit breaker**.
 The app writes small request files (`settings.json`, `CLOSE`, `RESET_HALT`,
 `PAUSED`) into `demo_state/`; the workflow validates and clamps them with
 `python -m tradebot controls` before they reach the bot (risk is capped at

@@ -120,6 +120,8 @@ def main():
                     help="rest a real stop order on the exchange this fraction below each stop, e.g. 0.20 (OKX only; 0 = off)")
     lv.add_argument("--close-now", nargs="*", default=[], metavar="SYMBOL",
                     help="sell these positions at market first (ALL = every position); not re-bought for 7 days")
+    lv.add_argument("--rebuy-wait-days", type=int, default=7,
+                    help="after a sale by hand, don't buy that coin again for this many days (0 = no wait)")
     lv.add_argument("--once", action="store_true",
                     help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
@@ -205,7 +207,7 @@ def main():
                             max_open=a.max_open, capital=a.capital, max_drawdown=a.max_drawdown,
                             pause_entries=a.pause_entries, max_price_gap=a.max_price_gap,
                             require_fresh=not a.no_fresh_check, backstop=a.backstop,
-                            close_now=a.close_now)
+                            close_now=a.close_now, rebuy_block_days=a.rebuy_wait_days)
         if a.reset_halt and trader.state.pop("halted", None):
             trader.state.pop("equity_peak", None)
             print("circuit breaker reset")

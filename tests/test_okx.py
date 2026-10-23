@@ -274,5 +274,20 @@ class ManualCloseTests(unittest.TestCase):
         self.assertEqual(audit(d), [])
 
 
+    def test_freed_slot_uses_todays_signal_unless_the_coin_must_wait(self):
+        for wait, expect in ((0, ["buy", "sell", "buy"]), (7, ["buy", "sell"])):
+            d, fake = tempfile.mkdtemp(), FakeOKX()
+            mk = lambda **kw: LiveTrader(client(fake), ["BTCUSDT"], "1h",
+                                         Params(fast=3, slow=10, rsi_max=101, take_profit=10), trade_usdt=20,
+                                         guard_args=(50, 20, os.path.join(d, "STOP")), state_dir=d,
+                                         rebuy_block_days=wait, **kw)
+            with mock.patch("tradebot.live.fetch_candles", return_value=trending_candles()):
+                t = mk(); t.preflight(); t.step()                       # buys on today's candle
+                t2 = mk(close_now=["ALL"]); t2.preflight(); t2.step()   # same candle: sell by hand
+            with open(os.path.join(d, "live_trades.csv")) as f:
+                sides = [r.split(",")[2].lower() for r in f.read().splitlines()[1:]]
+            self.assertEqual(sides, expect, f"rebuy wait {wait}")
+
+
 if __name__ == "__main__":
     unittest.main()

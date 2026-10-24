@@ -1,5 +1,5 @@
 {
-  "time": "2026-10-24 00:15:23 UTC",
+  "time": "2026-10-24 00:19:14 UTC",
   "symbols": [
     "ADAUSDT",
     "AVAXUSDT",
@@ -24,7 +24,7 @@
   "backstop_pct": 20.0,
   "max_drawdown_pct": 35.0,
   "daily_loss_pct": 3.0,
-  "rebuy_wait_days": 3,
+  "rebuy_wait_days": 0,
   "min_score": 6,
   "gold": true,
   "savings": false,

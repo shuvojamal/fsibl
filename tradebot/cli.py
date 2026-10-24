@@ -122,6 +122,9 @@ def main():
                     help="sell these positions at market first (ALL = every position); not re-bought for 7 days")
     lv.add_argument("--rebuy-wait-days", type=int, default=7,
                     help="after a sale by hand, don't buy that coin again for this many days (0 = no wait)")
+    lv.add_argument("--savings", action="store_true",
+                    help="live Binance only: keep spare USDT in flexible savings between runs")
+    lv.add_argument("--savings-keep", type=float, default=0.0, help="USDT always left on spot with --savings")
     lv.add_argument("--once", action="store_true",
                     help="check every symbol once, save state, and exit (for a scheduled job)")
     lv.add_argument("--no-adopt", action="store_true",
@@ -208,7 +211,8 @@ def main():
                             max_open=a.max_open, capital=a.capital, max_drawdown=a.max_drawdown,
                             pause_entries=a.pause_entries, max_price_gap=a.max_price_gap,
                             require_fresh=not a.no_fresh_check, backstop=a.backstop,
-                            close_now=a.close_now, rebuy_block_days=a.rebuy_wait_days)
+                            close_now=a.close_now, rebuy_block_days=a.rebuy_wait_days,
+                            savings=a.savings, savings_keep=a.savings_keep)
         if a.reset_halt and trader.state.pop("halted", None):
             trader.state.pop("equity_peak", None)
             print("circuit breaker reset")

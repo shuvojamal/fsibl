@@ -114,6 +114,33 @@ class BinanceClient:
     def open_orders(self, symbol=None):
         return self._request("GET", "/api/v3/openOrders", {"symbol": symbol}, signed=True)
 
+    # -- flexible savings (Simple Earn; live exchange only, not the testnet) --
+
+    def earn_product(self, asset="USDT"):
+        """The flexible savings product for `asset`: id, current yearly rate, minimum, flags."""
+        rows = self._request("GET", "/sapi/v1/simple-earn/flexible/list", {"asset": asset}, signed=True)["rows"]
+        if not rows:
+            raise BinanceError(0, -1, f"no flexible savings product for {asset}")
+        r = rows[0]
+        return {"id": r["productId"], "apr": float(r.get("latestAnnualPercentageRate", 0)),
+                "min": float(r.get("minPurchaseAmount", 0)), "can_buy": bool(r.get("canPurchase", True)),
+                "can_redeem": bool(r.get("canRedeem", True))}
+
+    def earn_balance(self, asset="USDT"):
+        """Amount of `asset` currently held in flexible savings."""
+        rows = self._request("GET", "/sapi/v1/simple-earn/flexible/position", {"asset": asset}, signed=True)["rows"]
+        return sum(float(r.get("totalAmount", 0)) for r in rows)
+
+    def earn_subscribe(self, product_id, amount):
+        return self._request("POST", "/sapi/v1/simple-earn/flexible/subscribe",
+                             {"productId": product_id, "amount": f"{math.floor(amount * 100) / 100:.2f}",
+                              "autoSubscribe": "false", "sourceAccount": "SPOT"}, signed=True)
+
+    def earn_redeem(self, product_id, amount):
+        return self._request("POST", "/sapi/v1/simple-earn/flexible/redeem",
+                             {"productId": product_id, "amount": f"{math.ceil(amount * 100) / 100:.2f}",
+                              "destAccount": "SPOT"}, signed=True)
+
     # -- orders -----------------------------------------------------------
 
     def market_order(self, symbol, side, qty=None, quote_qty=None):

@@ -100,6 +100,16 @@ keys file, its own records folder (`binance_live/`) and its own timer.
    **Sell all + Off** sells everything on the next pass and switches the
    real account off again; **Switch off** just stops it.
 
+6. Optional, **Auto savings** (Real money card): after each run the bot moves
+   spare USDT into Binance **Flexible Savings** (Simple Earn) and takes out
+   what a buy needs just before buying. Research round 32: about +3 points a
+   year at a 4% rate. It uses the same Spot-trading key (Binance's Simple
+   Earn API needs "Enable Spot & Margin Trading"; still no withdrawals).
+   In the no-orders test it only prints what it would move. Turning it off
+   moves the bot's deposits back to spot on the next run (your own savings
+   are left alone); **Sell all + Off** also turns it off. If Binance refuses
+   a savings call, the run logs it and trades from the spot balance as usual.
+
 With no settings, or `mode` anything but `test`/`live`, or `live` without
 the exact confirmation, the real timer does nothing.
 

@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict
 from datetime import datetime, timezone
 
-from tradebot.binance_client import BinanceClient, BinanceError, fill_summary
+from tradebot.binance_client import LIVE_URL, BinanceClient, BinanceError, fill_summary
 from tradebot.data import INTERVAL_MS, fetch_candles, ticker_price
 from tradebot.engines import EmaEngine
 
@@ -65,7 +65,8 @@ class LiveTrader:
     def __init__(self, client: BinanceClient, symbols, interval, params, trade_usdt,
                  guard_args, state_dir, dry_run=False, engine=None, adopt=True, max_open=0,
                  capital=0.0, max_drawdown=0.0, pause_entries=False, max_price_gap=0.0,
-                 require_fresh=False, backstop=0.0, close_now=(), rebuy_block_days=7):
+                 require_fresh=False, backstop=0.0, close_now=(), rebuy_block_days=7,
+                 savings=False, savings_keep=0.0):
         self.client, self.interval = client, interval
         self.engine = engine or EmaEngine(params)
         self.adopt = adopt  # treat coins already on the exchange as the bot's positions?
@@ -97,6 +98,19 @@ class LiveTrader:
         # often just re-enter on the same signal.
         self.close_now = [c.upper() for c in close_now]
         self.rebuy_block_days = rebuy_block_days
+        # Auto savings (research round 32): spare USDT sits in Binance's flexible
+        # savings between runs and earns interest; the bot takes out what a buy
+        # needs just before buying and puts the spare back after each run.
+        # Only on the live Binance exchange (the testnet and OKX demo have no
+        # savings product). Turning it off moves the bot's deposits back to spot.
+        # savings_keep: USDT always left on spot. A savings error never blocks
+        # trading or exits: the run simply carries on with the spot balance.
+        self.savings_wanted = savings
+        self.savings_ok = hasattr(client, "earn_product") and getattr(client, "base_url", "") == LIVE_URL
+        if savings and not self.savings_ok:
+            print(f"[{_now()}] auto savings ignored: only available on the live Binance exchange")
+        self.savings_keep = savings_keep
+        self._product = None
         self.symbols = [s.upper() for s in symbols]
         self.trade_usdt, self.dry_run = trade_usdt, dry_run
         os.makedirs(state_dir, exist_ok=True)
@@ -131,6 +145,13 @@ class LiveTrader:
         usdt = bal.get("USDT", 0.0)
         print(f"[{_now()}] connected to {self.client.base_url} (clock offset {offset} ms)")
         print(f"[{_now()}] free USDT: {usdt:,.2f}; per-trade size: {self.trade_usdt:,.2f}")
+        if self.savings_ok and self.savings_wanted:
+            try:
+                p, held = self._savings_product(), self.client.earn_balance("USDT")
+                print(f"[{_now()}] auto savings on: {held:,.2f} USDT in flexible savings at {p['apr']:.2%} a year")
+                usdt += held
+            except (OSError, BinanceError) as e:
+                print(f"[{_now()}] auto savings unavailable ({e}); trading from the spot balance only")
         if usdt < self.trade_usdt:
             print(f"[{_now()}] WARNING: not enough USDT for one trade")
         for sym in list(self.symbols):
@@ -195,6 +216,7 @@ class LiveTrader:
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
         self._sync_backstops()
+        self._sweep_savings()
         self._record_equity()
         self._save()
 
@@ -284,7 +306,7 @@ class LiveTrader:
         if self.capital:
             unreal = sum(p["qty"] * (self.client.price(s) - p["entry"]) for s, p in held.items())
             return self.capital + self.state.get("realised", 0.0) + unreal
-        total = self.client.balances().get("USDT", 0.0)
+        total = self.client.balances().get("USDT", 0.0) + self._savings_balance()
         for sym, pos in held.items():
             total += pos["qty"] * self.client.price(sym)
         return total
@@ -402,6 +424,10 @@ class LiveTrader:
             print(f"[{_now()}] DRY RUN would BUY {spend:.2f} USDT of {sym} at ~{price:.4f} "
                   f"stop {plan.stop:.4f} target {plan.target:.4f} ({why_buy})")
             return
+        spend = self._cash_for(spend)
+        if spend < self.client.symbol_filters(sym)["min_notional"]:
+            print(f"[{_now()}] {sym}: BUY skipped, not enough USDT on spot ({spend:.2f})")
+            return
         order = self.client.market_order(sym, "BUY", quote_qty=spend)
         qty, avg, fee = fill_summary(order)
         if qty == 0:
@@ -439,6 +465,81 @@ class LiveTrader:
         if ref:
             self._log_fill(sym, "SELL", ref, avg, qty * avg, fee)
         pos["qty"], pos["entry"], pos["stop"], pos["target"] = 0.0, 0.0, 0.0, 0.0
+
+    # -- auto savings -----------------------------------------------------
+
+    def _savings_product(self):
+        if self._product is None:
+            self._product = self.client.earn_product("USDT")
+        return self._product
+
+    def _savings_balance(self):
+        if not self.savings_ok or not (self.savings_wanted or self.state.get("savings", {}).get("deposited")):
+            return 0.0
+        try:
+            return self.client.earn_balance("USDT")
+        except (OSError, BinanceError) as e:
+            print(f"[{_now()}] savings balance unavailable ({e})")
+            return 0.0
+
+    def _cash_for(self, spend):
+        """Make sure `spend` USDT is free on spot, taking it out of savings if needed.
+
+        Returns what can actually be spent (less, if savings couldn't cover it).
+        """
+        if not (self.savings_ok and self.savings_wanted):
+            return spend
+        free = self.client.balances().get("USDT", 0.0)
+        if free >= spend:
+            return spend
+        try:
+            in_savings = self.client.earn_balance("USDT")
+            amount = min(in_savings, (spend - free) * 1.002 + 0.01)
+            if amount < 0.01:
+                return min(spend, free)
+            self.client.earn_redeem(self._savings_product()["id"], amount)
+            sv = self.state.setdefault("savings", {})
+            sv["deposited"] = max(0.0, sv.get("deposited", 0.0) - amount)
+            print(f"[{_now()}] savings: took {amount:.2f} USDT out for a buy")
+        except (OSError, BinanceError) as e:
+            print(f"[{_now()}] savings: could not take USDT out ({e}); using the spot balance")
+            return min(spend, free)
+        for _ in range(10):                         # flexible redemptions usually land at once
+            free = self.client.balances().get("USDT", 0.0)
+            if free >= spend:
+                break
+            time.sleep(1)
+        return min(spend, free)
+
+    def _sweep_savings(self):
+        """After the run: spare spot USDT into savings, or back out when switched off."""
+        if not self.savings_ok:
+            return
+        sv = self.state.setdefault("savings", {})
+        try:
+            if not self.savings_wanted:
+                back = min(sv.get("deposited", 0.0), self.client.earn_balance("USDT"))
+                if back >= 0.01:
+                    if self.dry_run:
+                        print(f"[{_now()}] DRY RUN would move {back:.2f} USDT from savings back to spot")
+                        return
+                    self.client.earn_redeem(self._savings_product()["id"], back)
+                    print(f"[{_now()}] savings switched off: moved {back:.2f} USDT back to spot")
+                self.state.pop("savings", None)
+                return
+            p = self._savings_product()
+            spare = self.client.balances().get("USDT", 0.0) - self.savings_keep
+            if spare >= max(1.0, p["min"]) and p["can_buy"]:
+                if self.dry_run:
+                    print(f"[{_now()}] DRY RUN would move {spare:.2f} USDT into flexible savings "
+                          f"({p['apr']:.2%} a year now)")
+                else:
+                    self.client.earn_subscribe(p["id"], spare)
+                    sv["deposited"] = sv.get("deposited", 0.0) + spare
+                    print(f"[{_now()}] savings: moved {spare:.2f} USDT in ({p['apr']:.2%} a year now)")
+            sv.update(balance=round(self.client.earn_balance("USDT"), 2), apr=p["apr"], time=_now())
+        except (OSError, BinanceError) as e:
+            print(f"[{_now()}] savings skipped this run ({e}); trading is unaffected")
 
     # -- emergency backstop ----------------------------------------------
 

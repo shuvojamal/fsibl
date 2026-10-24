@@ -543,10 +543,19 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       <div style="font-weight:700;color:${m === "live" ? "var(--down)" : "var(--fg)"}">${label}</div>
       <div class="note" style="margin-top:6px">Keys live only on your VPS (tradebot-live.env, installed with setup-live.sh). Records are kept apart in binance_live/.
         Start with the no-orders test, then live with a small capital (300–500). Sell all + Off stops everything.</div></div>
+      ${savingsCard()}
       <div class="actions">
         ${m !== "off" ? `<button class="btn" data-act="realmode" data-mode="off">Switch off</button>` : `<button class="btn primary" data-act="realmode" data-mode="test">No-orders test</button>`}
         ${m === "live" ? `<button class="btn danger" data-act="realstop">Sell all + Off</button>` : `<button class="btn danger" data-act="realmode" data-mode="live">Go live…</button>`}
       </div>`;
+  }
+
+  function savingsCard() {
+    const on = !!(data.settings || {}).savings, sv = data.state.savings || {};
+    const bal = sv.balance != null ? `${(+sv.balance).toFixed(2)} USDT in savings at ${(sv.apr * 100).toFixed(2)}% a year · updated ${ago(parseT(sv.time))}` : (on ? "Starts on the next live run." : "");
+    return `<div class="list"><div class="item"><div class="side ${on ? "buy" : "sell"}" style="${on ? "background:var(--up-bg);color:var(--up)" : ""}">${on ? "ON" : "OFF"}</div>
+      <div class="main"><div class="t">Auto savings</div><div class="s">Spare USDT earns interest in Binance Flexible Savings between trades (research round 32: about +3 points a year at 4%). ${esc(bal)}</div></div>
+      <div class="r"><button class="btn sm" data-act="savings">${on ? "Turn off" : "Turn on"}</button></div></div></div>`;
   }
 
   function scheduleCard() {
@@ -715,7 +724,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         await putFile("settings.json", JSON.stringify(st, null, 2) + "\n", `dashboard: real account ${mode}`);
         data.settings = st; await dispatch(); render();
       };
-      if (mode === "off") return confirmSheet("Switch the real account off?", "The bot stops all activity on your real account. Open positions stay open on Binance; sell them first with Sell all if you want to close them.",
+      if (mode === "off") return confirmSheet("Switch the real account off?", "The bot stops all activity on your real account. Open positions stay open on Binance; sell them first with Sell all if you want to close them. USDT in Flexible Savings stays there earning interest; withdraw it in the Binance app, or use Sell all + Off.",
         "Switch off", "primary", async () => { await save({}); toast("Real account off.") });
       if (mode === "test") return confirmSheet("Start the no-orders test?", "Within 10 minutes your VPS reads your real balance with the real keys and shows what the bot would buy. It places no orders.",
         "Start test", "primary", async () => { await save({}); toast("No-orders test requested. Check back in 10 minutes.") });
@@ -730,10 +739,20 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         try { await save({ confirm: CONFIRM }); close(); toast("Real trading switched on. The VPS picks it up within 10 minutes.") } catch (e) { close(); toast(e.message, true) }
       };
     },
-    realstop: () => confirmSheet("Sell everything and switch off?", "Every position on your real account is sold at market in the next VPS pass (within 10 minutes), then the bot stops trading the real account.",
+    savings: () => {
+      const on = !!(data.settings || {}).savings;
+      confirmSheet(on ? "Turn auto savings off?" : "Turn auto savings on?", on
+        ? "On the next run the bot moves the USDT it put into Flexible Savings back to your spot wallet. Savings you made yourself are not touched."
+        : "After each run the bot moves spare USDT from your spot wallet into Binance Flexible Savings, and takes out what a buy needs just before buying. Flexible savings can be withdrawn at any time; the rate changes daily. Only works in live mode (the no-orders test just shows what it would move). Your API key needs Spot trading permission.",
+        on ? "Turn off" : "Turn on", "primary", async () => {
+          const st = { ...data.settings, savings: !on };
+          await putFile("settings.json", JSON.stringify(st, null, 2) + "\n", `dashboard: auto savings ${on ? "off" : "on"}`);
+          data.settings = st; await dispatch(); render(); toast(on ? "Auto savings off from the next run." : "Auto savings on from the next run.") });
+    },
+    realstop: () => confirmSheet("Sell everything and switch off?", "Every position on your real account is sold at market in the next VPS pass (within 10 minutes), the USDT the bot put into savings goes back to your spot wallet, then the bot stops trading the real account.",
       "Sell all + Off", "danger", async () => {
         // stays live for this one pass so the sale can happen; the VPS switches it off afterwards
-        const st = { ...data.settings, stop_after_close: true };
+        const st = { ...data.settings, stop_after_close: true, savings: false };
         await putFile("settings.json", JSON.stringify(st, null, 2) + "\n", "dashboard: real account sell all then off");
         await putFile("CLOSE", "ALL\n", "dashboard: real account sell all");
         data.settings = st; data.closeReq = ["ALL"]; render(); toast("Selling everything on the next pass, then switching off.") }),

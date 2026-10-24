@@ -1,11 +1,13 @@
 venue: OKX DEMO
-free USDT: 88,187.25
+free USDT: 87,561.78
 
-open positions: 0
+open positions: 2
+  symbol               qty        entry          now         stop       P&L   P&L %  to stop
+  BNBUSDT         0.624121      737.899        737.9      698.868     +0.00  +0.00%   -5.29%
+  PEPEUSDT  35890416.657000  4.57798e-06    4.578e-06  3.86474e-06     +0.00  +0.00%  -15.58%
+  unrealised total: +0.00 USDT
 
 closed trades: 5, realised P&L: +76.61 USDT
-  2026-10-22 19:26:39 UTC BUY  BNBUSDT   1.363388 @ 732.733 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
-  2026-10-22 19:26:41 UTC BUY  BTCUSDT   0.012259 @ 81488.3 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
   2026-10-22 19:26:44 UTC BUY  ETHUSDT   0.417884 @ 2390.62 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
   2026-10-22 19:26:48 UTC BUY  NEARUSDT  201.940570 @ 4.947 trend_up+ema_aligned+rsi_zone+volume+pullback 
   2026-10-22 19:26:50 UTC BUY  PEPEUSDT  226274065.434000 @ 4.42e-06 trend_up+ema_aligned+momentum+rsi_zone+volume 
@@ -14,21 +16,24 @@ closed trades: 5, realised P&L: +76.61 USDT
   2026-10-23 06:45:10 UTC SELL ETHUSDT   0.417883 @ 2406.85 manual +5.7784
   2026-10-23 06:45:11 UTC SELL NEARUSDT  201.940570 @ 4.993 manual +8.2810
   2026-10-23 06:45:11 UTC SELL PEPEUSDT  226274065.000000 @ 4.62e-06 manual +44.2665
+  2026-10-24 00:29:24 UTC BUY  BNBUSDT   0.624121 @ 737.899 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
+  2026-10-24 00:29:24 UTC BUY  PEPEUSDT  35890416.657000 @ 4.58e-06 trend_up+ema_aligned+momentum+rsi_zone+volume+pullback 
 
-execution quality (5 fills; the backtest assumes 0.05% slippage + 0.10% fee per side):
+execution quality (7 fills; the backtest assumes 0.05% slippage + 0.10% fee per side):
+  BUY    2 fills  avg slippage -0.027%  worst +0.175%  avg fee 0.100%
   SELL   5 fills  avg slippage +0.011%  worst +0.100%  avg fee 0.100%
 
 today's score (1d candles, need 5 of 8):
      ADAUSDT   1/8  ema_aligned
      AVAXUSDT  2/8  trend_up, ema_aligned
-  ** BNBUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+  IN BNBUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
   ** BTCUSDT   5/8  trend_up, ema_aligned, rsi_zone, volatility_ok, pullback
      DOGEUSDT  0/8  
      ETHUSDT   4/8  trend_up, ema_aligned, volatility_ok, pullback
      LINKUSDT  3/8  trend_up, ema_aligned, rsi_zone
      NEARUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
      PAXGUSDT  2/8  volume, volatility_ok
-  ** PEPEUSDT  6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
+  IN PEPEUSDT  6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
      SOLUSDT   3/8  trend_up, ema_aligned, volatility_ok
      SUIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
      TRXUSDT   4/8  trend_up, rsi_zone, volatility_ok, pullback

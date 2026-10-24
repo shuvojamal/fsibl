@@ -1,5 +1,7 @@
 live vs backtest (same coins, dates, capital and rules):
-  since 2026-10-22: 3 trades matched, 2 only live, 0 only in the backtest
+  since 2026-10-22: 3 trades matched, 4 only live, 0 only in the backtest
   matched trades: live price -2.81% vs backtest on average (positive = live filled worse)
   only live:     2026-10-22 BUY  NEARUSDT
   only live:     2026-10-22 BUY  PEPEUSDT
+  only live:     2026-10-24 BUY  BNBUSDT
+  only live:     2026-10-24 BUY  PEPEUSDT

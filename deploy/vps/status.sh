@@ -6,4 +6,5 @@ echo "== real account"; cat "$DIR/repo/binance_live/last_run.json" 2>/dev/null |
 echo "== last run";     systemctl status tradebot.service --no-pager -n 0 | sed -n 1,4p
 echo "== last result";  cat "$DIR/repo/binance_state/last_run.json" 2>/dev/null | head -12 || echo "no run yet"
 echo "== positions";    sed -n '/open positions/,/unrealised/p' "$DIR/repo/binance_state/report.txt" 2>/dev/null || echo "no report yet"
+echo "== github sync";  sudo -u tradebot git -C "$DIR/repo" status 2>&1 | head -2; sudo -u tradebot git -C "$DIR/repo" log -1 --format="last commit %h %cr: %s" 2>&1
 echo "== recent log";   tail -n 15 "$DIR/repo/binance_state/run.log" 2>/dev/null || echo "no log yet"

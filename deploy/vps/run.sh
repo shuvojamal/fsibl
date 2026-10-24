@@ -30,7 +30,36 @@ else
 fi
 mkdir -p "$STATE"
 
-git pull -q --rebase --autostash || echo "git pull failed; running on the local copy"
+# Sync with GitHub without ever getting stuck. The app writes request files and
+# settings into the state folder while this machine writes its records there, so
+# the two can collide. On a conflict: this machine's records win, except files
+# the app writes (settings, requests), where GitHub's copy wins; code always
+# comes from GitHub. A rebase left half-done by an earlier pass is cleaned up.
+APP_FILES="settings.json CLOSE RESET_HALT RUN_NOW PAUSED"
+resolve() {   # finish a conflicted merge using the rules above
+  git diff --name-only --diff-filter=U | while read -r f; do
+    case "$f" in
+      "$STATE"/*)
+        base=${f#"$STATE"/}
+        if echo " $APP_FILES " | grep -q " $base "; then pick=theirs; else pick=ours; fi ;;
+      *) pick=theirs ;;
+    esac
+    if git cat-file -e ":$([ $pick = ours ] && echo 2 || echo 3):$f" 2>/dev/null; then
+      git checkout --"$pick" -- "$f" && git add -- "$f"
+    else
+      git rm -q --cached -- "$f" 2>/dev/null; rm -f -- "$f"
+    fi
+  done
+  git -c core.editor=true commit -q --no-edit
+}
+sync() {
+  [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ] && { echo "cleaning up an unfinished rebase"; git rebase --abort || true; }
+  [ -f .git/MERGE_HEAD ] && { git merge --abort || true; }
+  git fetch -q origin main || { echo "git fetch failed; running on the local copy"; return 1; }
+  git -c core.editor=true merge -q --no-edit origin/main 2>/dev/null || resolve || { echo "merge failed; local copy kept"; git merge --abort; return 1; }
+}
+git add -A "$STATE" && { git diff --cached --quiet || git commit -q -m "vps-bot: records left from an earlier pass"; }
+sync || true
 
 today=$(date -u +%F)
 reason=""
@@ -108,5 +137,5 @@ python3 -m tradebot audit --state-dir "$STATE" --max-open "$MAX_OPEN" | tee -a "
 
 git add -A "$STATE"
 git diff --cached --quiet || git commit -q -m "vps-bot: $reason $(date -u +%F)"
-for _ in 1 2 3; do git pull -q --rebase && git push -q && break || sleep 5; done
+for _ in 1 2 3; do sync && git push -q origin HEAD:main && break || sleep 5; done
 exit "$ok"

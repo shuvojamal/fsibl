@@ -6,7 +6,7 @@
   "daily_loss_pct": 3,
   "max_drawdown_pct": 35,
   "gold": true,
-  "rebuy_wait_days": 3,
+  "rebuy_wait_days": 0,
   "alert_pct": 20,
   "min_score": 6
 }

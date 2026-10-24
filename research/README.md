@@ -52,6 +52,7 @@ research/
 | 31 | `research31.py` | `research31.out` | `docs/research-round31-2026-10-24.md` | `aa3f404` | Pyramiding: 1-2 adds at +1R/+2R on steady and growth set-ups; fails (Sharpe flat or lower, drops deeper); no change |
 | 32 | `research32.py` | `research32.out` | `docs/research-round32-2026-10-24.md` | `f7eccdc` | Interest on idle USDT (flexible savings at 2/4/6%): cash is 63-80% of the account; 4% adds +3.1 to +3.7 pts/yr with shallower drops; passes; auto-savings not built yet |
 | 33 | `research33.py` | `research33.out` | `docs/research-round33-2026-10-24.md` | `630699f` | The 8 buy checks: payoff by score (rises 4->7), each check's value, remove/require each (16 variants, 12 cells): only 'trend_up removed' passes (10/12), confirmed on the 55-coin pool; made an app switch, default unchanged |
+| 34 | `research34.py` | `research34.out` | `docs/research-round34-2026-10-24.md` | `127a429` | Initial stop 1.5/2/2.5/3/4 x ATR (12 cells, steady set-up): Sharpe flat (0.97-1.03), tighter stop = bigger positions; 1.5x 9/12 but DD 4 pts deeper, fails; no change |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

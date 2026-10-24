@@ -1,34 +1,25 @@
 # Latest research report
 
-_Updated 2026-10-24 00:05 UTC by Claude (manual session)_
+_Updated 2026-10-24 05:45 UTC by Claude (daily scheduled run)_
 
-**Settings now in use (rounds 28-30):** 8 positions, 6 of 8 checks.
-OKX demo = steady (0.5% risk per trade), Binance testnet on the VPS =
-growth (1%). The real account is off.
+**OKX demo:** running normally. Holds BNB (bought 737.90) and PEPE (bought
+0.00000458), each risking about 25 USDT (0.5% of 5,000). Daily run came in
+at 04:26 UTC. Realised so far +76.61 USDT. The live-vs-backtest check shows
+4 "only live" buys: the backtest never saw your manual sale on Oct 23 (so
+it still "held" BNB/PEPE) and two Oct 22 buys used 5 checks before the
+setting moved to 6. Explained, not a fault.
 
-**Backtest 2022-26:** steady about +16%/yr, worst drop -16%; growth about
-+26%/yr, worst drop -28%. Realistic expectation is lower (steady ~12-15%,
-growth ~18-25%).
+**VPS testnet:** silent since Oct 23 18:02 UTC (holds BTC from 81,804).
+Most likely stuck in a git sync conflict; fixed in the code, but the VPS
+needs the one-time repair command once (see the chat). Not run in 26 h.
 
-**Latest round (31): pyramiding, adding to winning positions. Rejected.**
-It raises return only by raising risk (Sharpe flat or lower, deeper drops);
-on the growth set-up it lowered 2022-26 return to about +19%/yr.
+**Real account:** off. Note: one run on Oct 23 17:55 UTC was in live mode
+with 0 USDT, so it placed no orders. It is off now.
 
-**Round 32: interest on idle USDT. Passes.** Most of the account sits in
-cash (steady ~80%, growth ~63%). At 4% a year flexible-savings interest,
-2022-26 return rises to about +19% (steady) and +29% (growth), with
-slightly shallower drops. Real-account only; automatic savings not built yet.
+**Tested today (round 34): the stop distance at entry**, 1.5 to 4 × ATR.
+Return per unit of risk is the same at every distance (Sharpe ~1.0);
+a tighter stop only means bigger positions, like turning up the risk
+setting. 1.5 × ATR earned more but had deeper drops and failed the bar.
 
-**Round 33: the eight buy checks.** Higher scores do mean better trades
-(2022-26: +0.30R at 4 checks, +0.83R at 6, +0.92R at 7). The volatility
-check is the strongest single filter. Of 16 remove/require variants only
-"skip the 200-day trend check" passed (and was confirmed on a second coin
-pool: 2022-26 +17% vs +10%). Default unchanged; now a switch in settings
-to compare on one demo account.
-
-**Rejected so far:** other timeframes, arbitrage, funding carry, rotation,
-the Kronos AI, CFD markets, short selling, limit entries, tranching,
-regime-based sizing, pyramiding. Kept: the 3xATR trailing stop.
-
-**Next:** daily scheduled research checks the bots and tests one new idea
-against a pass bar written down before running.
+**What it means:** keep 2 × ATR. To earn more, use the risk setting
+(steady 0.5% vs growth 1%), which does the same thing openly.

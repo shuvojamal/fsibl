@@ -21,17 +21,17 @@ execution quality (5 fills; the backtest assumes 0.05% slippage + 0.10% fee per 
 today's score (1d candles, need 5 of 8):
      ADAUSDT   1/8  ema_aligned
      AVAXUSDT  2/8  trend_up, ema_aligned
-  ** BNBUSDT   5/8  trend_up, ema_aligned, rsi_zone, volatility_ok, pullback
-  ** BTCUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+  ** BNBUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
+  ** BTCUSDT   5/8  trend_up, ema_aligned, rsi_zone, volatility_ok, pullback
      DOGEUSDT  0/8  
-     ETHUSDT   4/8  trend_up, ema_aligned, volume, volatility_ok
-     LINKUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
+     ETHUSDT   4/8  trend_up, ema_aligned, volatility_ok, pullback
+     LINKUSDT  3/8  trend_up, ema_aligned, rsi_zone
      NEARUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
      PAXGUSDT  2/8  volume, volatility_ok
-  ** PEPEUSDT  5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
-     SOLUSDT   4/8  trend_up, ema_aligned, volatility_ok, pullback
+  ** PEPEUSDT  6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
+     SOLUSDT   3/8  trend_up, ema_aligned, volatility_ok
      SUIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
-     TRXUSDT   3/8  trend_up, volume, volatility_ok
-  ** UNIUSDT   5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
-     XRPUSDT   3/8  rsi_zone, volatility_ok, pullback
-  ** ZECUSDT   6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
+     TRXUSDT   4/8  trend_up, rsi_zone, volatility_ok, pullback
+     UNIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+     XRPUSDT   1/8  volatility_ok
+     ZECUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback

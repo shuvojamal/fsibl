@@ -7,7 +7,8 @@ through GitHub's contents API:
                     days before a coin sold by hand may be bought again, checks
                     required to buy (min_score, 4-7; research round 24), savings
                     (true: spare USDT in Binance flexible savings; live Binance
-                    only, research round 32)
+                    only, research round 32), ignore_trend (true: the 200-day
+                    trend check always counts as passed; research round 33)
                     (alert_pct is read only by the app)
     CLOSE           symbols to sell at market on the next run, or ALL
     RESET_HALT      clear a tripped circuit breaker
@@ -70,6 +71,7 @@ def read_controls(state_dir, default_capital=5000.0):
         out[key] = int(v) if isinstance(default, int) else v
     out["gold"] = bool(raw.get("gold", True))
     out["savings"] = raw.get("savings") is True
+    out["ignore_trend"] = raw.get("ignore_trend") is True
     mode = raw.get("mode", "off")
     if mode not in ("off", "test", "live"):
         notes.append(f"mode={mode!r} unknown; using off")
@@ -104,6 +106,8 @@ def live_args(c):
             "--max-drawdown", f"{c['max_drawdown_pct'] / 100:.4f}",
             "--max-open", str(c["max_open"]), "--backstop", f"{c['backstop_pct'] / 100:.4f}",
             "--rebuy-wait-days", str(c["rebuy_wait_days"]), "--min-score", str(c["min_score"])]
+    if c["ignore_trend"]:
+        args += ["--ignore-check", "trend_up"]
     if c["savings"]:
         args.append("--savings")
     if c["paused"]:

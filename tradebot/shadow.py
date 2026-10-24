@@ -115,14 +115,14 @@ def unlisted(state_dir):
                 if "skipped, not tradable on this exchange" in line and "] " in line}
 
 
-def shadow_report(state_dir, symbols, capital=5000.0, max_open=5, risk=0.01, fetch=fetch_candles, min_score=5):
+def shadow_report(state_dir, symbols, capital=5000.0, max_open=5, risk=0.01, fetch=fetch_candles, min_score=5, ignore=()):
     live = [t for t in live_trades(state_dir) if t["reason"] not in ("manual", "backstop")]
     symbols = [s for s in symbols if s not in unlisted(state_dir)]
     lines = ["live vs backtest (same coins, dates, capital and rules):"]
     if not live:
         return lines + ["  no live trades yet"]
     start = min(t["ms"] for t in live) - DAY   # the candle whose close produced the first trade
-    p = OppParams(min_score=min_score)
+    p = OppParams(min_score=min_score, ignore=ignore)
     syms = sorted(set(symbols) | {t["symbol"] for t in live})
     days_needed = int((max(t["ms"] for t in live) - start) / DAY) + p.warmup + 70
     candles = {}

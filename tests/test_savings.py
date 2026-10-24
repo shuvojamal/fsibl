@@ -140,3 +140,27 @@ class SavingsControlTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IgnoreTrendTests(unittest.TestCase):
+    """Round 33: the 200-day trend check can be made to always count as passed."""
+
+    def test_ignored_check_always_passes(self):
+        from tests.test_opportunity import uptrend
+        from tradebot.opportunity import Opportunity, OppParams
+        cs = uptrend()
+        down = [type(c)(c.open_time, 1e6 - c.open, 1e6 - c.low, 1e6 - c.high, 1e6 - c.close, c.volume, c.close_time)
+                for c in cs]                       # mirrored: price far below a falling 200-day average
+        i = len(down) - 1
+        self.assertFalse(dict(Opportunity(OppParams()).prepare(down).checks(i))["trend_up"])
+        self.assertTrue(dict(Opportunity(OppParams(ignore=("trend_up",))).prepare(down).checks(i))["trend_up"])
+
+    def test_setting_maps_to_flag(self):
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "settings.json"), "w") as f:
+            json.dump({"ignore_trend": True}, f)
+        args = live_args(read_controls(d))
+        self.assertEqual(args[args.index("--ignore-check") + 1], "trend_up")
+        with open(os.path.join(d, "settings.json"), "w") as f:
+            json.dump({"ignore_trend": "yes"}, f)
+        self.assertNotIn("--ignore-check", live_args(read_controls(d)))

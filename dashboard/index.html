@@ -574,7 +574,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   function settingsCard() {
     const c = { ...DEFAULTS(), ...data.settings };
     return `<div class="card note">Capital ${money(+c.capital, 0)} USDT · risk ${c.risk_pct}% per trade · up to ${c.max_open} positions ·
-      backstop ${+c.backstop_pct ? c.backstop_pct + "% below stops" : "off"} · daily loss limit ${c.daily_loss_pct}% · circuit breaker at ${c.max_drawdown_pct}% below peak · gold ${c.gold ? "on" : "off"} · re-buy wait after a manual sell ${+c.rebuy_wait_days ? c.rebuy_wait_days + " days" : "none"} · buys need ${c.min_score} of 8 checks · profit alert ${+c.alert_pct ? "at +" + c.alert_pct + "%" : "off"} · demo account only.
+      backstop ${+c.backstop_pct ? c.backstop_pct + "% below stops" : "off"} · daily loss limit ${c.daily_loss_pct}% · circuit breaker at ${c.max_drawdown_pct}% below peak · gold ${c.gold ? "on" : "off"} · re-buy wait after a manual sell ${+c.rebuy_wait_days ? c.rebuy_wait_days + " days" : "none"} · buys need ${c.min_score} of 8 checks${c.ignore_trend ? " (trend check skipped)" : ""} · profit alert ${+c.alert_pct ? "at +" + c.alert_pct + "%" : "off"} · demo account only.
       ${data.state.halted ? `<br><b style="color:var(--down)">Circuit breaker tripped:</b> ${esc(data.state.halted)}` : ""}</div>
       <div class="actions"><button class="btn" data-act="strategy">${I.gear}Edit settings</button>
       ${data.state.halted ? (data.resetPending ? `<div class="pending">Reset requested</div>` : `<button class="btn warn" data-act="resethalt">Reset breaker</button>`) : `<button class="btn" data-act="run">${I.bolt}Run now</button>`}</div>`;
@@ -623,6 +623,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         <label>Profit alert<select id="s-al">${opt([0, 10, 20, 30, 50], c.alert_pct, v => v ? "at +" + v + "%" : "Off")}</select></label>
       </div>
       <label class="check"><input id="s-gold" type="checkbox" ${c.gold ? "checked" : ""}> Include gold (PAXG) when the exchange lists it</label>
+      <label class="check"><input id="s-nt" type="checkbox" ${c.ignore_trend ? "checked" : ""}> Skip the 200-day trend check (round 33: better in backtests, on test)</label>
       <div class="actions"><button class="btn" id="no">Cancel</button><button class="btn primary" id="save">Save</button></div>`);
     $("no").onclick = close;
     const preset = risk => { $("s-open").value = "8"; $("s-risk").value = String(risk); $("s-ms").value = "6"; toast(`Preset filled: 8 positions, ${risk}% risk, 6 of 8 checks. Tap Save.`) };
@@ -631,7 +632,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     $("save").onclick = async () => {
       const v = { capital: Math.max(100, +$("s-cap").value || 5000), risk_pct: +$("s-risk").value, max_open: +$("s-open").value,
                   backstop_pct: +$("s-bs").value, daily_loss_pct: +$("s-dl").value, max_drawdown_pct: +$("s-dd").value, gold: $("s-gold").checked,
-                  rebuy_wait_days: +$("s-rb").value, alert_pct: +$("s-al").value, min_score: +$("s-ms").value };
+                  rebuy_wait_days: +$("s-rb").value, alert_pct: +$("s-al").value, min_score: +$("s-ms").value, ignore_trend: $("s-nt").checked };
       $("save").disabled = true;
       const merged = { ...data.settings, ...v };       // keeps the real account's mode and confirmation
       try { await putFile("settings.json", JSON.stringify(merged, null, 2) + "\n", "dashboard: strategy settings"); data.settings = merged; close(); render(); toast("Saved. Used from the next run.") }

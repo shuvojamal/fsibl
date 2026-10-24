@@ -34,6 +34,7 @@ class OppParams:
     reward_risk: float = 3.0   # only with trail_atr=0: target = entry + reward_risk * risk
     risk_frac: float = 0.01    # fraction of equity risked per trade
     min_score: int = 5         # out of 8
+    ignore: tuple = ()         # checks that always count as passed (research round 33: trend_up)
 
     @property
     def warmup(self):
@@ -84,7 +85,7 @@ class Opportunity:
                 or self.hist[i - 1] is None or self.high_n[i - 1] is None:
             return None
         price, a = self.closes[i], self.atr[i]
-        return [
+        out = [
             ("trend_up", price > self.trend[i] and self.trend[i] > self.trend[i - 2]),
             ("ema_aligned", self.fast[i] > self.slow[i]),
             ("momentum", self.hist[i] > 0 and self.hist[i] > self.hist[i - 1]),
@@ -94,6 +95,7 @@ class Opportunity:
             ("breakout", price > self.high_n[i - 1]),
             ("pullback", abs(price - self.fast[i]) <= a),
         ]
+        return [(n, ok or n in p.ignore) for n, ok in out]
 
     def signal(self, i):
         """A Plan if candle i is an opportunity, else None."""

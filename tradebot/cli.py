@@ -30,8 +30,11 @@ def _report(title, res, candles):
     print(f"  max drawdown     {res.max_drawdown:.2%}")
 
 
+CHECK_NAMES = ["trend_up", "ema_aligned", "momentum", "rsi_zone", "volume", "volatility_ok", "breakout", "pullback"]
+
+
 def _opp(a):
-    return OppParams(min_score=a.min_score, risk_frac=a.risk)
+    return OppParams(min_score=a.min_score, risk_frac=a.risk, ignore=tuple(a.ignore_check))
 
 
 def _engine(a):
@@ -58,6 +61,8 @@ def main():
         p.add_argument("--strategy", choices=["ema", "opportunity"], default="ema",
                        help="ema: crossover; opportunity: trade only when enough checks agree")
         p.add_argument("--min-score", type=int, default=5, help="opportunity: checks required, of 8")
+        p.add_argument("--ignore-check", nargs="*", default=[], choices=CHECK_NAMES,
+                       help="opportunity: checks that always count as passed (round 33: trend_up)")
         p.add_argument("--risk", type=float, default=0.01, help="opportunity: equity fraction risked per trade")
         p.add_argument("--fast", type=int, default=12)
         p.add_argument("--slow", type=int, default=26)
@@ -153,6 +158,7 @@ def main():
     sh.add_argument("--max-open", type=int, default=5)
     sh.add_argument("--risk", type=float, default=0.01)
     sh.add_argument("--min-score", type=int, default=5)
+    sh.add_argument("--ignore-check", nargs="*", default=[], choices=CHECK_NAMES)
 
     ct = sub.add_parser("controls", help="read the dashboard's settings/requests and print the live flags")
     ct.add_argument("--state-dir", default="demo_state")
@@ -237,7 +243,7 @@ def main():
     elif a.cmd == "shadow":
         from tradebot.shadow import shadow_report
         print("\n".join(shadow_report(a.state_dir, [x.upper() for x in a.symbols], a.capital, a.max_open, a.risk,
-                                       min_score=a.min_score)))
+                                       min_score=a.min_score, ignore=tuple(a.ignore_check))))
     elif a.cmd == "controls":
         from tradebot.control import live_args, read_controls
         c = read_controls(a.state_dir, a.default_capital)
@@ -248,6 +254,7 @@ def main():
         print(f"max_open={c['max_open']}")
         print(f"mode={c['mode']}")
         print(f"min_score={c['min_score']}")
+        print(f"ignore={'trend_up' if c['ignore_trend'] else ''}")
     elif a.cmd == "audit":
         from tradebot.audit import audit
         problems = audit(a.state_dir, a.max_open)

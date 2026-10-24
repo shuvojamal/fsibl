@@ -1,5 +1,5 @@
 {
-  "time": "2026-10-24 00:19:14 UTC",
+  "time": "2026-10-24 00:27:19 UTC",
   "symbols": [
     "ADAUSDT",
     "AVAXUSDT",
@@ -28,6 +28,7 @@
   "min_score": 6,
   "gold": true,
   "savings": false,
+  "ignore_trend": false,
   "mode": "off",
   "paused": false
 }

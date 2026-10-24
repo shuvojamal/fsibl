@@ -3,9 +3,9 @@ free USDT: 87,561.78
 
 open positions: 2
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  BNBUSDT         0.624121      737.899        737.9      698.868     +0.00  +0.00%   -5.29%
-  PEPEUSDT  35890416.657000  4.57798e-06    4.578e-06  3.86474e-06     +0.00  +0.00%  -15.58%
-  unrealised total: +0.00 USDT
+  BNBUSDT         0.624121      737.899        739.7      698.868     +1.12  +0.24%   -5.52%
+  PEPEUSDT  35890416.657000  4.57798e-06    4.573e-06  3.86474e-06     -0.18  -0.11%  -15.49%
+  unrealised total: +0.95 USDT
 
 closed trades: 5, realised P&L: +76.61 USDT
   2026-10-22 19:26:44 UTC BUY  ETHUSDT   0.417884 @ 2390.62 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 

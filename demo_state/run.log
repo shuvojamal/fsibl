@@ -122,3 +122,7 @@
 [2026-10-24 00:29:24 UTC] BUY PEPEUSDT 35890416.657 @ 4.57798e-06 fee 0.1645 (trend_up+ema_aligned+momentum+rsi_zone+volume+pullback)  order 4036576853067091968
 [2026-10-24 00:29:25 UTC] BNBUSDT: backstop placed at 559.095 (20% below the stop 698.868)
 [2026-10-24 00:29:25 UTC] PEPEUSDT: backstop placed at 3.0918e-06 (20% below the stop 3.86474e-06)
+[2026-10-24 04:25:30 UTC] connected to https://www.okx.com (clock offset -54 ms)
+[2026-10-24 04:25:30 UTC] free USDT: 87,561.78; per-trade size: 5,000.00
+[2026-10-24 04:25:31 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-10-24 04:25:32 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)

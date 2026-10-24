@@ -3,139 +3,187 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f4f6fb">
+<meta name="theme-color" content="#f3f4fb">
 <title>Tradebot Desk</title>
 <style>
-/* App shell: sticky top status, one scrolling view per tab, bottom tab bar. System fonts only, so nothing loads before first paint. */
+/* App shell: sticky top bar, one scrolling view per tab, floating tab bar. System fonts only, so nothing loads before first paint. */
 :root {
-  --bg: #f4f6fb; --surface: #ffffff; --surface-2: #eef1f7; --line: #e6eaf2; --fg: #0f1523; --muted: #5f6b80;
-  --accent: #4f5fe6; --accent-ink: #ffffff; --up: #0e9466; --down: #d9473f; --warn: #b26b00;
-  --up-bg: rgba(14, 148, 102, .1); --down-bg: rgba(217, 71, 63, .1); --warn-bg: rgba(255, 176, 32, .16); --accent-bg: rgba(79, 95, 230, .1);
-  --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 16px rgba(16, 24, 40, .06);
+  --bg: #f3f4fb; --surface: #ffffff; --surface-2: #f0f2fa; --line: #e7e9f4; --fg: #111427; --muted: #646b85;
+  --accent: #6355f0; --accent-2: #b14cf0; --accent-3: #ff5d8f; --accent-ink: #ffffff;
+  --up: #0aa06e; --down: #e5484d; --warn: #c27400; --info: #1f8cff;
+  --up-bg: rgba(10, 160, 110, .12); --down-bg: rgba(229, 72, 77, .11); --warn-bg: rgba(255, 170, 0, .16); --accent-bg: rgba(99, 85, 240, .11); --info-bg: rgba(31, 140, 255, .12);
+  --grad: linear-gradient(135deg, #5b5cf0 0%, #9b4cf0 55%, #f0508f 100%);
+  --grad-up: linear-gradient(135deg, #11b981, #0ea5a4); --grad-down: linear-gradient(135deg, #f43f5e, #f97316);
+  --shadow: 0 1px 2px rgba(30, 27, 75, .04), 0 6px 20px rgba(30, 27, 75, .07);
+  --shadow-lg: 0 12px 34px rgba(91, 76, 240, .28);
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
-  --r: 16px; color-scheme: light;
+  --r: 20px; --ease: cubic-bezier(.2, .8, .2, 1); color-scheme: light;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent }
-html, body { margin: 0; height: 100% }
-body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased }
+html, body { margin: 0; min-height: 100% }
+body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased; overscroll-behavior-y: contain }
+html, body { overflow-x: clip }   /* the slide-in animation must never widen the page */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(60% 40% at 0% 0%, rgba(99, 85, 240, .14), transparent 70%),
+              radial-gradient(50% 35% at 100% 10%, rgba(240, 80, 143, .12), transparent 70%),
+              radial-gradient(60% 40% at 50% 100%, rgba(14, 165, 164, .10), transparent 70%) }
 .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" }
 .up { color: var(--up) } .down { color: var(--down) } .muted { color: var(--muted) }
 
 /* top bar */
-.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px);
   padding: calc(env(safe-area-inset-top, 0px) + 12px) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
   display: flex; align-items: center; gap: 10px }
-.brand { font-weight: 700; font-size: 17px; letter-spacing: -.01em }
-.acct { border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 600 12px var(--sans); padding: 5px 10px; border-radius: 999px; cursor: pointer }
-.acct::after { content: " ▾"; color: var(--muted) }
-.acct.real { border-color: var(--down); color: var(--down); background: var(--down-bg) }
-.choice { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; text-align: left; font: inherit; color: var(--fg); width: 100% }
+.brand { font-weight: 800; font-size: 19px; letter-spacing: -.02em; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent }
+.acct { border: 0; background: var(--accent-bg); color: var(--accent); font: 700 12px var(--sans); padding: 6px 11px; border-radius: 999px; cursor: pointer; transition: transform .15s var(--ease) }
+.acct::after { content: " ▾"; opacity: .7 }
+.acct.real { color: #fff; background: var(--grad-down) }
+.choice { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 16px; border: 2px solid transparent; background: var(--surface-2); cursor: pointer; text-align: left; font: inherit; color: var(--fg); width: 100%; transition: transform .15s var(--ease), border-color .2s }
 .choice[aria-current="true"] { border-color: var(--accent); background: var(--accent-bg) }
-.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted) }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap }
 .status i { width: 7px; height: 7px; border-radius: 50%; background: currentColor }
 .status.run { background: var(--up-bg); color: var(--up) } .status.pause { background: var(--warn-bg); color: var(--warn) }
 .status.halt, .status.err { background: var(--down-bg); color: var(--down) }
-.status.run i { animation: pulse 2s ease-in-out infinite }
-@keyframes pulse { 50% { opacity: .3 } }
+.status.run i { box-shadow: 0 0 0 0 currentColor; animation: ping 2s ease-out infinite }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(10, 160, 110, .55) } 80%, 100% { box-shadow: 0 0 0 7px rgba(10, 160, 110, 0) } }
 .spacer { flex: 1 }
-.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--surface); color: var(--fg); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow) }
+.icon-btn { width: 40px; height: 40px; border-radius: 14px; border: 0; background: var(--surface); color: var(--accent); display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow); transition: transform .15s var(--ease) }
 .icon-btn svg { width: 20px; height: 20px }
 .icon-btn.spin svg { animation: spin .8s linear infinite }
 @keyframes spin { to { transform: rotate(360deg) } }
+.ptr { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 58px); z-index: 4; width: 38px; height: 38px; margin-left: -19px; border-radius: 50%;
+  background: var(--surface); box-shadow: var(--shadow); display: grid; place-items: center; color: var(--accent); opacity: 0; transform: translateY(-30px) scale(.6); pointer-events: none }
+.ptr svg { width: 20px; height: 20px } .ptr.spin svg { animation: spin .8s linear infinite }
 
 /* views */
-main { padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(96px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-width: 720px; margin: 0 auto }
+main { padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(110px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-width: 720px; margin: 0 auto }
 .view { display: grid; gap: 14px }
 .view > * { min-width: 0 }   /* long single-line text must shrink, not widen the page */
 .card { background: var(--surface); border-radius: var(--r); padding: 16px; min-width: 0; box-shadow: var(--shadow) }
-h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 6px 2px 0; letter-spacing: .02em }
+h2 { font-size: 13px; font-weight: 700; color: var(--muted); margin: 8px 2px 0; letter-spacing: .03em; text-transform: uppercase }
 
 /* hero */
-.hero .label { font-size: 13px; color: var(--muted) }
-.hero .big { font-size: 38px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin-top: 4px }
-.hero .delta { display: inline-flex; gap: 8px; align-items: center; margin-top: 8px; font-weight: 600; font-size: 14px }
-.badge { padding: 3px 8px; border-radius: 8px; font-size: 13px; font-weight: 600 }
+.hero { position: relative; overflow: hidden; color: #fff; background: var(--grad); box-shadow: var(--shadow-lg); padding: 18px 18px 8px }
+.hero::after { content: ""; position: absolute; right: -60px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .12); pointer-events: none }
+.hero .label { font-size: 13px; opacity: .85; font-weight: 600 }
+.hero .big { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-top: 4px }
+.hero .delta { display: inline-flex; gap: 8px; align-items: center; margin-top: 8px; font-weight: 700; font-size: 14px }
+.hero .delta .up, .hero .delta .down, .hero .delta .muted { color: #fff }
+.hero .muted { opacity: .8 }
+.badge { padding: 3px 9px; border-radius: 999px; font-size: 13px; font-weight: 700 }
 .badge.up { background: var(--up-bg) } .badge.down { background: var(--down-bg) }
-.chart { margin: 14px -4px -4px; height: 140px }
+.hero .badge { background: rgba(255, 255, 255, .22); color: #fff }
+.chart { position: relative; margin: 14px -6px 0; height: 140px; touch-action: pan-y }
 .chart svg { width: 100%; height: 100%; display: block; overflow: visible }
+.scrub { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px dashed rgba(255, 255, 255, .8); pointer-events: none }
+.scrub b { position: absolute; top: -2px; transform: translateX(-50%); white-space: nowrap; background: rgba(17, 20, 39, .78); color: #fff; font: 600 12px var(--sans); padding: 4px 8px; border-radius: 8px }
+.scrub i { position: absolute; left: -6px; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .35) }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
-.stat { background: var(--surface); border-radius: 14px; padding: 12px; min-width: 0; box-shadow: var(--shadow) }
-.stat .k { font-size: 12px; color: var(--muted) } .stat .v { font-size: 17px; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere }
+.stat { position: relative; background: var(--surface); border-radius: 16px; padding: 12px; min-width: 0; box-shadow: var(--shadow); overflow: hidden }
+.stat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, var(--accent)) }
+.stat:nth-child(3n+1) { --c: var(--info) } .stat:nth-child(3n+2) { --c: var(--accent-2) } .stat:nth-child(3n) { --c: var(--accent-3) }
+.stat .k { font-size: 12px; color: var(--muted); font-weight: 600 } .stat .v { font-size: 17px; font-weight: 800; margin-top: 2px; overflow-wrap: anywhere }
 
 /* actions */
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
-.btn { height: 48px; border-radius: 14px; border: 0; font: 600 15px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow) }
+.btn { position: relative; overflow: hidden; height: 50px; border-radius: 16px; border: 0; font: 700 15px var(--sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--surface); color: var(--fg); box-shadow: var(--shadow); transition: transform .15s var(--ease), box-shadow .2s, filter .2s }
 .btn svg { width: 18px; height: 18px }
-.btn.primary { background: var(--accent); color: var(--accent-ink) }
-.btn.warn { background: var(--warn-bg); color: var(--warn) }
+.btn.primary { background: var(--grad); color: var(--accent-ink); box-shadow: 0 6px 18px rgba(99, 85, 240, .3) }
+.btn.warn { background: linear-gradient(135deg, #ffb020, #ff8a00); color: #fff; box-shadow: 0 6px 18px rgba(255, 150, 0, .25) }
 .btn.danger { background: var(--down-bg); color: var(--down) }
 .btn:disabled { opacity: .5 }
-.btn.sm { height: 38px; font-size: 14px; border-radius: 12px; box-shadow: none }
-.pending { font-size: 12px; font-weight: 700; color: var(--warn); background: var(--warn-bg); padding: 8px 10px; border-radius: 10px; text-align: center }
+.btn.sm { height: 40px; font-size: 14px; border-radius: 13px; box-shadow: none; background: var(--surface-2) }
+.btn.sm.danger { background: var(--down-bg) }
+.btn:active, .icon-btn:active, .acct:active, .choice:active, .tab:active, .item[data-acct-go]:active, [data-goto]:active { transform: scale(.96) }
+.rip { position: absolute; border-radius: 50%; background: currentColor; opacity: .18; transform: scale(0); animation: rip .5s ease-out forwards; pointer-events: none }
+@keyframes rip { to { transform: scale(2.6); opacity: 0 } }
+.pending { font-size: 12px; font-weight: 700; color: var(--warn); background: var(--warn-bg); padding: 9px 11px; border-radius: 12px; text-align: center }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
-select { font: 15px var(--sans); color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; width: 100% }
+select { font: 15px var(--sans); color: var(--fg); background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 13px; padding: 12px; width: 100%; transition: border-color .2s }
+select:focus, input:focus { border-color: var(--accent); outline: none }
 .check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--fg) }
-.check input { width: 20px; height: 20px }
+.check input { width: 20px; height: 20px; accent-color: var(--accent) }
 .btn:focus-visible, .icon-btn:focus-visible, .tab:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 
 /* position cards */
 .pos { display: grid; gap: 10px }
 .pos-head { display: flex; align-items: center; gap: 10px }
-.coin { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-weight: 700; font-size: 13px; background: var(--accent-bg); color: var(--accent); flex: none }
-.pos-name { font-weight: 700 } .pos-sub { font-size: 12px; color: var(--muted) }
-.pos-pnl { margin-left: auto; text-align: right } .pos-pnl .a { font-weight: 700 } .pos-pnl .p { font-size: 12px }
+.coin { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; font-weight: 800; font-size: 12px; letter-spacing: -.02em; flex: none;
+  color: #fff; background: var(--cc, var(--grad)); box-shadow: 0 4px 12px color-mix(in srgb, var(--cc, #6355f0) 35%, transparent) }
+.pos-name { font-weight: 800 } .pos-sub { font-size: 12px; color: var(--muted) }
+.pos-pnl { margin-left: auto; text-align: right } .pos-pnl .a { font-weight: 800; font-size: 16px } .pos-pnl .p { font-size: 12px; font-weight: 700; display: inline-block; padding: 1px 7px; border-radius: 999px; margin-top: 2px }
+.pos-pnl .p.up { background: var(--up-bg) } .pos-pnl .p.down { background: var(--down-bg) }
 .risk { display: grid; gap: 6px; font-size: 12px; color: var(--muted) }
-.track { position: relative; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden }
-.fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px }
+.track { position: relative; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden }
+.fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; transition: width .6s var(--ease) }
 .row3 { display: flex; justify-content: space-between; gap: 8px }
+.flash-up { animation: fu 1.1s ease-out } .flash-down { animation: fd 1.1s ease-out }
+@keyframes fu { 0% { background: var(--up-bg); border-radius: 6px } 100% { background: transparent } }
+@keyframes fd { 0% { background: var(--down-bg); border-radius: 6px } 100% { background: transparent } }
 
 /* lists */
 .list { background: var(--surface); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow) }
-.item { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line) }
+.item { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line); transition: transform .15s var(--ease), background .2s }
 .item:last-child { border-bottom: 0 }
-.item .main { min-width: 0; flex: 1 } .item .t { font-weight: 600 } .item .s { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.item .main { min-width: 0; flex: 1 } .item .t { font-weight: 700 } .item .s { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .item .r { text-align: right; flex: none } .item .r .s { text-align: right }
-.side { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 11px; font-weight: 800; flex: none }
-.side.buy { background: var(--accent-bg); color: var(--accent) } .side.sell { background: var(--down-bg); color: var(--down) }
-.empty { padding: 28px 16px; text-align: center; color: var(--muted) }
+.side { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-size: 10px; font-weight: 800; flex: none; color: #fff }
+.side.buy { background: var(--grad-up) } .side.sell { background: var(--grad-down) }
+.empty { padding: 30px 16px; text-align: center; color: var(--muted) }
+.empty::before { content: "🌙"; display: block; font-size: 30px; margin-bottom: 6px }
 
 /* signals */
 .sig { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line) }
 .sig:last-child { border-bottom: 0 }
 .dots { display: flex; gap: 4px }
-.dots b { width: 9px; height: 9px; border-radius: 50%; background: #dde2ec }
-.dots b.on { background: var(--muted) } .dots.go b.on { background: var(--accent) } .dots.held b.on { background: var(--up) }
-.tag { font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px }
-.tag.go { background: var(--accent-bg); color: var(--accent) } .tag.held { background: var(--up-bg); color: var(--up) }
+.dots b { width: 10px; height: 10px; border-radius: 50%; background: #e3e6f2; transition: background .3s }
+.dots b.on { background: #a9afc6 } .dots.go b.on { background: var(--grad) } .dots.held b.on { background: var(--grad-up) }
+.tag { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; letter-spacing: .02em }
+.tag.go { background: var(--grad); color: #fff } .tag.held { background: var(--grad-up); color: #fff }
 
 /* bot */
 pre.log { margin: 0; font: 12px/1.6 var(--mono); white-space: pre-wrap; word-break: break-word; color: var(--muted); max-height: 340px; overflow: auto }
 .note { font-size: 13px; color: var(--muted); line-height: 1.5 }
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 20;
-  background: var(--fg); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: 0 8px 30px rgba(16,24,40,.25) }
-.toast.err { background: var(--down); color: #fff }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  background: var(--fg); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(17, 20, 39, .3) }
+.toast.err { background: var(--grad-down) }
+@media (prefers-reduced-motion: no-preference) { .toast:not([hidden]) { animation: pop .3s var(--ease) } }
+@keyframes pop { from { opacity: 0; transform: translate(-50%, 14px) scale(.96) } }
 
-/* tab bar */
-nav.tabs { position: fixed; inset: auto 0 0 0; z-index: 6; display: grid; grid-template-columns: repeat(5, 1fr);
-  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid var(--line); padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)) }
-.tab { border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 2px; padding: 6px 0; font: 600 11px var(--sans); cursor: pointer; border-radius: 12px }
+/* floating tab bar with a sliding highlight */
+nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 6; display: grid; grid-template-columns: repeat(5, 1fr);
+  width: min(calc(100% - 24px), 520px); background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: saturate(1.5) blur(18px); -webkit-backdrop-filter: saturate(1.5) blur(18px);
+  border-radius: 24px; padding: 6px; box-shadow: 0 10px 30px rgba(30, 27, 75, .14), 0 0 0 1px rgba(30, 27, 75, .04) }
+.tab { position: relative; z-index: 1; border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 2px; padding: 7px 0; font: 700 10.5px var(--sans); cursor: pointer; border-radius: 18px; transition: color .25s, transform .15s var(--ease) }
 .tab svg { width: 22px; height: 22px }
-.tab[aria-selected="true"] { color: var(--accent) }
+.tab[aria-selected="true"] { color: #fff }
+.tab-ind { width: calc((100% - 12px) / 5); position: absolute; z-index: 0; top: 6px; bottom: 6px; left: 6px; border-radius: 18px; background: var(--grad); box-shadow: 0 6px 16px rgba(99, 85, 240, .35); transition: transform .35s var(--ease) }
 
 /* sheet (confirm + settings) */
-.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(15,21,35,.35); display: grid; align-items: end }
-.sheet { background: var(--surface); border-radius: 22px 22px 0 0; padding: 20px max(18px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
-  display: grid; gap: 14px; max-width: 720px; width: 100%; margin: 0 auto }
-.sheet h3 { margin: 0; font-size: 18px } .sheet p { margin: 0; color: var(--muted) }
-@media (prefers-reduced-motion: no-preference) { .sheet { animation: up .22s ease-out } .view { animation: fade .18s ease-out } }
-@keyframes up { from { transform: translateY(30px); opacity: 0 } }
-@keyframes fade { from { opacity: 0; transform: translateY(4px) } }
-label { display: grid; gap: 6px; font-size: 13px; color: var(--muted) }
-input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; width: 100% }
-.skel { background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2)); background-size: 200% 100%; border-radius: 8px; animation: sh 1.2s linear infinite; color: transparent }
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(17, 20, 39, .38); display: grid; align-items: end }
+.sheet { background: var(--surface); border-radius: 26px 26px 0 0; padding: 10px max(18px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 14px; max-width: 720px; width: 100%; margin: 0 auto; max-height: 92vh; overflow: auto }
+.sheet::before { content: ""; justify-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin-bottom: 4px }
+.sheet h3 { margin: 0; font-size: 19px; font-weight: 800 } .sheet p { margin: 0; color: var(--muted) }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: up .32s var(--ease) } .scrim { animation: fadein .25s ease-out }
+  .view.enter > * { animation: rise .45s var(--ease) both }
+  .view.enter > *:nth-child(2) { animation-delay: .04s } .view.enter > *:nth-child(3) { animation-delay: .08s } .view.enter > *:nth-child(4) { animation-delay: .12s }
+  .view.enter > *:nth-child(5) { animation-delay: .16s } .view.enter > *:nth-child(n+6) { animation-delay: .2s }
+  .view.from-right > * { animation-name: inright } .view.from-left > * { animation-name: inleft }
+}
+@keyframes up { from { transform: translateY(100%) } }
+@keyframes fadein { from { opacity: 0 } }
+@keyframes rise { from { opacity: 0; transform: translateY(12px) } }
+@keyframes inright { from { opacity: 0; transform: translateX(28px) } }
+@keyframes inleft { from { opacity: 0; transform: translateX(-28px) } }
+label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 600 }
+input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 13px; padding: 12px; width: 100%; transition: border-color .2s }
+.skel { background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2)); background-size: 200% 100%; border-radius: 10px; animation: sh 1.2s linear infinite; color: transparent }
+.hero .skel { background: linear-gradient(90deg, rgba(255,255,255,.15), rgba(255,255,255,.3), rgba(255,255,255,.15)); background-size: 200% 100% }
 @keyframes sh { to { background-position: -200% 0 } }
 </style>
 </head>
@@ -151,7 +199,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
 
 <main id="main"></main>
 
-<nav class="tabs" role="tablist">
+<nav class="tabs" role="tablist"><span class="tab-ind" id="tabind"></span>
   <button class="tab" data-tab="home" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>Home</button>
   <button class="tab" data-tab="positions" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18"/></svg>Positions</button>
   <button class="tab" data-tab="trades" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4l-3 3M7 4l3 3"/><path d="M17 20V4M17 20l-3-3M17 20l3-3"/></svg>Trades</button>
@@ -159,6 +207,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   <button class="tab" data-tab="bot" role="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V3M9 13h.01M15 13h.01"/></svg>Bot</button>
 </nav>
 
+<div class="ptr" id="ptr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></div>
 <div id="overlay"></div>
 <div id="toast" class="toast" hidden></div>
 
@@ -196,6 +245,12 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   const tone = n => n > 0 ? "up" : n < 0 ? "down" : "";
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const coin = s => (s || "").replace(/USDT$/, "");
+  // A colour per coin (close to each brand), so lists are easy to scan; unknown coins get a stable hue.
+  const COIN_C = { BTC: "#f7931a", ETH: "#627eea", BNB: "#e8b30b", SOL: "#9945ff", XRP: "#23292f", ADA: "#2a71d0", DOGE: "#c2a633",
+    AVAX: "#e84142", LINK: "#2a5ada", NEAR: "#00c08b", PEPE: "#3d9a3a", SUI: "#4da2ff", TRX: "#ff060a", UNI: "#ff007a",
+    PAXG: "#d4a72c", ZEC: "#e5a93d", LTC: "#345d9d", DOT: "#e6007a", OKX: "#6355f0", VPS: "#0ea5a4", REAL: "#f43f5e" };
+  const cc = s => { const k = coin(s); if (COIN_C[k]) return COIN_C[k]; let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) % 360; return `hsl(${h} 70% 50%)` };
+  const coinAv = s => `<div class="coin" style="--cc:${cc(s)}">${esc(coin(s).slice(0, 4))}</div>`;
   const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago" };
   const parseT = s => Date.parse(String(s || "").replace(" UTC", "Z").replace(" ", "T"));
 
@@ -306,6 +361,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     else setStatus("run", "Running");
   }
 
+  let chartData = null;
   function chart(capital, live) {
     const pts = data.equity.map(r => ({ t: parseT(r.time), v: +r.equity })).filter(p => !isNaN(p.t) && !isNaN(p.v));
     pts.unshift({ t: pts.length ? pts[0].t - 86400000 : Date.now() - 86400000, v: capital });
@@ -315,13 +371,14 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
     const x = t => (t - t0) / Math.max(1, t1 - t0) * W, y = v => H - (v - lo) / (hi - lo) * H;
     const d = pts.map((p, i) => (i ? "L" : "M") + x(p.t).toFixed(1) + " " + y(p.v).toFixed(1)).join(" ");
-    const c = live >= capital ? "var(--up)" : "var(--down)", e = pts[pts.length - 1];
+    const c = "#ffffff", e = pts[pts.length - 1];
+    chartData = { pts, x, y, W, t0, t1 };
     return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Equity history">
-      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>
-      <line x1="0" x2="${W}" y1="${y(capital)}" y2="${y(capital)}" stroke="var(--line)" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".35"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>
+      <line x1="0" x2="${W}" y1="${y(capital)}" y2="${y(capital)}" stroke="rgba(255,255,255,.45)" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
       <path d="${d} L ${W} ${H} L 0 ${H} Z" fill="url(#g)"/>
       <path d="${d}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-      <circle cx="${x(e.t)}" cy="${y(e.v)}" r="5" fill="${c}" vector-effect="non-scaling-stroke"/></svg>`;
+      <path d="M ${x(e.t)} ${y(e.v)} l .01 0" stroke="${c}" stroke-width="11" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
   }
 
   function alertBanner() {
@@ -341,9 +398,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     return `
       <div class="card hero">
         <div class="label">Bot balance · USDT</div>
-        <div class="big num">${money(a.equity)}</div>
+        <div class="big num" id="bigbal" data-v="${a.equity}">${money(lastBal ?? a.equity)}</div>
         <div class="delta"><span class="badge ${tone(a.pnl)} num">${pct(a.pnl / a.capital)}</span><span class="${tone(a.pnl)} num">${sgn(a.pnl)} USDT</span><span class="muted">all time</span></div>
-        <div class="chart">${chart(a.capital, a.equity)}</div>
+        <div class="chart" id="chart">${chart(a.capital, a.equity)}<div class="scrub" id="scrub" hidden><i></i><b></b></div></div>
       </div>
       <div class="stats">
         <div class="stat"><div class="k">Open P&amp;L</div><div class="v num ${tone(a.unreal)}">${a.ok ? sgn(a.unreal) : "…"}</div></div>
@@ -383,7 +440,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     return `<div class="list">${overview.map(o => {
       const pnl = o.equity != null ? o.equity - o.capital : null;
       const tag = o.a.real ? (o.mode === "live" ? "LIVE" : o.mode === "test" ? "no-orders test" : "off") : "test money";
-      return `<div class="item" data-acct-go="${o.k}" style="cursor:pointer"><div class="coin" style="${o.a.real ? "background:var(--down-bg);color:var(--down)" : ""}">${o.a.short}</div>
+      return `<div class="item" data-acct-go="${o.k}" style="cursor:pointer">${coinAv(o.a.short)}
         <div class="main"><div class="t">${esc(o.a.name)}</div>
           <div class="s">${o.has ? `${o.open} open · ${o.score} of 8 checks · ${tag}${o.last ? " · ran " + ago(o.last) : ""}` : "not set up yet"}</div></div>
         <div class="r"><div class="t num ${tone(pnl)}">${o.equity != null ? money(o.equity, 0) : "–"}</div>
@@ -399,6 +456,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       : `<div class="num" style="font-size:12px">If the stop is hit: ${sgn(lock)} USDT (the trade's risk)</div>`;
   }
 
+  const lastPnl = {};
   function posCards(limit) {
     const h = held();
     if (!h.length) return `<div class="card empty">No open positions. The bot is waiting for a signal.</div>`;
@@ -407,11 +465,13 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       // bar: how much room is left between price and stop, relative to the initial risk
       const room = now != null ? Math.max(0, Math.min(1, (now - p.stop) / Math.max(1e-12, p.entry - p.stop) / 2)) : .5;
       const toStop = now != null ? (now - p.stop) / now : null;
-      const col = room < .2 ? "var(--down)" : room < .45 ? "var(--warn)" : "var(--up)";
+      const col = room < .2 ? "var(--grad-down)" : room < .45 ? "linear-gradient(90deg,#ffb020,#ff8a00)" : "var(--grad-up)";
+      const prev = lastPnl[s]; lastPnl[s] = pnl;
+      const flash = prev != null && pnl != null && Math.abs(pnl - prev) > 1e-9 ? (pnl > prev ? "flash-up" : "flash-down") : "";
       return `<div class="card pos">
-        <div class="pos-head"><div class="coin">${esc(coin(s).slice(0, 4))}</div>
+        <div class="pos-head">${coinAv(s)}
           <div><div class="pos-name">${esc(coin(s))}</div><div class="pos-sub num">${money(p.entry * p.qty)} USDT · entry ${px(p.entry)}</div></div>
-          <div class="pos-pnl"><div class="a num ${tone(pnl)}">${sgn(pnl)}</div><div class="p num ${tone(r)}">${pct(r)}</div></div></div>
+          <div class="pos-pnl"><div class="a num ${tone(pnl)} ${flash}">${sgn(pnl)}</div><div class="p num ${tone(r)}">${pct(r)}</div></div></div>
         <div class="risk"><div class="track"><div class="fill" style="width:${(room * 100).toFixed(0)}%;background:${col}"></div></div>
           <div class="row3 num"><span>Stop ${px(p.stop)}</span><span>${toStop == null ? "" : F[1].format(toStop * 100) + "% above stop"}</span><span>Now ${px(now)}</span></div>
           ${lockLine(p)}
@@ -489,9 +549,10 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const rows = part.split("\n").slice(1).map(l => l.match(/^\s*(IN|\*\*)?\s*([A-Z0-9]+)USDT\s+(\d)\/8\s*(.*)$/)).filter(Boolean)
       .sort((a, b) => b[3] - a[3]);
     if (!rows.length) return `<div class="card empty">No scan yet. It appears after the next bot run.</div>`;
-    return `<h2>Today's scan · needs 5 of 8 to buy</h2><div class="list">${rows.map(([, f, s, sc, checks]) => {
-      const kind = f === "IN" ? "held" : +sc >= 5 ? "go" : "";
-      return `<div class="sig"><div class="coin">${esc(s.slice(0, 4))}</div><div class="main" style="flex:1;min-width:0">
+    const need = +(data.settings.min_score || 5);
+    return `<h2>Today's scan · needs ${need} of 8 to buy</h2><div class="list">${rows.map(([, f, s, sc, checks]) => {
+      const kind = f === "IN" ? "held" : +sc >= need ? "go" : "";
+      return `<div class="sig">${coinAv(s)}<div class="main" style="flex:1;min-width:0">
         <div class="t" style="font-weight:600">${esc(s)} ${kind ? `<span class="tag ${kind}">${kind === "held" ? "HOLDING" : "BUY SIGNAL"}</span>` : ""}</div>
         <div class="s muted" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(checks.replace(/_/g, " "))}</div></div>
         <div class="dots ${kind}">${Array.from({ length: 8 }, (_, i) => `<b class="${i < +sc ? "on" : ""}"></b>`).join("")}</div></div>`;
@@ -661,19 +722,57 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   }
 
   const VIEWS = { home: vHome, positions: vPositions, trades: vTrades, signals: vSignals, bot: vBot };
+  const TABS = ["home", "positions", "trades", "signals", "bot"];
+  let shownTab = null, lastBal = null;
   function render() {
     for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", b.dataset.tab === tab);
+    $("tabind").style.transform = `translateX(${TABS.indexOf(tab) * 100}%)`;
     if (!cfg.token) { $("main").innerHTML = ""; return openSettings(true) }
     if (!data) { $("main").innerHTML = `<div class="view"><div class="card hero"><div class="label skel">loading</div><div class="big skel">00,000.00</div><div class="chart skel"></div></div><div class="stats"><div class="stat skel">x</div><div class="stat skel">x</div><div class="stat skel">x</div></div></div>`; return }
     statusFromData();
     const y = scrollY;
-    $("main").innerHTML = `<div class="view">${VIEWS[tab]()}</div>`;
+    // entrance animation only when the tab changes, not on the 15-second price refresh
+    const dir = shownTab == null ? "" : TABS.indexOf(tab) > TABS.indexOf(shownTab) ? " from-right" : TABS.indexOf(tab) < TABS.indexOf(shownTab) ? " from-left" : null;
+    $("main").innerHTML = `<div class="view${dir === null ? "" : " enter" + dir}">${VIEWS[tab]()}</div>`;
+    shownTab = tab;
     scrollTo(0, y);
+    countUp(); bindChart();
   }
+  function countUp() {
+    const el = $("bigbal"); if (!el) return;
+    const to = +el.dataset.v, from = lastBal ?? to; lastBal = to;
+    if (Math.abs(to - from) < .005 || matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = money(to); return }
+    const t0 = performance.now(), dur = 700;
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      if (el.isConnected) el.textContent = money(from + (to - from) * e); if (k < 1) requestAnimationFrame(step) };
+    requestAnimationFrame(step);
+  }
+  function bindChart() {
+    const box = $("chart"), sc = $("scrub"); if (!box || !chartData) return;
+    const show = e => {
+      const r = box.getBoundingClientRect(), f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      const t = chartData.t0 + f * (chartData.t1 - chartData.t0);
+      const p = chartData.pts.reduce((a, q) => Math.abs(q.t - t) < Math.abs(a.t - t) ? q : a);
+      const xf = chartData.x(p.t) / chartData.W;
+      sc.hidden = false; sc.style.left = (xf * 100) + "%";
+      sc.querySelector("i").style.top = (chartData.y(p.v) / 140 * 100) + "%";
+      const b = sc.querySelector("b"); b.textContent = `${new Date(p.t).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${money(p.v)}`;
+      b.style.left = xf < .18 ? "60px" : xf > .82 ? "-60px" : "0";
+    };
+    box.onpointerdown = e => { show(e); buzz(4) };
+    box.onpointermove = e => { if (e.pointerType === "mouse" || e.buttons) show(e) };
+    box.onpointerleave = box.onpointerup = box.onpointercancel = () => setTimeout(() => { sc.hidden = true }, 900);
+  }
+  const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms) } catch (e) {} };
 
   // ---------- sheets & actions ----------
-  function sheet(html) { $("overlay").innerHTML = `<div class="scrim" id="scrim"><div class="sheet" role="dialog">${html}</div></div>`;
-    $("scrim").onclick = e => { if (e.target.id === "scrim") close() } }
+  function sheet(html) { $("overlay").innerHTML = `<div class="scrim" id="scrim"><div class="sheet" role="dialog" id="sheet">${html}</div></div>`;
+    $("scrim").onclick = e => { if (e.target.id === "scrim") close() };
+    const sh = $("sheet"); let y0 = null, dy = 0;
+    sh.addEventListener("touchstart", e => { y0 = sh.scrollTop <= 0 && !e.target.closest("input,select,textarea") ? e.touches[0].clientY : null; dy = 0 }, { passive: true });
+    sh.addEventListener("touchmove", e => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translateY(${dy}px)`; sh.style.transition = "none" }, { passive: true });
+    sh.addEventListener("touchend", () => { if (y0 == null) return; sh.style.transition = "transform .25s var(--ease)";
+      if (dy > 110 && $("scrim").onclick) close(); else sh.style.transform = ""; y0 = null }); }
   const close = () => { $("overlay").innerHTML = "" };
   function confirmSheet(title, text, label, cls, fn) {
     sheet(`<h3>${title}</h3><p>${text}</p><div class="actions"><button class="btn" id="no">Cancel</button><button class="btn ${cls}" id="yes">${label}</button></div>`);
@@ -778,19 +877,52 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
             if (r.status !== 204) throw new Error("Couldn't start the schedule (HTTP " + r.status + ").");
             data.schedule = "active"; render(); toast("Daily bot started.") }),
   };
+  document.addEventListener("pointerdown", e => {
+    const b = e.target.closest(".btn"); if (!b) return;
+    const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height), sp = document.createElement("span");
+    sp.className = "rip"; sp.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+    b.appendChild(sp); setTimeout(() => sp.remove(), 520);
+  });
+  const goTab = t => { if (t === tab) return; tab = t; S.set("tb_tab", tab); buzz(6); scrollTo(0, 0); render() };
   document.addEventListener("click", e => {
-    const a = e.target.closest("[data-act]"); if (a) return ACTS[a.dataset.act](a);
+    const a = e.target.closest("[data-act]"); if (a) { buzz(8); return ACTS[a.dataset.act](a) }
     const ag = e.target.closest("[data-acct-go]");
     if (ag && ag.dataset.acctGo !== acct) { acct = ag.dataset.acctGo; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); chip(); loadCache(); render(); load(); return }
-    const g = e.target.closest("[data-goto]"); if (g) { tab = g.dataset.goto; S.set("tb_tab", tab); scrollTo(0, 0); render() }
-    const t = e.target.closest(".tab"); if (t) { tab = t.dataset.tab; S.set("tb_tab", tab); scrollTo(0, 0); render() }
+    const g = e.target.closest("[data-goto]"); if (g) goTab(g.dataset.goto);
+    const t = e.target.closest(".tab"); if (t) goTab(t.dataset.tab);
   });
-  $("refresh").onclick = load;
+  $("refresh").onclick = () => { buzz(6); load() };
+  let tx = null, ty = 0, pull = 0;
+  const main = $("main"), ptr = $("ptr");
+  main.addEventListener("touchstart", e => {
+    if ($("overlay").innerHTML || e.target.closest(".chart, pre, input, select")) { tx = null; return }
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY; pull = 0;
+  }, { passive: true });
+  main.addEventListener("touchmove", e => {
+    if (tx == null) return;
+    const dy = e.touches[0].clientY - ty, dx = e.touches[0].clientX - tx;
+    if (scrollY <= 0 && dy > 0 && Math.abs(dy) > Math.abs(dx)) {
+      pull = Math.min(110, dy * .5);
+      ptr.style.opacity = Math.min(1, pull / 60); ptr.style.transform = `translateY(${pull - 30}px) rotate(${pull * 3}deg) scale(${.6 + Math.min(.4, pull / 150)})`;
+    }
+  }, { passive: true });
+  main.addEventListener("touchend", e => {
+    if (tx == null) return;
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (pull >= 60) { buzz(10); ptr.classList.add("spin"); load().finally(() => { ptr.classList.remove("spin") }) }
+    ptr.style.transition = "transform .3s var(--ease), opacity .3s"; ptr.style.opacity = 0; ptr.style.transform = "";
+    setTimeout(() => { ptr.style.transition = "" }, 300);
+    if (pull < 10 && Math.abs(dx) > 70 && Math.abs(dy) < 50) {
+      const i = TABS.indexOf(tab) + (dx < 0 ? 1 : -1);
+      if (i >= 0 && i < TABS.length) goTab(TABS[i]);
+    }
+    tx = null; pull = 0;
+  });
   const chip = () => { $("acct").textContent = ACCOUNTS[acct].short; $("acct").classList.toggle("real", !!ACCOUNTS[acct].real) };
   chip();
   $("acct").onclick = () => {
     sheet(`<h3>Account</h3>${Object.entries(ACCOUNTS).map(([k, a]) => `<button class="choice" data-acct="${k}" aria-current="${k === acct}">
-      <div class="coin">${a.short}</div><div><div style="font-weight:700">${a.name}</div>
+      ${coinAv(a.short)}<div><div style="font-weight:700">${a.name}</div>
       <div class="muted" style="font-size:12px">${a.real ? "Runs on your VPS · REAL MONEY · off until you switch it on" : a.gh ? "Runs on GitHub every day · test money" : "Runs on your VPS (Germany) · test money"}</div></div></button>`).join("")}`);
     for (const b of document.querySelectorAll("[data-acct]")) b.onclick = () => {
       acct = b.dataset.acct; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); chip();

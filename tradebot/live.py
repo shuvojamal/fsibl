@@ -207,8 +207,10 @@ class LiveTrader:
                     buys.append(buy)
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
-        if freed:
-            buys += self._refill_candidates({b[0] for b in buys})
+        retry = any(p.get("retry_candle") and p["retry_candle"] == p["last_candle"]
+                    for p in self.state["positions"].values())
+        if freed or retry:
+            buys += self._refill_candidates({b[0] for b in buys}, only_held_back=not freed)
         buys.sort(key=lambda b: -b[2].score)
         for sym, pos, plan, price in buys:
             try:
@@ -363,14 +365,16 @@ class LiveTrader:
                 self._close(sym, pos, "manual", ref=self.client.price(sym))
                 if pos["qty"] == 0:
                     freed += 1
-                    until = time.time() * 1000 + self.rebuy_block_days * 86_400_000
-                    self.state.setdefault("rebuy_blocked", {})[sym] = until
+                    self.state.setdefault("sold_by_hand", {})[sym] = time.time() * 1000
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: manual SELL failed: {type(e).__name__}: {e}")
         return freed
 
-    def _refill_candidates(self, already):
+    def _refill_candidates(self, already, only_held_back=False):
         """After a sale by hand, today's buy signals can use the freed slots now.
+
+        Also used for buys held back earlier today (re-buy wait, pause, breaker,
+        full slots): with only_held_back, just those coins are looked at again.
 
         Coins whose latest daily candle was already processed earlier today are
         normally skipped until tomorrow's candle; this looks at them again, for
@@ -382,6 +386,8 @@ class LiveTrader:
             pos = self.state["positions"][sym]
             if sym in already or pos["qty"] > 0:
                 continue
+            if only_held_back and pos.get("retry_candle") != pos["last_candle"]:
+                continue
             try:
                 candles = fetch_candles(sym, self.interval, self.engine.history)
                 last = candles[-1]
@@ -389,16 +395,27 @@ class LiveTrader:
                     continue                       # not processed yet: the normal pass handles it
                 action = self.engine.decide(candles, False)
                 if action and action[0] == "buy" and not self._bad_data(sym, last):
-                    print(f"[{_now()}] {sym}: today's buy signal considered for a freed slot")
+                    print(f"[{_now()}] {sym}: today's buy signal looked at again")
                     out.append((sym, pos, action[1], last.close))
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
         return out
 
+    def _sold_by_hand_at(self, sym):
+        sold = self.state.get("sold_by_hand", {}).get(sym)
+        if sold is None and sym in self.state.get("rebuy_blocked", {}):
+            sold = self.state["rebuy_blocked"][sym] - 7 * 86_400_000   # older records: block end, 7-day wait
+        return sold
+
     def _open(self, sym, pos, plan, price):
-        until = self.state.get("rebuy_blocked", {}).get(sym, 0)
-        if until > time.time() * 1000:
-            print(f"[{_now()}] {sym}: BUY skipped, sold by hand {self.rebuy_block_days} days ago or less")
+        # A buy held back by one of these may go ahead later today, when the reason
+        # goes away (the owner changes the setting, unpauses, a slot frees up):
+        # the coin is marked and looked at again on the next run (step()).
+        pos["retry_candle"] = pos["last_candle"]
+        sold = self._sold_by_hand_at(sym)
+        if sold is not None and time.time() * 1000 < sold + self.rebuy_block_days * 86_400_000:
+            print(f"[{_now()}] {sym}: BUY skipped, sold by hand less than {self.rebuy_block_days} days ago "
+                  f"(re-buy wait setting)")
             return
         if self.pause_entries:
             print(f"[{_now()}] {sym}: BUY skipped, bot is paused (exits still run)")
@@ -411,6 +428,7 @@ class LiveTrader:
             if open_now >= self.max_open:
                 print(f"[{_now()}] {sym}: BUY skipped, {open_now} positions open (cap {self.max_open})")
                 return
+        pos.pop("retry_candle", None)
         spend = self._spend(plan, price)
         if spend < self.client.symbol_filters(sym)["min_notional"]:
             print(f"[{_now()}] {sym}: risk-sized order {spend:.2f} USDT is below the exchange minimum")

@@ -1,5 +1,5 @@
 {
-  "time": "2026-10-23 17:53:46 UTC",
+  "time": "2026-10-24 00:15:23 UTC",
   "symbols": [
     "ADAUSDT",
     "AVAXUSDT",
@@ -19,13 +19,15 @@
     "ZECUSDT"
   ],
   "capital": 5000.0,
-  "risk_pct": 1.0,
-  "max_open": 5,
+  "risk_pct": 0.5,
+  "max_open": 8,
   "backstop_pct": 20.0,
   "max_drawdown_pct": 35.0,
   "daily_loss_pct": 3.0,
   "rebuy_wait_days": 3,
+  "min_score": 6,
   "gold": true,
+  "savings": false,
   "mode": "off",
   "paused": false
 }

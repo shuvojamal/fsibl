@@ -207,6 +207,7 @@ class LiveTrader:
                     buys.append(buy)
             except (OSError, BinanceError) as e:
                 print(f"[{_now()}] {sym}: {type(e).__name__}: {e}")
+        self._wait_over()
         retry = any(p.get("retry_candle") and p["retry_candle"] == p["last_candle"]
                     for p in self.state["positions"].values())
         if freed or retry:
@@ -406,6 +407,20 @@ class LiveTrader:
         if sold is None and sym in self.state.get("rebuy_blocked", {}):
             sold = self.state["rebuy_blocked"][sym] - 7 * 86_400_000   # older records: block end, 7-day wait
         return sold
+
+    def _wait_over(self):
+        """Coins whose re-buy wait has ended (or been shortened in the app): forget the
+        sale and look at today's signal once more, in case it was held back earlier."""
+        now = time.time() * 1000
+        for sym in self.symbols:
+            sold = self._sold_by_hand_at(sym)
+            if sold is None or now < sold + self.rebuy_block_days * 86_400_000:
+                continue
+            self.state.get("sold_by_hand", {}).pop(sym, None)
+            self.state.get("rebuy_blocked", {}).pop(sym, None)
+            pos = self.state["positions"][sym]
+            if pos["qty"] <= 0 and pos.get("last_candle"):
+                pos["retry_candle"] = pos["last_candle"]
 
     def _open(self, sym, pos, plan, price):
         # A buy held back by one of these may go ahead later today, when the reason

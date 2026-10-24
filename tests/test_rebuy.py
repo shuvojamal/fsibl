@@ -41,6 +41,20 @@ class RebuyTests(unittest.TestCase):
         self.run_step(t)
         self.assertEqual([o["side"] for o in self.fake.orders], ["BUY"])
 
+    def test_runs_from_before_the_fix_are_caught_up(self):
+        t = self.trader(rebuy_block_days=7)
+        t.state["rebuy_blocked"] = {"BTCUSDT": time.time() * 1000 + 6 * 86_400_000}   # old-style record
+        t._save()
+        self.run_step(t)
+        self.assertEqual(self.fake.orders, [])
+        t = self.trader(rebuy_block_days=0)
+        t.state["positions"]["BTCUSDT"].pop("retry_candle", None)   # an old run never marked it
+        t._save()
+        self.run_step(t)
+        self.assertEqual([o["side"] for o in self.fake.orders], ["BUY"])
+        self.run_step(self.trader(rebuy_block_days=0))
+        self.assertEqual(len(self.fake.orders), 1)
+
     def test_paused_then_resumed_same_day(self):
         self.run_step(self.trader(pause_entries=True))
         self.assertEqual(self.fake.orders, [])

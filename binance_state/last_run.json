@@ -1,7 +1,7 @@
 {
-  "time": "2026-10-23 18:22:26 UTC",
+  "time": "2026-10-24 00:12:35 UTC",
   "venue": "BINANCE TESTNET (VPS)",
-  "reason": "request (RUN_NOW)",
+  "reason": "daily",
   "ok": true,
   "symbols": [
     "ADAUSDT",
@@ -23,13 +23,14 @@
   ],
   "capital": 5000,
   "risk_pct": 1.0,
-  "max_open": 5,
+  "max_open": 8,
   "backstop_pct": 20.0,
   "max_drawdown_pct": 35.0,
   "daily_loss_pct": 3.0,
   "rebuy_wait_days": 7,
-  "min_score": 5,
+  "min_score": 6,
   "gold": true,
+  "savings": false,
   "mode": "off",
   "paused": false
 }

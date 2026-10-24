@@ -1,3 +1,5 @@
 live vs backtest (same coins, dates, capital and rules):
-  since 2026-10-23: 0 trades matched, 1 only live, 0 only in the backtest
-  only live:     2026-10-23 BUY  BTCUSDT
+  since 2026-10-23: 1 trades matched, 1 only live, 1 only in the backtest
+  matched trades: live price +0.43% vs backtest on average (positive = live filled worse)
+  only live:     2026-10-24 BUY  BNBUSDT
+  only backtest: 2026-10-23 BUY  ZECUSDT

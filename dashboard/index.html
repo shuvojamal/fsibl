@@ -313,6 +313,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
         st: "completed", c: data.last.ok === false ? "failure" : "success", url: `https://github.com/${cfg.repo}/commits/main/${DIR}` }];
       pausedSha = paused ? paused.sha : null;
       render();
+      loadOverview().catch(() => {});
       await refreshPrices();
     } catch (e) { toast(e.message, true); setStatus("err", "Error") }
     finally { loading = false; $("refresh").classList.remove("spin") }
@@ -428,10 +429,11 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
                last: lastRun.time ? parseT(lastRun.time) : 0 };
     }));
     overviewAt = Date.now();
-    const el = $("overview"); if (el) el.innerHTML = overviewHtml();
+    const el = $("overview");
+    if (el) { const t = document.createElement("div"); t.id = "overview"; t.innerHTML = overviewHtml(); morph(el, t) }
   }
   function overviewHtml() {
-    if (!overview) { loadOverview().catch(() => {}); return `<div class="card note">Loading…</div>`; }
+    if (!overview) { loadOverview().catch(() => {}); return `<div class="list"><div class="item skel" style="height:210px"></div></div><div class="note">&nbsp;</div>`; }
     return `<div class="list">${overview.map(o => {
       const pnl = o.equity != null ? o.equity - o.capital : null;
       const tag = o.a.real ? (o.mode === "live" ? "LIVE" : o.mode === "test" ? "no-orders test" : "off") : "test money";
@@ -725,13 +727,35 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     if (!cfg.token) { $("main").innerHTML = ""; return openSettings(true) }
     if (!data) { $("main").innerHTML = `<div class="view"><div class="card hero"><div class="label skel">loading</div><div class="big skel">00,000.00</div><div class="chart skel"></div></div><div class="stats"><div class="stat skel">x</div><div class="stat skel">x</div><div class="stat skel">x</div></div></div>`; return }
     statusFromData();
-    const y = scrollY;
-    // entrance animation only when the tab changes, not on the 15-second price refresh
+    // entrance animation only when the tab changes; a refresh on the same tab
+    // patches the screen in place (only changed text and attributes), so nothing jumps
     const dir = shownTab == null ? "" : TABS.indexOf(tab) > TABS.indexOf(shownTab) ? " from-right" : TABS.indexOf(tab) < TABS.indexOf(shownTab) ? " from-left" : null;
-    $("main").innerHTML = `<div class="view${dir === null ? "" : " enter" + dir}">${VIEWS[tab]()}</div>`;
+    const cur = $("main").firstElementChild;
+    if (dir === null && cur && cur.classList.contains("view")) {
+      const tpl = document.createElement("template");
+      tpl.innerHTML = `<div class="view">${VIEWS[tab]()}</div>`;
+      morph(cur, tpl.content.firstElementChild);
+    } else {
+      $("main").innerHTML = `<div class="view${dir === null ? "" : " enter" + dir}">${VIEWS[tab]()}</div>`;
+    }
     shownTab = tab;
-    scrollTo(0, y);
     countUp(); bindChart();
+  }
+  // Minimal DOM patcher: makes `a` look like `b`, touching only what differs.
+  function morph(a, b) {
+    if (a.nodeType !== b.nodeType || a.nodeName !== b.nodeName) { a.replaceWith(b); return }
+    if (a.nodeType === 3 || a.nodeType === 8) { if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue; return }
+    if (a.nodeType !== 1) return;
+    if (a.id === "scrub") return;                                   // owned by the chart touch handler
+    if (a.classList.contains("view")) a.className = "view";         // keep it, but no entrance replay
+    else {
+      for (const at of [...a.attributes]) if (!b.hasAttribute(at.name)) a.removeAttribute(at.name);
+      for (const at of [...b.attributes]) if (a.getAttribute(at.name) !== at.value) a.setAttribute(at.name, at.value);
+    }
+    if (a.id === "bigbal") return;                                  // count-up animates the text itself
+    const ac = [...a.childNodes], bc = [...b.childNodes];
+    for (let i = 0; i < bc.length; i++) { if (i < ac.length) morph(ac[i], bc[i]); else a.appendChild(bc[i]) }
+    for (let i = bc.length; i < ac.length; i++) ac[i].remove();
   }
   function countUp() {
     const el = $("bigbal"); if (!el) return;

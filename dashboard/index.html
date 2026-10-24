@@ -65,21 +65,17 @@ main { padding: 4px max(16px, env(safe-area-inset-right, 0px)) calc(110px + env(
 h2 { font-size: 13px; font-weight: 700; color: var(--muted); margin: 8px 2px 0; letter-spacing: .03em; text-transform: uppercase }
 
 /* hero */
-.hero { position: relative; overflow: hidden; color: #fff; background: var(--grad); box-shadow: var(--shadow-lg); padding: 18px 18px 8px }
-.hero::after { content: ""; position: absolute; right: -60px; top: -70px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255, 255, 255, .12); pointer-events: none }
-.hero .label { font-size: 13px; opacity: .85; font-weight: 600 }
+.hero { position: relative; overflow: hidden; padding: 18px 18px 8px }
+.hero .label { font-size: 13px; color: var(--muted); font-weight: 600 }
 .hero .big { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-top: 4px }
 .hero .delta { display: inline-flex; gap: 8px; align-items: center; margin-top: 8px; font-weight: 700; font-size: 14px }
-.hero .delta .up, .hero .delta .down, .hero .delta .muted { color: #fff }
-.hero .muted { opacity: .8 }
 .badge { padding: 3px 9px; border-radius: 999px; font-size: 13px; font-weight: 700 }
 .badge.up { background: var(--up-bg) } .badge.down { background: var(--down-bg) }
-.hero .badge { background: rgba(255, 255, 255, .22); color: #fff }
 .chart { position: relative; margin: 14px -6px 0; height: 140px; touch-action: pan-y }
 .chart svg { width: 100%; height: 100%; display: block; overflow: visible }
-.scrub { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px dashed rgba(255, 255, 255, .8); pointer-events: none }
+.scrub { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px dashed var(--muted); pointer-events: none }
 .scrub b { position: absolute; top: -2px; transform: translateX(-50%); white-space: nowrap; background: rgba(17, 20, 39, .78); color: #fff; font: 600 12px var(--sans); padding: 4px 8px; border-radius: 8px }
-.scrub i { position: absolute; left: -6px; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .35) }
+.scrub i { position: absolute; left: -6px; margin-top: -6px; width: 11px; height: 11px; border-radius: 50%; background: var(--surface); border: 2.5px solid var(--fg) }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
 .stat { position: relative; background: var(--surface); border-radius: 16px; padding: 12px; min-width: 0; box-shadow: var(--shadow); overflow: hidden }
 .stat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, var(--accent)) }
@@ -183,7 +179,6 @@ nav.tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc
 label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 600 }
 input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 13px; padding: 12px; width: 100%; transition: border-color .2s }
 .skel { background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2)); background-size: 200% 100%; border-radius: 10px; animation: sh 1.2s linear infinite; color: transparent }
-.hero .skel { background: linear-gradient(90deg, rgba(255,255,255,.15), rgba(255,255,255,.3), rgba(255,255,255,.15)); background-size: 200% 100% }
 @keyframes sh { to { background-position: -200% 0 } }
 </style>
 </head>
@@ -371,11 +366,11 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
     const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
     const x = t => (t - t0) / Math.max(1, t1 - t0) * W, y = v => H - (v - lo) / (hi - lo) * H;
     const d = pts.map((p, i) => (i ? "L" : "M") + x(p.t).toFixed(1) + " " + y(p.v).toFixed(1)).join(" ");
-    const c = "#ffffff", e = pts[pts.length - 1];
+    const c = live >= capital ? "var(--up)" : "var(--down)", e = pts[pts.length - 1];
     chartData = { pts, x, y, W, t0, t1 };
     return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Equity history">
-      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".35"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>
-      <line x1="0" x2="${W}" y1="${y(capital)}" y2="${y(capital)}" stroke="rgba(255,255,255,.45)" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>
+      <line x1="0" x2="${W}" y1="${y(capital)}" y2="${y(capital)}" stroke="var(--line)" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
       <path d="${d} L ${W} ${H} L 0 ${H} Z" fill="url(#g)"/>
       <path d="${d}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
       <path d="M ${x(e.t)} ${y(e.v)} l .01 0" stroke="${c}" stroke-width="11" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;

@@ -3,9 +3,9 @@ free USDT: 87,561.78
 
 open positions: 2
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  BNBUSDT         0.624121      737.899        739.7      698.868     +1.12  +0.24%   -5.52%
-  PEPEUSDT  35890416.657000  4.57798e-06    4.573e-06  3.86474e-06     -0.18  -0.11%  -15.49%
-  unrealised total: +0.95 USDT
+  BNBUSDT         0.624121      737.899        747.2      698.868     +5.80  +1.26%   -6.47%
+  PEPEUSDT  35890416.657000  4.57798e-06    4.482e-06  3.86474e-06     -3.44  -2.10%  -13.77%
+  unrealised total: +2.36 USDT
 
 closed trades: 5, realised P&L: +76.61 USDT
   2026-10-22 19:26:44 UTC BUY  ETHUSDT   0.417884 @ 2390.62 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
@@ -29,14 +29,14 @@ today's score (1d candles, need 5 of 8):
   IN BNBUSDT   6/8  trend_up, ema_aligned, rsi_zone, volume, volatility_ok, pullback
   ** BTCUSDT   5/8  trend_up, ema_aligned, rsi_zone, volatility_ok, pullback
      DOGEUSDT  0/8  
-     ETHUSDT   4/8  trend_up, ema_aligned, volatility_ok, pullback
-     LINKUSDT  3/8  trend_up, ema_aligned, rsi_zone
+     ETHUSDT   2/8  trend_up, volatility_ok
+     LINKUSDT  3/8  trend_up, ema_aligned, volume
      NEARUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
-     PAXGUSDT  2/8  volume, volatility_ok
-  IN PEPEUSDT  6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
+     PAXGUSDT  1/8  volatility_ok
+  IN PEPEUSDT  5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
      SOLUSDT   3/8  trend_up, ema_aligned, volatility_ok
-     SUIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+     SUIUSDT   3/8  trend_up, ema_aligned, rsi_zone
      TRXUSDT   4/8  trend_up, rsi_zone, volatility_ok, pullback
-     UNIUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
-     XRPUSDT   1/8  volatility_ok
-     ZECUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+     UNIUSDT   3/8  trend_up, ema_aligned, pullback
+     XRPUSDT   2/8  volatility_ok, pullback
+  ** ZECUSDT   5/8  trend_up, ema_aligned, momentum, rsi_zone, pullback

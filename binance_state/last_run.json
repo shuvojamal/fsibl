@@ -1,5 +1,5 @@
 {
-  "time": "2026-10-24 00:12:35 UTC",
+  "time": "2026-10-25 00:12:19 UTC",
   "venue": "BINANCE TESTNET (VPS)",
   "reason": "daily",
   "ok": true,
@@ -31,6 +31,7 @@
   "min_score": 6,
   "gold": true,
   "savings": false,
+  "ignore_trend": false,
   "mode": "off",
   "paused": false
 }

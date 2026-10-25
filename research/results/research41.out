@@ -1,0 +1,17 @@
+Quality screen on DSE (5y growth + consistent up years + shallow 3y drop), top-100 liquid, 0.7%/side, price + bonus
+
+strategy                             |        2013-10..2019         |        2020..2026-01        
+PRIMARY quality top 10, yearly       |   -5.7%  Sh -0.65  DD -33.4% |   -0.5%  Sh  0.08  DD -41.1% |
+quality top 5, yearly                |   -3.9%  Sh -0.40  DD -30.5% |   +0.9%  Sh  0.15  DD -35.7% |
+quality top 20, yearly               |   -6.8%  Sh -0.82  DD -36.2% |   -5.6%  Sh -0.19  DD -47.6% |
+quality top 10, every 6 months       |   -7.4%  Sh -0.83  DD -38.8% |   -4.5%  Sh -0.12  DD -48.9% |
+owner six, equal weight (HINDSIGHT)  |  +14.8%  Sh  1.07  DD -16.1% |  +11.8%  Sh  0.86  DD -19.4% |
+hold DSEX (price index)              |   +2.1%  Sh  0.24  DD -30.7% |   +2.4%  Sh  0.24  DD -37.4% |
+
+  FAIL  beats DSEX, 2013-10..2019
+  FAIL  beats DSEX, 2020..2026-01
+  PASS  worst drop within 5 pts of DSEX, 2013-10..2019
+  PASS  worst drop within 5 pts of DSEX, 2020..2026-01
+verdict: FAIL
+
+shares the screen held most often (all runs): PTL x19, BEACONPHAR x18, FINEFOODS x17, BRACBANK x16, IBNSINA x16, SUNLIFEINS x15, SINGERBD x14, SQURPHARMA x12, PHARMAID x10, STANDARINS x10, BSC x10, BEACHHATCH x10, UTTARABANK x10, KOHINOOR x10, BERGERPBL x9

@@ -59,6 +59,7 @@ research/
 | 38 | `research38.py` | `research38.out` | `docs/research-round38-2026-10-25.md` | `b684a8e` | Live rules on DSE shares (393 equities, adjusted, 2012-26, Mendeley CC BY 4.0, cached `dse_daily_adj.pkl.gz`): loses money in both halves (-16%/-13% a year) vs DSEX +3%; costs vs tight stops, gross edge ~0; rejected |
 | 39 | `research39.py` | `research39.out` | `docs/research-round39-2026-10-25.md` | `1d0427f` | 1999-2025 DSE dataset (Mendeley 5mww8rb9td, unadjusted): self-detection of bonuses finds 29 of 1,236 events (markers only from 2023); unusable for extending round 38; not cached |
 | 40 | `research40.py` | `research40.out` | `docs/research-round40-2026-10-25.md` | `2acc537` | Quarterly DSE portfolios (momentum, low-vol, combo, filter; top-50 liquid, 0.7%/side): all lose or trail DSEX (+2%/yr) in both halves; only 2% of shares made 30%+/yr over 5/10 years, median share ~-5%/0%; fails |
+| 41 | `research41.py` | `research41.out` | `docs/research-round41-2026-10-25.md` | `99ca9d7` | Owner's six DSE shares (BRAC, Uttara, Kohinoor, Square, Marico, Ibn Sina): 10y price+bonus CAGR 2-16%, basket +15%/+12% a year (hindsight) vs DSEX +2%; a price-only quality screen picking in advance: -6%/-1%, fails |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

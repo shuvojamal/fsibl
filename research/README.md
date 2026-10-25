@@ -54,6 +54,7 @@ research/
 | 33 | `research33.py` | `research33.out` | `docs/research-round33-2026-10-24.md` | `630699f` | The 8 buy checks: payoff by score (rises 4->7), each check's value, remove/require each (16 variants, 12 cells): only 'trend_up removed' passes (10/12), confirmed on the 55-coin pool; made an app switch, default unchanged |
 | 34 | `research34.py` | `research34.out` | `docs/research-round34-2026-10-24.md` | `127a429` | Initial stop 1.5/2/2.5/3/4 x ATR (12 cells, steady set-up): Sharpe flat (0.97-1.03), tighter stop = bigger positions; 1.5x 9/12 but DD 4 pts deeper, fails; no change |
 | 35 | `research35.py` | `research35.out` | `docs/research-round35-2026-10-25.md` | `1b1d600` | Risk profile steady vs growth (12 cells): worst 30 days -14% vs -24%, worst year -10% vs -20%, both ~21 months below the high in 2022-23, 57% losing months; neither passes the pre-set bar (duration); steady recommended for first real money |
+| 36 | `research36.py` | `research36.out` | `docs/research-round36-2026-10-25.md` | `dd58c69` | 500 USDT x 5 years, current set-ups, bootstrap: realistic median CAGR steady 10% (13% with savings) on 2022-26 markets, 17-20% on all history; growth 16-17% / 30-33%; owner's question |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

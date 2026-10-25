@@ -1,0 +1,16 @@
+Realistic scenario, auto savings 3%, 8 slots, 6 checks; 4,000 five-year paths
+
+history 2018-26 (with the 2020-21 bull market)
+  set-up       P(CAGR>=30%) median CAGR  P(loss) typical worst drop bad-case drop 500 -> median
+  steady 0.5%           17%      +19.8%       1%               -18%          -28%         1,233
+  growth 1%             57%      +33.0%       2%               -33%          -49%         2,080
+  risk 1.5%             61%      +36.7%       4%               -41%          -61%         2,389
+  risk 2%               65%      +41.2%       4%               -45%          -66%         2,809
+
+history 2022-26 only (cautious)
+  set-up       P(CAGR>=30%) median CAGR  P(loss) typical worst drop bad-case drop 500 -> median
+  steady 0.5%            6%      +12.9%       6%               -21%          -35%           916
+  growth 1%             24%      +17.1%      12%               -37%          -59%         1,100
+  risk 1.5%             16%      +10.5%      25%               -48%          -72%           825
+  risk 2%               18%      +11.0%      29%               -52%          -75%           844
+

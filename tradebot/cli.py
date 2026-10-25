@@ -271,7 +271,10 @@ def main():
             client = OKXClient(demo=not a.live)
         else:
             client = BinanceClient(base_url=LIVE_URL if a.live else TESTNET_URL)
-        print("\n".join(report(client, a.state_dir, [s.upper() for s in a.symbols], a.interval)))
+        from tradebot.control import read_controls
+        c = read_controls(a.state_dir)                 # the account's own checks setting
+        p = OppParams(min_score=c["min_score"], ignore=("trend_up",) if c["ignore_trend"] else ())
+        print("\n".join(report(client, a.state_dir, [s.upper() for s in a.symbols], a.interval, params=p)))
     elif a.cmd == "test-order":
         if a.live and not a.i_accept_the_risk:
             ap.error("--live places real orders with real money; add --i-accept-the-risk")

@@ -1,0 +1,26 @@
+Risk profile, 8 slots, 6 checks, top 15; per half: median cell / worst cell of the six close times
+
+steady 8 x 0.5%
+                        2018-21 med / worst    2022-26 med / worst
+  worst day                  -8.9% / -10.9%          -6.6% / -7.0%
+  worst 7 days              -10.0% / -12.6%          -8.4% / -9.0%
+  worst 30 days             -11.5% / -13.7%         -9.5% / -10.3%
+  longest under high          302 d / 318 d          649 d / 653 d
+  time >10% under                   8% / 9%              37% / 45%
+  losing months                   43% / 43%              57% / 60%
+  calendar years (whole run 2018-03 to now; median / worst close time):
+   2018: -2%/-2%  2019: +19%/+17%  2020: +41%/+28%  2021: +67%/+55%  2022: -7%/-10%  2023: +35%/+28%  2024: +41%/+14%  2025: -5%/-7%  2026: +15%/+10%
+  worst cell: 30-day -13.7%, longest under high 653 days (21 months), worst year -10.3% -> NOT fit by the pre-set bar
+
+growth 8 x 1%
+                        2018-21 med / worst    2022-26 med / worst
+  worst day                 -15.3% / -18.3%        -11.2% / -12.7%
+  worst 7 days              -17.2% / -21.7%        -14.3% / -16.0%
+  worst 30 days             -19.9% / -23.5%        -16.7% / -17.8%
+  longest under high          310 d / 318 d          649 d / 652 d
+  time >10% under                 46% / 48%              72% / 73%
+  losing months                   43% / 43%              57% / 59%
+  calendar years (whole run 2018-03 to now; median / worst close time):
+   2018: -3%/-4%  2019: +38%/+35%  2020: +94%/+61%  2021: +158%/+122%  2022: -14%/-20%  2023: +68%/+44%  2024: +82%/+29%  2025: -10%/-13%  2026: +29%/+18%
+  worst cell: 30-day -23.5%, longest under high 652 days (21 months), worst year -19.9% -> NOT fit by the pre-set bar
+

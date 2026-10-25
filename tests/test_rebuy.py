@@ -70,3 +70,20 @@ class RebuyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReportSettingTests(unittest.TestCase):
+    def test_report_uses_the_accounts_checks_setting(self):
+        import io, json, sys
+        from contextlib import redirect_stdout
+        from tests.test_opportunity import uptrend
+        from tradebot import cli
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "settings.json"), "w") as f:
+            json.dump({"min_score": 6}, f)
+        out = io.StringIO()
+        with mock.patch("tradebot.report.fetch_candles", return_value=uptrend()), \
+                mock.patch.object(sys, "argv", ["tradebot", "report", "BTCUSDT", "--exchange", "none", "--state-dir", d]), \
+                redirect_stdout(out):
+            cli.main()
+        self.assertIn("need 6 of 8", out.getvalue())

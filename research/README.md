@@ -56,6 +56,7 @@ research/
 | 35 | `research35.py` | `research35.out` | `docs/research-round35-2026-10-25.md` | `1b1d600` | Risk profile steady vs growth (12 cells): worst 30 days -14% vs -24%, worst year -10% vs -20%, both ~21 months below the high in 2022-23, 57% losing months; neither passes the pre-set bar (duration); steady recommended for first real money |
 | 36 | `research36.py` | `research36.out` | `docs/research-round36-2026-10-25.md` | `dd58c69` | 500 USDT x 5 years, current set-ups, bootstrap: realistic median CAGR steady 10% (13% with savings) on 2022-26 markets, 17-20% on all history; growth 16-17% / 30-33%; owner's question |
 | 37 | `research37.py` | `research37.out` | `docs/research-round37-2026-10-25.md` | `2005c50` | Chance of 30%/yr over 5 years by risk 0.5/1/1.5/2%: 17/57/61/65% on all history, 6/24/16/18% on 2022-26; above 1% the 2022-26 median falls and loss odds double; never above 1% |
+| 38 | `research38.py` | `research38.out` | `docs/research-round38-2026-10-25.md` | `b684a8e` | Live rules on DSE shares (393 equities, adjusted, 2012-26, Mendeley CC BY 4.0, cached `dse_daily_adj.pkl.gz`): loses money in both halves (-16%/-13% a year) vs DSEX +3%; costs vs tight stops, gross edge ~0; rejected |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

@@ -1,0 +1,25 @@
+DSE: 393 equities with 260+ days, adjusted prices 2012-10 .. 2026-01; costs 0.40% + 0.30% slippage per side
+
+case                           |                2013-10..2019                 |                2020..2026-01                
+                               |   ret/yr Sharpe   maxDD trades  win  avgR |   ret/yr Sharpe   maxDD trades  win  avgR
+PRIMARY 8x1%, 6 chk, top 20    |   -16.3%   0.13  -66.9%    400  23% -0.21 |   -13.0%   0.23  -71.2%    398  25% -0.08 |
+8x0.5%, 6 chk, top 20          |    -9.8%  -0.00  -44.3%    424  23% -0.21 |    -2.3%   0.15  -46.7%    408  26% -0.02 |
+8x1%, 5 chk, top 20            |   -20.5%   0.09  -75.6%    499  24% -0.24 |    -6.5%   0.38  -69.3%    508  27% -0.01 |
+8x1%, 6 chk, top 10            |   -10.8%   0.22  -62.2%    267  24% -0.21 |    -7.9%   0.20  -56.3%    273  22% -0.06 |
+8x1%, 6 chk, top 30            |   -21.1%   0.01  -71.5%    469  23% -0.28 |   -17.5%   0.20  -77.9%    469  22% -0.18 |
+PRIMARY, costs 0.6%+0.5%       |   -26.9%  -0.08  -79.3%    407  21% -0.35 |   -20.1%   0.11  -77.1%    400  23% -0.18 |
+hold DSEX (price index)        |    +3.0%   0.29  -30.7%                   |    +3.5%   0.29  -37.4%                   |
+
+  FAIL  makes money after costs, 2013-10..2019
+  FAIL  makes money after costs, 2020..2026-01
+  FAIL  Sharpe above DSEX, 2013-10..2019
+  FAIL  Sharpe above DSEX, 2020..2026-01
+  FAIL  shallower worst drop than DSEX, 2013-10..2019
+  FAIL  shallower worst drop than DSEX, 2020..2026-01
+
+verdict: FAIL: not worth offering as is
+
+Diagnostics on the primary set-up (not part of the pass bar):
+no costs at all (gross edge)         | 2013-10..2019   +3.2% Sh  0.42 DD -44.8% avgR +0.03 | 2020..2026-01   +5.1% Sh  1.08 DD -58.1% avgR +0.08 |
+stops 4xATR, trail 6xATR             | 2013-10..2019   -6.9% Sh  0.16 DD -49.0% avgR -0.18 | 2020..2026-01   -5.3% Sh  0.18 DD -48.7% avgR -0.09 |
+stops 4xATR, trail 6xATR, no costs   | 2013-10..2019   -1.1% Sh  0.28 DD -46.0% avgR -0.05 | 2020..2026-01   -1.1% Sh  0.61 DD -46.6% avgR +0.01 |

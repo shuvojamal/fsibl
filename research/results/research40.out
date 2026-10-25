@@ -1,0 +1,26 @@
+Quarterly rebalanced DSE portfolios, top-50 liquid universe, costs 0.7% per side; price + bonus (cash dividends excluded)
+
+strategy                         |         2013-10..2019          |         2020..2026-01         
+                                 |    ret/yr  Sharpe    maxDD   |    ret/yr  Sharpe    maxDD  
+PRIMARY momentum 12-1, top 10    |     -4.9%   -0.17   -48.6%   |    -10.0%   -0.24   -68.0%   |
+momentum 12-1, top 5             |     -6.7%   -0.16   -57.4%   |     -4.5%    0.02   -66.0%   |
+momentum 12-1, top 20            |     -4.3%   -0.20   -39.6%   |     -6.3%   -0.14   -62.3%   |
+momentum 6 months, top 10        |     -3.1%   -0.07   -45.2%   |     +1.2%    0.18   -67.7%   |
+low volatility, top 10           |     -7.6%   -0.54   -51.8%   |     -5.7%   -0.29   -57.9%   |
+momentum + low vol, top 10       |     -3.8%   -0.22   -40.4%   |     +0.9%    0.14   -52.4%   |
+momentum 12-1 + DSEX filter      |     -8.6%   -0.60   -56.4%   |     -1.5%    0.00   -40.0%   |
+equal-weight universe (50)       |     -9.1%   -0.60   -53.2%   |     -5.0%   -0.13   -60.8%   |
+hold DSEX (price index)          |     +2.1%    0.24   -30.7%   |     +2.4%    0.24   -37.4%   |
+
+  FAIL  beats DSEX, 2013-10..2019
+  PASS  beats the equal-weight universe, 2013-10..2019
+  FAIL  worst drop within 5 pts of DSEX, 2013-10..2019
+  FAIL  beats DSEX, 2020..2026-01
+  FAIL  beats the equal-weight universe, 2020..2026-01
+  FAIL  worst drop within 5 pts of DSEX, 2020..2026-01
+verdict for the primary strategy: FAIL
+variants beating both benchmarks in both halves: none
+
+Shares with 30%+ a year (price + bonus, to 2026-01; hindsight):
+  5 years: 6 of 327 shares (2%); median share -5.4%/yr; top: FINEFOODS +52%, HAMI +42%, ORIONINFU +41%, KBPPWBIL +41%, GQBALLPEN +35%, AL-HAJTEX +31%, CITYGENINS +25%, SHYAMPSUG +22%, DULAMIACOT +21%, EASTRNLUB +21%
+  10 years: 5 of 280 shares (2%); median share -0.3%/yr; top: FINEFOODS +49%, ZEALBANGLA +35%, SHYAMPSUG +35%, KAY&QUE +35%, DULAMIACOT +33%, HAMI +27%, MONNOAGML +22%, ORIONINFU +22%, GQBALLPEN +21%, BEACONPHAR +20%

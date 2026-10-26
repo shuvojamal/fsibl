@@ -1,25 +1,25 @@
 # Latest research report
 
-_Updated 2026-10-25 05:50 UTC by Claude (daily scheduled run)_
+_Updated 2026-10-26 05:50 UTC by Claude (daily scheduled run)_
 
-**OKX demo:** daily run done (04:29 UTC). Holds BNB (+1.3%) and PEPE (−2.1%),
-open P&L +2.36 USDT; realised +76.61. No new trades, no errors.
+**OKX demo: today's run FAILED.** GitHub started the scheduled job at 04:31
+UTC and it stopped after 3 seconds with no log, which usually means GitHub
+didn't run it (Actions minutes/billing limit, or a GitHub outage). Last good
+run: Oct 25. Holds BNB (+1.3%) and PEPE (−2.1%) as of then; the emergency
+backstop orders on OKX still protect both. Please check the repository's
+Actions page or GitHub billing, or press Run now in the app.
 
-**VPS testnet:** back online after the repair; daily runs on Oct 24 and 25.
-Holds BTC (−1.2%) and BNB (+0.1%), open P&L −10.33 USDT. PEPE and ZEC were
-skipped because the testnet price was 2–3% off real Binance (the safety
-check working; real Binance won't have this gap).
+**VPS testnet:** daily run done at 00:10 UTC. Holds BTC (−2.0%) and BNB
+(+0.1%), open P&L −17.65 USDT. Audit passed. PEPE and ZEC were skipped
+because the testnet price was off real Binance.
 
 **Real account:** off. No runs since Oct 23.
 
-**Fixed:** the report said "need 5 of 8" although both bots now need 6.
+**Tested today (round 43): a cap on each position's size** (50/33/20% of
+the account). It almost never applies: with these settings a position is
+only about 5–17% of the account. No benefit, no change.
 
-**Tested today (round 35): what the bad times look like.**
-Steady (0.5% risk): worst month −14%, worst year −10%.
-Growth (1% risk): worst month −24%, worst year −20%.
-Both spent about 21 months below their previous high in 2022–23, and more
-months lose (57%) than win; the profit comes from a few strong months.
-
-**What it means:** start real money with **steady**, using money that can
-sit for 2+ years. Don't judge the bot month by month. Growth only after
-steady has run live for a while. No settings were changed.
+**Recent DSE work (rounds 38–42):** the bot's signals don't work on DSE
+shares; holding strong dividend-paying blue chips for years did (about 9%
+a year on price alone since 2013, vs 2% for DSEX), but choosing them needs
+company fundamentals, not price signals.

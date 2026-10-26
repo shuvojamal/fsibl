@@ -1,0 +1,16 @@
+Per-position size cap (share of equity); 8 slots, 6 checks, top 15; medians over six close times
+
+steady 8 x 0.5%
+  cap             2018-21 ret / Sh  2022-26 ret / Sh  DD 18-21  DD 22-26  wins vs no cap verdict
+  no cap (live)    +29.5% / 1.57   +15.7% / 1.03    -12.8%    -16.4%                 REF
+  cap 50%          +29.5% / 1.57   +15.7% / 1.03    -12.8%    -16.4%         0 of 12 
+  cap 33%          +29.5% / 1.57   +15.7% / 1.03    -12.8%    -16.4%         0 of 12 
+  cap 20%          +29.5% / 1.57   +15.7% / 1.03    -12.8%    -16.4%         4 of 12 
+
+growth 8 x 1%
+  cap             2018-21 ret / Sh  2022-26 ret / Sh  DD 18-21  DD 22-26  wins vs no cap verdict
+  no cap (live)    +61.7% / 1.66   +25.9% / 0.97    -21.8%    -28.3%                 REF
+  cap 50%          +61.7% / 1.66   +25.9% / 0.97    -21.8%    -28.3%         0 of 12 
+  cap 33%          +61.7% / 1.66   +25.9% / 0.97    -21.8%    -28.3%         5 of 12 
+  cap 20%          +61.1% / 1.65   +27.2% / 1.03    -21.8%    -29.0%         2 of 12 
+

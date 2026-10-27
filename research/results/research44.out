@@ -1,0 +1,14 @@
+Growth set-up (8 x 1%, top 15): skip the 200-day trend check; medians over six close times
+
+variant               2018-21 ret / Sh  2022-26 ret / Sh  DD 18-21  DD 22-26 trades 22-26
+live (6 of 8)          +61.7% / 1.66   +25.9% / 0.97    -21.8%    -28.3%          249
+trend_up removed       +75.3% / 1.77   +25.6% / 0.90    -24.5%    -29.7%          320
+
+Sharpe wins for 'trend_up removed': 9 of 12 (6/3); 2022-26 drop within 3 pts: True
+
+Round 12's 55-coin pool:
+variant                 2018-21 ret / Sh / DD    2022-26 ret / Sh / DD
+live (6 of 8)           +59.7% / 1.67 / -19.8%    +14.8% / 0.65 / -30.0%
+trend_up removed        +76.6% / 1.83 / -24.9%    +26.0% / 0.90 / -27.3%
+
+verdict: FAIL on the growth set-up (cells 9/12, drop ok True, 55-coin both halves True)

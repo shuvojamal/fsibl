@@ -62,6 +62,7 @@ research/
 | 41 | `research41.py` | `research41.out` | `docs/research-round41-2026-10-25.md` | `99ca9d7` | Owner's six DSE shares (BRAC, Uttara, Kohinoor, Square, Marico, Ibn Sina): 10y price+bonus CAGR 2-16%, basket +15%/+12% a year (hindsight) vs DSEX +2%; a price-only quality screen picking in advance: -6%/-1%, fails |
 | 42 | `research42.py` | `research42.out` | `docs/research-round42-2026-10-25.md` | `a886c22` | CFA post's 30 DSE blue chips in our data 2013-26: median share +3.5%/yr price+bonus, equal-weight basket +8.6%/yr vs DSEX +2.2% (about 13-15% with dividends); gap to the post = dividends, 2001 start, hindsight list |
 | 43 | `research43.py` | `research43.out` | `docs/research-round43-2026-10-26.md` | `34c3ad7` | Per-position size cap 50/33/20% of equity (steady and growth, 12 cells): caps almost never bind (positions ~5-17% of equity); no pass, no change |
+| 44 | `research44.py` | `research44.out` | `docs/research-round44-2026-10-27.md` | `23c3739` | 'Skip the 200-day trend check' on the growth set-up: 9/12 cells (6/6 bull, 3/6 recent), drop and 55-coin tests pass; fails the 10/12 bar narrowly; not for the growth account |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

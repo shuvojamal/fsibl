@@ -1,0 +1,19 @@
+Position size at entry (share of equity) and single-trade results; 12 cells pooled
+
+growth 8 x 1%
+  trades 2508; position size median 9%, 90th percentile 16%, largest 47%
+  above 25% of equity: 40 (1.6%); above 40%: 1 (0.0%)
+  coins in the >25% trades: TRX 40
+  worst single-trade loss, positions >25%: -1.43% of equity; positions <=25%: -2.75%
+  trades losing more than 2x the planned risk: big 0, normal 24
+  average result, positions >25%: +1.228% of equity; <=25%: +0.780%
+
+steady 8 x 0.5%
+  trades 2536; position size median 5%, 90th percentile 8%, largest 23%
+  above 25% of equity: 0 (0.0%); above 40%: 0 (0.0%)
+  coins in the >25% trades: 
+  worst single-trade loss, positions >25%: +0.00% of equity; positions <=25%: -1.37%
+  trades losing more than 2x the planned risk: big 0, normal 27
+  average result, positions >25%: +0.000% of equity; <=25%: +0.404%
+
+verdict: FAIL: no cap recommended (round 43 stands)

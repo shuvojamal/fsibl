@@ -1,3 +1,4 @@
 time,symbol,side,qty,price,fee,reason,pnl_usdt,order_id
 2026-10-23 17:20:47 UTC,BTCUSDT,BUY,0.01136,81804.01000000,0.00000000,trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback,,6247436
 2026-10-24 00:11:45 UTC,BNBUSDT,BUY,1.227,738.74000000,0.00000000,trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback,,2387113
+2026-10-28 00:11:54 UTC,TRXUSDT,BUY,7475.6,0.33190000,0.00000000,trend_up+momentum+rsi_zone+volume+volatility_ok+pullback,,131089

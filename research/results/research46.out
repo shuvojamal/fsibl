@@ -1,0 +1,8 @@
+Missed days (no run at all), steady set-up 8 x 0.5%, 6 checks, top 15; medians over six close times
+
+outages                    days missed  2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26     avg loss R 22-26 verdict
+no outages                          0%   +29.5% / 1.57   +15.7% / 1.03    -16.4%                -0.88 REF
+5% of days at random                5%   +30.2% / 1.59   +14.5% / 0.92    -17.0%                -0.88 tolerable
+3-day outage every month           10%   +28.4% / 1.55   +14.9% / 0.99    -16.6%                -0.92 tolerable
+7-day outage every month           23%   +28.1% / 1.45   +12.8% / 0.84    -14.6%                -0.97 tolerable
+30-day outage every year            8%   +29.1% / 1.59   +15.8% / 1.03    -15.9%                -0.85 tolerable

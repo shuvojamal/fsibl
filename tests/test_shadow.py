@@ -34,6 +34,14 @@ class Shadow(unittest.TestCase):
         self.assertTrue(buys)
         self.assertTrue(all(t["symbol"] == "BTCUSDT" for t in trades))
 
+    def test_order_from_the_latest_close_is_included_as_an_estimate(self):
+        cs = daily(uptrend(400), 1_790_000_000_000 // DAY * DAY)
+        first = replay({"BTCUSDT": cs}, cs[-60].open_time)[0]
+        k = next(i for i, c in enumerate(cs) if replay.__globals__["_day"](c.open_time) == first["day"])
+        cut = cs[:k]                                   # the signal candle is now the latest closed one
+        trades = replay({"BTCUSDT": cut}, cs[-60].open_time)
+        self.assertEqual((trades[-1]["day"], trades[-1]["side"], trades[-1].get("estimated")), (first["day"], "BUY", True))
+
     def test_report_skips_unlisted_coins_and_says_when_live_matches(self):
         d = tempfile.mkdtemp()
         cs = daily(uptrend(400), 1_790_000_000_000 // DAY * DAY)

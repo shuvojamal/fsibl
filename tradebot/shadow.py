@@ -83,6 +83,21 @@ def replay(candles, start, capital=5000.0, max_open=5, risk=0.01, params=OppPara
                 plan = st.signal(i)
                 if plan:
                     pending[s] = ("BUY", plan)
+    # Orders decided at the latest close fill at the next open, a candle that
+    # hasn't closed yet; without this the live bot's trade from this morning
+    # shows as "only live" for a day. Filled here at the last close (estimate).
+    if times and pending:
+        t = times[-1]; nxt = _day(t + DAY)
+        last = {s: candles[s][idx[s][t]].close for s in pending if t in idx[s]}
+        for s, (side, plan) in sorted(pending.items(), key=lambda x: x[1][0] != "SELL"):
+            if s not in last:
+                continue
+            if side == "SELL" and s in pos:
+                pos.pop(s)
+                out.append({"day": nxt, "symbol": s, "side": "SELL", "price": last[s], "estimated": True})
+            elif side == "BUY" and s not in pos and len(pos) < max_open and last[s] > plan.stop:
+                pos[s] = {}
+                out.append({"day": nxt, "symbol": s, "side": "BUY", "price": last[s], "estimated": True})
     return out
 
 

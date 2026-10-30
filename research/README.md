@@ -65,6 +65,7 @@ research/
 | 44 | `research44.py` | `research44.out` | `docs/research-round44-2026-10-27.md` | `23c3739` | 'Skip the 200-day trend check' on the growth set-up: 9/12 cells (6/6 bull, 3/6 recent), drop and 55-coin tests pass; fails the 10/12 bar narrowly; not for the growth account |
 | 45 | `research45.py` | `research45.out` | `docs/research-round45-2026-10-28.md` | `c191a04` | Position size distribution (after a 50% TRX buy on the VPS): growth median 9%, max 47%, >25% only TRX (1.6% of trades), worst big-position loss -1.4% of equity; no cap; corrects round 43's '5-17%' as the typical range; notes Binance accounts lack a backstop |
 | 46 | `research46.py` | `research46.out` | `docs/research-round46-2026-10-29.md` | `3240bd6` | Missed days (no run): 5% random, 3 or 7 days a month, 30 days a year; all tolerable (worst: 7 days/month -3 pts/yr in 2022-26); crash-during-outage risk is what a backstop is for |
+| 47 | `research47.py` | `research47.out` | `docs/research-round47-2026-10-30.md` | `ecbb40c` | Minimum initial stop distance 3%/5% (calm coins like TRX): practically no effect on growth or steady; no pass, no change |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

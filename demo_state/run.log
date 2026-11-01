@@ -130,3 +130,8 @@
 [2026-10-25 04:29:09 UTC] free USDT: 87,561.78; per-trade size: 5,000.00
 [2026-10-25 04:29:11 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
 [2026-10-25 04:29:12 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-11-01 05:50:45 UTC] connected to https://www.okx.com (clock offset -75 ms)
+[2026-11-01 05:50:45 UTC] free USDT: 87,561.78; per-trade size: 5,000.00
+[2026-11-01 05:50:47 UTC] PAXGUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-11-01 05:50:49 UTC] ZECUSDT: skipped, not tradable on this exchange (Instrument ID, Instrument ID code, or Spread ID doesn't exist.)
+[2026-11-01 05:50:52 UTC] SELL BNBUSDT 0.624121 @ 705.025 fee 0.4400 (stop_loss) -20.9573 order 4060416857203593216

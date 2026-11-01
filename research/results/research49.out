@@ -1,0 +1,8 @@
+A coin collapses 90% overnight right after entry: loss as a share of the account
+
+set-up           positions |   no backstop: median / 90th / worst |   backstop 20% below stop: median / 90th / worst
+growth 8 x 1%         2548 |       8.3%      14.4%        42.0% |           3.3%           5.2%            13.8%
+steady 8 x 0.5%       2578 |       4.4%       7.3%        21.0% |           1.7%           2.6%             6.9%
+
+For scale: the planned loss of a normal stop-out is 1% (growth) or 0.5% (steady) of the account.
+verdict: PASS: a Binance backstop is high priority before real money

@@ -67,6 +67,7 @@ research/
 | 46 | `research46.py` | `research46.out` | `docs/research-round46-2026-10-29.md` | `3240bd6` | Missed days (no run): 5% random, 3 or 7 days a month, 30 days a year; all tolerable (worst: 7 days/month -3 pts/yr in 2022-26); crash-during-outage risk is what a backstop is for |
 | 47 | `research47.py` | `research47.out` | `docs/research-round47-2026-10-30.md` | `ecbb40c` | Minimum initial stop distance 3%/5% (calm coins like TRX): practically no effect on growth or steady; no pass, no change |
 | 48 | `research48.py` | `research48.out` | `docs/research-round48-2026-10-31.md` | `635d019` | Losing streaks (after the testnet's first 3 trades all lost): win rate 41%, 3+ streaks ~3.7/yr, first 3 trades all lose ~48% of starts (losses cluster); normal, no action |
+| 49 | `research49.py` | `research49.out` | `docs/research-round49-2026-11-01.md` | `0d8f784` | Coin collapses 90% while held: account loss growth 8%/14%/42% (median/90th/worst) without a backstop vs 3%/5%/14% with one; passes; Binance backstop recommended before real money |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

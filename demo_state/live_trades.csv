@@ -12,3 +12,4 @@ time,symbol,side,qty,price,fee,reason,pnl_usdt,order_id
 2026-10-24 00:29:24 UTC,BNBUSDT,BUY,0.6241212500000001,737.89938567,0.46100264,trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback,,4036576832598888448
 2026-10-24 00:29:24 UTC,PEPEUSDT,BUY,35890416.657,0.00000458,0.16454265,trend_up+ema_aligned+momentum+rsi_zone+volume+pullback,,4036576853067091968
 2026-11-01 05:50:52 UTC,BNBUSDT,SELL,0.624121,705.02545869,0.44002119,stop_loss,-20.9573,4060416857203593216
+2026-11-02 05:50:43 UTC,UNIUSDT,BUY,21.60932604,7.26088984,0.15706002,trend_up+ema_aligned+momentum+rsi_zone+volume+pullback,,4063315646662889472

@@ -1,7 +1,7 @@
 {
   "risk": {
-    "day": "2026-11-01",
-    "day_pnl": -20.95732937395605
+    "day": "2026-11-02",
+    "day_pnl": 0.0
   },
   "params": {
     "fast": 12,
@@ -17,21 +17,21 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "AVAXUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "BNBUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000,
+      "last_candle": 1793491200000,
       "peak": 740.0
     },
     "BTCUSDT": {
@@ -39,7 +39,7 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000,
+      "last_candle": 1793491200000,
       "peak": 81488.33658852204,
       "retry_candle": 1792713600000
     },
@@ -48,14 +48,14 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "ETHUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000,
+      "last_candle": 1793491200000,
       "peak": 2390.616188925704,
       "retry_candle": 1792713600000
     },
@@ -64,14 +64,14 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "NEARUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000,
+      "last_candle": 1793491200000,
       "peak": 4.946999999978975,
       "retry_candle": 1792713600000
     },
@@ -80,7 +80,7 @@
       "entry": 4.577977732384285e-06,
       "stop": 3.8647447172046295e-06,
       "target": 0.00457,
-      "last_candle": 1793404800000,
+      "last_candle": 1793491200000,
       "peak": 5e-06,
       "backstop_id": "4036576868747878400",
       "backstop_px": 3.091795773763704e-06
@@ -90,35 +90,37 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "SUIUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "TRXUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "UNIUSDT": {
-      "qty": 0.0,
-      "entry": 0.0,
-      "stop": 0.0,
-      "target": 0.0,
-      "last_candle": 1793404800000
+      "qty": 21.60932604,
+      "entry": 7.260889841350986,
+      "stop": 6.052703378606508,
+      "target": 7217.0,
+      "last_candle": 1793491200000,
+      "backstop_id": "4063315660397518848",
+      "backstop_px": 4.842162702885207
     },
     "XRPUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793404800000
+      "last_candle": 1793491200000
     },
     "ZECUSDT": {
       "qty": 0.0,

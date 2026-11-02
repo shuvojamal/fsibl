@@ -1,0 +1,18 @@
+Spread of daily Sharpe across 13 nearby variants: sd 0.11 annualised
+
+steady 8 x 0.5%, 6 checks: daily Sharpe 0.0563 (annualised 1.08), skew +0.41, kurtosis 19.6, 3352 days; no-correction PSR 0.9995
+   N trials | luck bar  DSR (variant spread) | luck bar  DSR (spread x4)
+        100 |     0.27                 0.993 |     0.55            0.946
+        300 |     0.31                 0.990 |     0.62            0.915
+        600 |     0.34                 0.988 |     0.67            0.891
+       1000 |     0.35                 0.986 |     0.70            0.872
+
+growth 8 x 1%, 6 checks: daily Sharpe 0.0576 (annualised 1.10), skew +0.40, kurtosis 18.5, 3352 days; no-correction PSR 0.9996
+   N trials | luck bar  DSR (variant spread) | luck bar  DSR (spread x4)
+        100 |     0.27                 0.994 |     0.55            0.955
+        300 |     0.31                 0.992 |     0.62            0.927
+        600 |     0.34                 0.990 |     0.67            0.905
+       1000 |     0.35                 0.989 |     0.70            0.888
+
+verdict: PASS: the edge still clears the luck bar at N = 600
+Rule of thumb: DSR >= 0.95 strong evidence; 0.5 = a coin flip between real edge and luck.

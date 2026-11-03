@@ -1,0 +1,9 @@
+Every 90-day window (daily step), six close times pooled
+
+set-up           period    windows  P(loss)  5th pct    10th  median    90th   worst
+steady 8 x 0.5%  all         18365      49%    -5.9%   -4.3%   +0.0%  +20.5%  -13.7%
+steady 8 x 0.5%  2022-26      9993      60%    -6.9%   -5.5%   -0.9%  +19.8%  -13.7%
+growth 8 x 1%    all         18365      49%   -11.1%   -8.3%   +0.0%  +39.7%  -22.9%
+growth 8 x 1%    2022-26      9993      59%   -12.8%  -10.4%   -1.8%  +35.9%  -22.9%
+
+verdict: a losing 90-day demo is NOT evidence against the strategy

@@ -1,21 +1,23 @@
 # Latest research report
 
-_Updated 2026-11-02 05:50 UTC by Claude (daily scheduled run)_
+_Updated 2026-11-03 05:50 UTC by Claude (daily scheduled run)_
 
-**OKX demo: running again** (GitHub billing fixed). Its Nov 1 run sold BNB
-at its stop (705.03, −20.96 USDT; the price had dipped below the stop while
-the bot couldn't run). PEPE is +8.9%. Note: GitHub starts the "00:07" run
-4–6 hours late every day, which costs a little (round 23); the VPS runs on time.
+**OKX demo:** running (Nov 2, 05:50 UTC). Bought UNI at 7.261 (with an
+OKX backstop order). Holds PEPE (+7.2%) and UNI (0.0%); open P&L +11.83.
 
-**VPS testnet:** daily run done at 00:10 UTC, audit passed. New buy: UNI
-at 7.186 (stop 6.05). Realised so far −156.59 USDT; live matches the
-backtest (7 trades matched).
+**VPS testnet:** daily run at 00:10 UTC, audit passed. Holds UNI (bought
+yesterday at 7.186, now −1.3%). Live matches the backtest.
 
 **Real account:** off.
 
-**Tested today (round 50): after 49 rounds and ~600 variants tried, is
-the edge still more than luck?** Yes: the chance it is real is about 0.99
-(about 0.9 on a deliberately harsh measure), for both steady and growth.
+**Tested today (round 51): what a 90-day demo should show.** About half of
+all 90-day periods lose money in the backtest, and the typical 90 days is
+roughly flat; the profit comes from occasional strong quarters (+20% to
++40%). So the demo can't prove the strategy makes money.
 
-**What it means:** the strategy still stands. Recommendation unchanged:
-add Binance backstop orders before the real account trades (round 49).
+**What it means:** judge the demo on whether the bot behaves like the
+backtest (trades match, fills close, no errors), not on its profit. Only a
+result worse than about −7% (steady) or −13% (growth) over 90 days would
+be a warning sign worth investigating.
+
+**Still recommended:** Binance backstop orders before real money.

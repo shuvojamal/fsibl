@@ -17,21 +17,21 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "AVAXUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "BNBUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000,
+      "last_candle": 1793577600000,
       "peak": 759.85
     },
     "BTCUSDT": {
@@ -39,7 +39,7 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000,
+      "last_candle": 1793577600000,
       "peak": 81804.01
     },
     "DOGEUSDT": {
@@ -47,63 +47,63 @@
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "ETHUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "LINKUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "NEARUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "PAXGUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "PEPEUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "SOLUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "SUIUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "TRXUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000,
+      "last_candle": 1793577600000,
       "peak": 0.3524
     },
     "UNIUSDT": {
@@ -111,21 +111,22 @@
       "entry": 7.186,
       "stop": 6.052703378606508,
       "target": 7217.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000,
+      "peak": 7.186
     },
     "XRPUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     },
     "ZECUSDT": {
       "qty": 0.0,
       "entry": 0.0,
       "stop": 0.0,
       "target": 0.0,
-      "last_candle": 1793491200000
+      "last_candle": 1793577600000
     }
   },
   "equity_peak": 5114.9108956,

@@ -3,9 +3,9 @@ free USDT: 87,844.30
 
 open positions: 2
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  PEPEUSDT  35890416.657000  4.57798e-06    4.907e-06  3.86474e-06    +11.81  +7.19%  -21.24%
-  UNIUSDT        21.609326      7.26089        7.262       6.0527     +0.02  +0.02%  -16.65%
-  unrealised total: +11.83 USDT
+  PEPEUSDT  35890416.657000  4.57798e-06    4.694e-06  3.86474e-06     +4.16  +2.53%  -17.67%
+  UNIUSDT        21.609326      7.26089        6.988       6.0527     -5.90  -3.76%  -13.38%
+  unrealised total: -1.73 USDT
 
 closed trades: 6, realised P&L: +55.65 USDT
   2026-10-22 19:26:50 UTC BUY  PEPEUSDT  226274065.434000 @ 4.42e-06 trend_up+ema_aligned+momentum+rsi_zone+volume 
@@ -25,18 +25,18 @@ execution quality (9 fills; the backtest assumes 0.05% slippage + 0.10% fee per 
 
 today's score (1d candles, need 6 of 8):
      ADAUSDT   0/8  
-     AVAXUSDT  2/8  volume, pullback
-     BNBUSDT   4/8  trend_up, rsi_zone, volatility_ok, pullback
-     BTCUSDT   3/8  trend_up, ema_aligned, volatility_ok
+     AVAXUSDT  0/8  
+     BNBUSDT   2/8  trend_up, volatility_ok
+     BTCUSDT   2/8  trend_up, volatility_ok
      DOGEUSDT  1/8  volatility_ok
-     ETHUSDT   2/8  trend_up, volatility_ok
-     LINKUSDT  3/8  trend_up, rsi_zone, pullback
-     NEARUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
-     PAXGUSDT  1/8  volatility_ok
+     ETHUSDT   3/8  trend_up, volume, volatility_ok
+     LINKUSDT  4/8  trend_up, rsi_zone, volume, pullback
+     NEARUSDT  2/8  trend_up, ema_aligned
+     PAXGUSDT  2/8  volume, volatility_ok
   IN PEPEUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
-     SOLUSDT   2/8  trend_up, volatility_ok
-     SUIUSDT   1/8  pullback
-     TRXUSDT   2/8  volume, volatility_ok
+     SOLUSDT   2/8  volume, volatility_ok
+     SUIUSDT   0/8  
+     TRXUSDT   3/8  rsi_zone, volatility_ok, pullback
   IN UNIUSDT   6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
      XRPUSDT   1/8  volatility_ok
-     ZECUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+     ZECUSDT   5/8  trend_up, ema_aligned, rsi_zone, volume, pullback

@@ -79,6 +79,27 @@ Then open the app, tap the account chip at the top, and pick
 - The emergency backstop isn't available on Binance in this bot, so the
   setting is ignored there. The daily-close stop still applies.
 
+## OKX demo account on the VPS (replaces GitHub Actions)
+
+The OKX demo bot used to run on GitHub Actions; it now runs here too, so no
+Actions minutes are used and it runs right after the daily close instead of
+4-6 hours late.
+
+1. On okx.com: Trade > Demo trading, then (profile) > Demo trading API >
+   Create API key: Read + Trade, no withdrawals. Note the passphrase you set.
+2. On the VPS: `bash /opt/tradebot/repo/deploy/vps/setup-okx.sh`. It checks
+   that OKX is reachable, creates `/opt/tradebot/tradebot-okx.env`
+   (root:tradebot, 640) and installs `tradebot-okx.timer`.
+3. Paste the demo key, secret and passphrase: `nano /opt/tradebot/tradebot-okx.env`.
+4. In the app, OKX account: **Run now** (the VPS picks it up within 10
+   minutes), or wait for the daily run at about 00:05 UTC.
+   Watch it with `journalctl -u tradebot-okx -f`.
+
+The bot continues with the same `demo_state/` records (positions, trades,
+settings). The old GitHub workflow has been removed, so the two can never
+run at the same time. You can delete the three OKX secrets on GitHub
+(Settings > Secrets and variables > Actions) once the VPS run works.
+
 ## Real-money account (opt-in, off by default)
 
 A third account, **Binance REAL (VPS)**, trades the owner's real Binance
@@ -117,7 +138,7 @@ the exact confirmation, the real timer does nothing.
 
 | | |
 |---|---|
-| Watch the log | `journalctl -u tradebot -f` |
+| Watch the log | `journalctl -u tradebot -f` (OKX demo: `-u tradebot-okx`) |
 | Stop the bot completely | `systemctl stop tradebot.timer` |
 | Start it again | `systemctl start tradebot.timer` |
 | Health check (timer, last run, positions, log) | `bash /opt/tradebot/repo/deploy/vps/status.sh` |

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Quick health check of the bot on this VPS.   bash status.sh [/opt/tradebot]
 DIR="${1:-/opt/tradebot}"
-echo "== timers";       systemctl list-timers 'tradebot*' --no-pager | sed -n '1,3p'
+echo "== timers";       systemctl list-timers 'tradebot*' --no-pager | sed -n '1,5p'
+echo "== OKX demo";     cat "$DIR/repo/demo_state/last_run.json" 2>/dev/null | grep -E '"(time|venue|reason)"' || echo "not installed (setup-okx.sh)"
 echo "== real account"; cat "$DIR/repo/binance_live/last_run.json" 2>/dev/null | grep -E '"(time|mode|capital)"' || echo "off or not installed"
 echo "== last run";     systemctl status tradebot.service --no-pager -n 0 | sed -n 1,4p
 echo "== last result";  cat "$DIR/repo/binance_state/last_run.json" 2>/dev/null | head -12 || echo "no run yet"

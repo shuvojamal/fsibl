@@ -216,9 +216,10 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   // Two bots, one app: the OKX demo run by GitHub Actions, and the Binance
   // testnet run by the owner's VPS (deploy/vps/). Each keeps its own folder.
   const ACCOUNTS = {
-    demo: { dir: "demo_state", name: "OKX demo", short: "OKX", gh: true },
-    vps: { dir: "binance_state", name: "Binance testnet (VPS)", short: "VPS", gh: false },
-    real: { dir: "binance_live", name: "Binance REAL (VPS)", short: "REAL", gh: false, real: true },
+    // All three run on the owner's VPS (no GitHub Actions); each has its own systemd timer.
+    demo: { dir: "demo_state", name: "OKX demo (VPS)", short: "OKX", gh: false, timer: "tradebot-okx.timer" },
+    vps: { dir: "binance_state", name: "Binance testnet (VPS)", short: "VPS", gh: false, timer: "tradebot.timer" },
+    real: { dir: "binance_live", name: "Binance REAL (VPS)", short: "REAL", gh: false, real: true, timer: "tradebot-live.timer" },
   };
   const WORKFLOW = "demo-bot.yml";
   let acct = ACCOUNTS[S.get("tb_acct")] ? S.get("tb_acct") : "demo", DIR = ACCOUNTS[acct].dir;
@@ -409,7 +410,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       ${posCards(3)}
       ${held().length > 3 ? `<button class="btn" data-goto="positions">See all positions</button>` : ""}
       <h2>All accounts</h2><div id="overview">${overviewHtml()}</div>
-      <div class="note">Prices live from Binance${prices._at ? " · updated " + ago(prices._at) : ""}. The bot trades once a day at 6:07 am (Bangladesh)${last ? " · last run " + ago(last) : ""}.${data.state.halted ? " Circuit breaker: " + esc(data.state.halted) : ""}</div>`;
+      <div class="note">Prices live from Binance${prices._at ? " · updated " + ago(prices._at) : ""}. The bot trades once a day at about 6:05 am (Bangladesh)${last ? " · last run " + ago(last) : ""}.${data.state.halted ? " Circuit breaker: " + esc(data.state.halted) : ""}</div>`;
   }
 
   // ---------- all accounts side by side (the 90-day comparison) ----------
@@ -619,9 +620,9 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   function scheduleCard() {
     if (data.schedule === "vps") {
       const t = data.last.time ? parseT(data.last.time) : 0;
-      return `<div class="card note">${t ? `Runs on your VPS. Last run ${ago(t)} (${esc(data.last.reason || "")}).` : "No run from the VPS yet. Set it up with <b>deploy/vps/setup.sh</b> (see deploy/vps/README.md)."}
+      return `<div class="card note">${t ? `Runs on your VPS. Last run ${ago(t)} (${esc(data.last.reason || "")}).` : `No run from the VPS yet. Set it up with <b>deploy/vps/${acct === "demo" ? "setup-okx.sh" : acct === "real" ? "setup-live.sh" : "setup.sh"}</b> (see deploy/vps/README.md).`}
         It trades once a day after the daily close and checks for your requests (Sell, Run now, Reset) every 10 minutes.
-        To stop it, run <b>systemctl stop tradebot.timer</b> on the VPS; Pause here stops new buys.</div>`;
+        To stop it, run <b>systemctl stop ${ACCOUNTS[acct].timer}</b> on the VPS; Pause here stops new buys.</div>`;
     }
     const on = data.schedule === "active";
     return `<div class="list"><div class="item"><div class="side ${on ? "buy" : "sell"}" style="${on ? "background:var(--up-bg);color:var(--up)" : ""}">${on ? "ON" : "OFF"}</div>
@@ -942,7 +943,7 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
   $("acct").onclick = () => {
     sheet(`<h3>Account</h3>${Object.entries(ACCOUNTS).map(([k, a]) => `<button class="choice" data-acct="${k}" aria-current="${k === acct}">
       ${coinAv(a.short)}<div><div style="font-weight:700">${a.name}</div>
-      <div class="muted" style="font-size:12px">${a.real ? "Runs on your VPS · REAL MONEY · off until you switch it on" : a.gh ? "Runs on GitHub every day · test money" : "Runs on your VPS (Germany) · test money"}</div></div></button>`).join("")}`);
+      <div class="muted" style="font-size:12px">${a.real ? "Runs on your VPS · REAL MONEY · off until you switch it on" : a.gh ? "Runs on GitHub every day · test money" : `Runs on your VPS (Germany) · ${a.dir === "demo_state" ? "OKX demo" : "Binance testnet"} · test money`}</div></div></button>`).join("")}`);
     for (const b of document.querySelectorAll("[data-acct]")) b.onclick = () => {
       acct = b.dataset.acct; DIR = ACCOUNTS[acct].dir; S.set("tb_acct", acct); chip();
       close(); loadCache(); render(); load();

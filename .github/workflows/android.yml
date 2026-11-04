@@ -2,10 +2,11 @@
 # and publishes the APK as the GitHub release "dashboard-latest".
 name: android-app
 
+# Manual only (Actions > android-app > Run workflow): the owner moved
+# everything off GitHub Actions. The app loads dashboard/index.html from the
+# repo when it opens, so dashboard changes don't need a new build; only
+# changes under android/ do. A prebuilt APK is kept in dist/.
 on:
-  push:
-    branches: [main]
-    paths: ["dashboard/**", "android/**", ".github/workflows/android.yml"]
   workflow_dispatch:
 
 permissions:

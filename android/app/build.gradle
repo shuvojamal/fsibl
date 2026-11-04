@@ -8,8 +8,10 @@ android {
         applicationId "com.shuvojamal.tradebot"
         minSdk 26
         targetSdk 34
-        versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1") as int)
-        versionName "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+        // Builds made outside GitHub Actions set TRADEBOT_BUILD (100 and up);
+        // Actions builds use 100 + the run number, so each new APK is an update.
+        versionCode((System.getenv("TRADEBOT_BUILD") ?: (((System.getenv("GITHUB_RUN_NUMBER") ?: "0") as int) + 100) as String) as int)
+        versionName "1.1." + (System.getenv("TRADEBOT_BUILD") ?: System.getenv("GITHUB_RUN_NUMBER") ?: "0")
     }
 
     // A fixed key so each new APK installs as an update over the previous one.

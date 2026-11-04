@@ -62,9 +62,9 @@ an average win 3.6 times the average loss.
 
 - Code: `tradebot/opportunity.py` (rules), `tradebot/live.py` (execution
   and risk), `tradebot/okx_client.py` (exchange), `tradebot/scan.py` (universe).
-- Schedule: `.github/workflows/demo-bot.yml` runs once a day at 00:07 UTC,
-  after the daily candle closes, and commits state and a report to
-  `demo_state/`.
+- Schedule: the owner's VPS runs each account once a day just after the
+  00:00 UTC daily close (`deploy/vps/run.sh`, systemd timers) and commits
+  state and a report to the account's folder (`demo_state/` for the OKX demo).
 - Hard limits, enforced outside the strategy and not overridable by it:
   per-trade size cap, daily loss limit (3% of capital), maximum positions,
   drawdown circuit breaker (35% below peak, latches until reset), a `STOP`

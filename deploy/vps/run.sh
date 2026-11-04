@@ -5,6 +5,9 @@
 #                 records in binance_state/          (tradebot.timer)
 #   run.sh real   the owner's REAL Binance account, keys from tradebot-live.env,
 #                 records in binance_live/           (tradebot-live.timer)
+#   run.sh okx    the OKX DEMO account (test money), keys from tradebot-okx.env,
+#                 records in demo_state/             (tradebot-okx.timer)
+#                 (moved here from GitHub Actions so no Actions minutes are used)
 #
 # The real account does nothing until the owner switches it on in the app:
 # binance_live/settings.json "mode" = "test" (real keys, no orders: --dry-run)
@@ -12,7 +15,7 @@
 # RISK"). Anything else, or no settings file, means off.
 #
 # It does a full run once a day after the 00:00 UTC candle closes, and in
-# between only when the dashboard app left a request in binance_state/
+# between only when the dashboard app left a request in the state folder
 # (CLOSE, RESET_HALT or RUN_NOW). Re-running on the same daily candle is
 # safe: the bot never acts twice on one candle, it only carries out the
 # request. State is committed and pushed so the app can show it.
@@ -23,8 +26,11 @@ cd "$(dirname "$0")/../.."
 exec 9>"../.run.lock"
 flock 9
 MODE_ARG="${1:-test}"
+EXCH=binance
 if [ "$MODE_ARG" = real ]; then
   STATE=binance_live; DEFAULT_CAPITAL=300; VENUE="BINANCE REAL (VPS)"
+elif [ "$MODE_ARG" = okx ]; then
+  STATE=demo_state; DEFAULT_CAPITAL=5000; VENUE="OKX DEMO (VPS)"; EXCH=okx
 else
   STATE=binance_state; DEFAULT_CAPITAL=5000; VENUE="BINANCE TESTNET (VPS)"
 fi
@@ -87,7 +93,11 @@ if [ "$MODE_ARG" = real ]; then
     *) rm -f "$STATE/RUN_NOW" "$STATE/CLOSE" "$STATE/RESET_HALT"; exit 0 ;;   # off: do nothing at all
   esac
 fi
-[ -n "${BINANCE_API_KEY:-}" ] || { echo "BINANCE_API_KEY is empty: put the keys in the keys file in the install directory"; exit 1; }
+if [ "$EXCH" = okx ]; then
+  [ -n "${OKX_API_KEY:-}" ] || { echo "OKX_API_KEY is empty: put the OKX demo keys in tradebot-okx.env in the install directory"; exit 1; }
+else
+  [ -n "${BINANCE_API_KEY:-}" ] || { echo "BINANCE_API_KEY is empty: put the keys in the keys file in the install directory"; exit 1; }
+fi
 echo "[$(date -u '+%F %T') UTC] run: $reason${REAL:+ (REAL ACCOUNT, mode $MODE)}" | tee -a "$STATE/run.log"
 
 TOP=$(python3 -m tradebot scan --top 15 --symbols-only)
@@ -100,7 +110,7 @@ SYMS=$(echo $TOP $HELD $GOLD | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 set +e
 # shellcheck disable=SC2086  # ARGS and SYMS are validated word lists
-python3 -u -m tradebot live $SYMS --exchange binance --strategy opportunity --interval 1d \
+python3 -u -m tradebot live $SYMS --exchange "$EXCH" --strategy opportunity --interval 1d \
   $ARGS $REAL --no-adopt --state-dir "$STATE" --once 2>&1 | tee -a "$STATE/run.log"
 ok=${PIPESTATUS[0]}
 set -e
@@ -120,7 +130,7 @@ if s.pop("stop_after_close", False):
     print("real account switched off after selling everything")
 PY
 fi
-python3 -m tradebot report $SYMS --exchange binance $REPORT_REAL --state-dir "$STATE" > "$STATE/report.txt" 2>&1 || true
+python3 -m tradebot report $SYMS --exchange "$EXCH" $REPORT_REAL --state-dir "$STATE" > "$STATE/report.txt" 2>&1 || true
 python3 -m tradebot shadow $SYMS --state-dir "$STATE" --max-open "$MAX_OPEN" --min-score "$MIN_SCORE" --ignore-check $IGNORE > "$STATE/shadow.txt" 2>&1 || true
 python3 - <<PY
 import json, datetime

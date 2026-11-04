@@ -215,14 +215,18 @@ python -m tradebot live BTCUSDT ETHUSDT --exchange okx --dry-run
 python -m tradebot live BTCUSDT ETHUSDT --exchange okx --trade-usdt 50
 ```
 
-**Running it every day without a computer on:** `.github/workflows/demo-bot.yml`
-runs the opportunity bot once a day at 00:07 UTC on GitHub's servers
-(`live --once`), trading the top 15 coins by volume plus anything it still
-holds, and commits its state and a `report.txt` to `demo_state/`. It is off
-until you add the three OKX demo secrets and set the repository variable
-`TRADEBOT_ENABLED=true` (Settings → Secrets and variables → Actions). Because
-it checks once a day, a stop is acted on at the next daily run, not the
-moment it is touched; expect fills somewhat worse than the backtest's.
+**Running it every day without a computer on:** everything runs on the
+owner's VPS (`deploy/vps/`), with no GitHub Actions minutes. Three systemd
+timers call `deploy/vps/run.sh`: the Binance testnet (`binance_state/`), the
+OKX demo (`run.sh okx`, `demo_state/`, installed with `setup-okx.sh`) and the
+opt-in real account (`binance_live/`). Each runs once a day right after the
+00:00 UTC close (`live --once`), trading the top 15 coins by volume plus
+anything it still holds, carries out the app's requests in between, and
+commits its state and a `report.txt` back to the repo. Because it checks once
+a day, a stop is acted on at the next daily run, not the moment it is
+touched; expect fills somewhat worse than the backtest's. (Until 2026-11 the
+OKX demo ran on GitHub Actions; it moved to the VPS after GitHub billing
+blocks and its runs starting 4-6 hours late.)
 
 ## Dashboard app (phone or browser)
 
@@ -236,12 +240,16 @@ start the daily schedule**; **edit the
 strategy settings** (capital, risk per trade, max positions, backstop, daily
 loss limit, circuit breaker, gold, re-buy wait, profit alert); and **reset a tripped circuit breaker**.
 The app writes small request files (`settings.json`, `CLOSE`, `RESET_HALT`,
-`PAUSED`) into `demo_state/`; the workflow validates and clamps them with
+`PAUSED`) into each account's folder; the VPS validates and clamps them with
 `python -m tradebot controls` before they reach the bot (risk is capped at
 2%, positions at 10).
 It talks only to GitHub (with a fine-grained token kept on your device) and
-to Binance for prices. `.github/workflows/android.yml` wraps it in an Android
-app and publishes `TradebotDesk.apk` as the release **dashboard-latest**.
+to Binance for prices. The Android app (`android/`) is a small wrapper that
+downloads `dashboard/index.html` from the repo each time it opens (kept as a
+local copy offline), so dashboard changes reach the phone without a new
+build. The APK is `dist/TradebotDesk.apk`; rebuild it only when `android/`
+changes (locally with Gradle, or by starting `.github/workflows/android.yml`
+by hand).
 
 **Going live** needs two flags, `--live --i-accept-the-risk`, and live-only
 API keys. On the VPS this is packaged as an opt-in third account (see

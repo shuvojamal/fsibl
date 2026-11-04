@@ -70,6 +70,7 @@ research/
 | 49 | `research49.py` | `research49.out` | `docs/research-round49-2026-11-01.md` | `0d8f784` | Coin collapses 90% while held: account loss growth 8%/14%/42% (median/90th/worst) without a backstop vs 3%/5%/14% with one; passes; Binance backstop recommended before real money |
 | 50 | `research50.py` | `research50.out` | `docs/research-round50-2026-11-02.md` | `f6c7e53` | Deflated Sharpe updated for ~600 variants tried and the current set-ups: steady DSR 0.988 (0.89 harsh), growth 0.990 (0.91); passes; edge still clears the luck bar |
 | 51 | `research51.py` | `research51.out` | `docs/research-round51-2026-11-03.md` | `ee4ec33` | 90-day windows: ~half lose (60% in 2022-26), median ~0, 90th pct +20%/+40%; the 90-day demo tests execution, not profitability; red flags below -7% (steady) / -13% (growth) |
+| 52 | `research52.py` | `research52.out` | `docs/research-round52-2026-11-04.md` | `132c36b` | 300-500 USDT account vs Binance's 5 USDT minimum: steady 0% buys skipped, same returns (fine); growth 13% skipped (mostly no-cash leftovers), -0.3 pts/yr |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

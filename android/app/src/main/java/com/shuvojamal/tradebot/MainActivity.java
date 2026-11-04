@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -20,10 +21,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Shows the dashboard page. The page is downloaded from the repository when the
- * app opens (so dashboard changes need no new build and no GitHub Actions), kept
- * as a local copy for the next start or when offline, and the copy bundled in
- * assets/index.html is used only until the first download succeeds.
+ * Shows the dashboard page and keeps it up to date without new builds or GitHub
+ * Actions. The repository is private, so the page updates itself: once it has
+ * the owner's GitHub token it fetches dashboard/index.html through the GitHub
+ * API and passes it to TradebotApp.update(), which, if it differs from what is
+ * shown, saves it as the local copy and shows it. The
+ * copy bundled in assets/index.html is used until the first update. (A direct
+ * download from raw.githubusercontent.com is also tried; it works only while
+ * the repository is public.)
  */
 public class MainActivity extends Activity {
     private static final String PAGE = "https://raw.githubusercontent.com/shuvojamal/binancebot/main/dashboard/index.html";
@@ -52,6 +57,7 @@ public class MainActivity extends Activity {
                 return false;
             }
         });
+        web.addJavascriptInterface(new Bridge(), "TradebotApp");
         setContentView(web);
         String cached = read(cacheFile());
         show(cached != null ? cached : asset());
@@ -64,7 +70,27 @@ public class MainActivity extends Activity {
         web.loadDataWithBaseURL(BASE, html, "text/html", "utf-8", null);
     }
 
-    /** Download the latest page; if it changed, save it and show it. */
+    /** Called by the page with a newer copy of itself (fetched with the owner's token). */
+    private class Bridge {
+        @JavascriptInterface
+        public void update(String html) {
+            if (html == null || !html.contains("<html")) return;
+            runOnUiThread(() -> {
+                if (html.equals(shown)) return;
+                save(html);
+                show(html);
+            });
+        }
+    }
+
+    private void save(String html) {
+        try (FileOutputStream out = new FileOutputStream(cacheFile())) {
+            out.write(html.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** Download the latest page (public repositories only); if it changed, save it and show it. */
     private void refresh() {
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(PAGE + "?t=" + System.currentTimeMillis()).openConnection();
@@ -73,9 +99,7 @@ public class MainActivity extends Activity {
             if (c.getResponseCode() != 200) return;
             String html = new String(readAll(c.getInputStream()), StandardCharsets.UTF_8);
             if (!html.contains("<html")) return;            // not the page (error page, captive portal)
-            try (FileOutputStream out = new FileOutputStream(cacheFile())) {
-                out.write(html.getBytes(StandardCharsets.UTF_8));
-            }
+            save(html);
             runOnUiThread(() -> show(html));
         } catch (Exception ignored) {
             // offline: keep the copy already shown

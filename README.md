@@ -244,10 +244,11 @@ The app writes small request files (`settings.json`, `CLOSE`, `RESET_HALT`,
 `python -m tradebot controls` before they reach the bot (risk is capped at
 2%, positions at 10).
 It talks only to GitHub (with a fine-grained token kept on your device) and
-to Binance for prices. The Android app (`android/`) is a small wrapper that
-downloads `dashboard/index.html` from the repo each time it opens (kept as a
-local copy offline), so dashboard changes reach the phone without a new
-build. The APK is `dist/TradebotDesk.apk`; rebuild it only when `android/`
+to Binance for prices. The Android app (`android/`) is a small wrapper; the
+page keeps itself up to date: with the owner's token it fetches the latest
+`dashboard/index.html` through the GitHub API (the repo is private) and hands
+it to the app, which saves it as the local copy, so dashboard changes reach
+the phone without a new build. The APK is `dist/TradebotDesk.apk`; rebuild it only when `android/`
 changes (locally with Gradle, or by starting `.github/workflows/android.yml`
 by hand).
 

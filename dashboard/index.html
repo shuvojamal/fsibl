@@ -315,9 +315,25 @@ input { font: 15px var(--mono); color: var(--fg); background: var(--surface-2); 
       pausedSha = paused ? paused.sha : null;
       render();
       loadOverview().catch(() => {});
+      selfUpdate();
       await refreshPrices();
     } catch (e) { toast(e.message, true); setStatus("err", "Error") }
     finally { loading = false; $("refresh").classList.remove("spin") }
+  }
+  // Inside the Android app: fetch the latest copy of this page with the owner's
+  // token (the repository is private) and hand it to the app if it changed, so
+  // page updates need no new APK. Checked at most every 10 minutes.
+  let selfChecked = 0;
+  async function selfUpdate() {
+    const app = window.TradebotApp;
+    if (!app || Date.now() - selfChecked < 600000) return;
+    selfChecked = Date.now();
+    try {
+      const r = await gh(`/contents/dashboard/index.html?ref=main`, { accept: "application/vnd.github.raw+json" });
+      if (!r.ok) return;
+      const html = await r.text();
+      if (html.includes("<html")) app.update(html);    // the app ignores it if it's the page already shown
+    } catch (e) {}
   }
   const held = () => Object.entries((data && data.state.positions) || {}).filter(([, p]) => p.qty > 0);
   async function refreshPrices() {

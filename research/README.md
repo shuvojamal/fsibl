@@ -72,6 +72,7 @@ research/
 | 51 | `research51.py` | `research51.out` | `docs/research-round51-2026-11-03.md` | `ee4ec33` | 90-day windows: ~half lose (60% in 2022-26), median ~0, 90th pct +20%/+40%; the 90-day demo tests execution, not profitability; red flags below -7% (steady) / -13% (growth) |
 | 52 | `research52.py` | `research52.out` | `docs/research-round52-2026-11-04.md` | `132c36b` | 300-500 USDT account vs Binance's 5 USDT minimum: steady 0% buys skipped, same returns (fine); growth 13% skipped (mostly no-cash leftovers), -0.3 pts/yr |
 | 53 | `research53.py` | `research53.out` | `docs/research-round53-2026-11-05.md` | `0453031` | Max new buys per day 1/2/3: max 3 rarely binds (ties 'win' 9-10/12 by noise), max 1 trims drops 1-3 pts but costs 1.4-3 pts/yr; no change; pass bar needs an effect-size floor |
+| 54 | `research54.py` | `research54.out` | `docs/research-round54-2026-11-06.md` | `02e1892` | Second-day confirmation before buying: win rate 36->39%, trades -30%, bull-market returns halved (steady 2018-21 +29.5% -> +12.7%); fails; no change |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

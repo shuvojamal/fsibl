@@ -74,6 +74,7 @@ research/
 | 53 | `research53.py` | `research53.out` | `docs/research-round53-2026-11-05.md` | `0453031` | Max new buys per day 1/2/3: max 3 rarely binds (ties 'win' 9-10/12 by noise), max 1 trims drops 1-3 pts but costs 1.4-3 pts/yr; no change; pass bar needs an effect-size floor |
 | 54 | `research54.py` | `research54.out` | `docs/research-round54-2026-11-06.md` | `02e1892` | Second-day confirmation before buying: win rate 36->39%, trades -30%, bull-market returns halved (steady 2018-21 +29.5% -> +12.7%); fails; no change |
 | 55 | `research55.py` | `research55.out` | `docs/research-round55-2026-11-07.md` | `e17edb2` | Indicator lengths moved ~25% (10 variants): fast EMA 15/25 and ATR 10/20 give ~12-13% vs 15.7% in 2022-26 (equal in 2018-21); fails robustness bar; live set-up is on a recent-years peak; plan ~12%/yr for steady; no change |
+| 56 | `research56.py` | `research56.out` | `docs/research-round56-2026-11-08.md` | `9c262fc` | Nine-setting ensemble (fast EMA x ATR neighbours): 2022-26 +14.0% vs live +15.7%, slightly better worst cell and 2018-21; fails narrowly; fairer estimate of the rule family; no change |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

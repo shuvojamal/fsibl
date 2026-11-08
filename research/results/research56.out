@@ -1,0 +1,9 @@
+Nine-setting ensemble (fast EMA 15/20/25 x ATR 10/14/20, a ninth of the capital each) vs the live setting; steady 8 x 0.5%
+
+                      2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26  worst-cell Sharpe
+live                   +29.5% / 1.57   +15.7% / 1.03    -16.4%               0.58
+ensemble               +31.3% / 1.66   +14.0% / 0.93    -16.4%               0.63
+median neighbour       +31.1% / 1.64   +14.5% / 0.92    -16.7%               0.60
+
+ensemble beats live's Sharpe in 8 of 12 cells
+verdict: FAIL: keep the single live setting

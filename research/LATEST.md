@@ -1,23 +1,23 @@
 # Latest research report
 
-_Updated 2026-11-08 05:50 UTC by Claude (daily scheduled run)_
+_Updated 2026-11-09 05:50 UTC by Claude (daily scheduled run)_
 
 **OKX demo: still waiting for the VPS setup** (no run since Nov 4). PEPE
 and UNI are protected only by their OKX backstop orders until you run the
 one-line setup command and add the demo keys.
 
 **VPS testnet:** daily run at 00:10 UTC, audit passed, no trades. Holds
-UNI (+0.1%) and ZEC (−3.3%). Realised so far −205.61 USDT.
+UNI (−5.5%) and ZEC (−6.0%), both still above their stops. Open P&L
+−32.77 USDT; realised so far −205.61.
 
 **Real account:** off.
 
-**Tested today (round 56): spread the money over nine nearby settings**
-instead of one (a remedy for yesterday's "lucky peak" finding). It earned
-about +14% a year in 2022–26 against +15.7% for the current setting, was a
-little steadier in bad periods, and better in 2018–21. Not enough to be
-worth nine sub-accounts. No change.
+**Tested today (round 57): how much do trading fees matter?** Very little:
+the bot trades only about 50 times a year. Paying Binance fees in BNB
+(0.075% instead of 0.10%) adds about 0.2 points a year for steady, 0.4 for
+growth. Even three times worse slippage costs only about 1 point a year.
 
-**What it means:** about +14% is the fairer backtest figure for recent
-markets; after real-world costs, plan about 12% a year for steady.
+**What it means:** fees aren't a concern. BNB fees are optional; if you use
+them on the real account, keep a few USDT of BNB topped up.
 
 **To do (you):** run the VPS setup command for the OKX demo.

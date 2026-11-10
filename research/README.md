@@ -76,6 +76,7 @@ research/
 | 55 | `research55.py` | `research55.out` | `docs/research-round55-2026-11-07.md` | `e17edb2` | Indicator lengths moved ~25% (10 variants): fast EMA 15/25 and ATR 10/20 give ~12-13% vs 15.7% in 2022-26 (equal in 2018-21); fails robustness bar; live set-up is on a recent-years peak; plan ~12%/yr for steady; no change |
 | 56 | `research56.py` | `research56.out` | `docs/research-round56-2026-11-08.md` | `9c262fc` | Nine-setting ensemble (fast EMA x ATR neighbours): 2022-26 +14.0% vs live +15.7%, slightly better worst cell and 2018-21; fails narrowly; fairer estimate of the rule family; no change |
 | 57 | `research57.py` | `research57.out` | `docs/research-round57-2026-11-09.md` | `36d37d5` | Fees 0.075/0.10/0.15% x slippage 0.02/0.05/0.15%: BNB fees +0.2 pts (steady) / +0.4 (growth); each +0.05%/side -0.4/-0.8 pts; costs a small factor |
+| 58 | `research58.py` | `research58.out` | `docs/research-round58-2026-11-10.md` | `311f3d9` | Tighter trail after +3R/+5R (2 or 2.5 x ATR): avg trade +0.65R -> +0.45R, 2022-26 return -1 to -7 pts; fails; keep 3 x ATR for the whole trade |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

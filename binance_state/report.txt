@@ -3,9 +3,9 @@ free USDT: 9,225.94
 
 open positions: 2
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  UNIUSDT        41.770000        7.186        6.789       6.0527    -16.58  -5.52%  -10.85%
-  ZECUSDT         0.206000      1302.35      1223.76      1062.46    -16.19  -6.03%  -13.18%
-  unrealised total: -32.77 USDT
+  UNIUSDT        41.770000        7.186        7.002       6.0527     -7.69  -2.56%  -13.56%
+  ZECUSDT         0.206000      1302.35      1169.07      1062.46    -27.46 -10.23%   -9.12%
+  unrealised total: -35.14 USDT
 
 closed trades: 4, realised P&L: -205.61 USDT
   2026-10-23 17:20:47 UTC BUY  BTCUSDT   0.011360 @ 81804 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
@@ -24,19 +24,19 @@ execution quality (10 fills; the backtest assumes 0.05% slippage + 0.10% fee per
   SELL   4 fills  avg slippage +0.262%  worst +0.734%  avg fee 0.000%
 
 today's score (1d candles, need 6 of 8):
-     ADAUSDT   0/8  
-     AVAXUSDT  0/8  
-     BNBUSDT   2/8  trend_up, volatility_ok
-     BTCUSDT   1/8  volatility_ok
+     ADAUSDT   1/8  volume
+     AVAXUSDT  4/8  momentum, rsi_zone, volume, pullback
+     BNBUSDT   4/8  trend_up, rsi_zone, volatility_ok, pullback
+     BTCUSDT   3/8  trend_up, volume, volatility_ok
      DOGEUSDT  1/8  volume
-     ETHUSDT   1/8  volatility_ok
-     LINKUSDT  0/8  
-     NEARUSDT  2/8  trend_up, ema_aligned
-     PAXGUSDT  3/8  rsi_zone, volatility_ok, pullback
-     PEPEUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
-     SOLUSDT   0/8  
-     SUIUSDT   0/8  
+     ETHUSDT   2/8  volume, volatility_ok
+     LINKUSDT  4/8  trend_up, rsi_zone, volume, pullback
+     NEARUSDT  1/8  trend_up
+     PAXGUSDT  4/8  momentum, rsi_zone, volume, volatility_ok
+  ** PEPEUSDT  6/8  trend_up, ema_aligned, momentum, rsi_zone, volume, pullback
+     SOLUSDT   1/8  volume
+     SUIUSDT   2/8  rsi_zone, pullback
      TRXUSDT   3/8  rsi_zone, volatility_ok, pullback
   IN UNIUSDT   3/8  trend_up, rsi_zone, pullback
      XRPUSDT   1/8  volume
-  IN ZECUSDT   4/8  trend_up, ema_aligned, rsi_zone, pullback
+  IN ZECUSDT   5/8  trend_up, ema_aligned, rsi_zone, volume, pullback

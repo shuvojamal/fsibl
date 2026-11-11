@@ -100,3 +100,8 @@ audit passed: binance_state is consistent
 [2026-11-10 00:11:21 UTC] free USDT: 9,225.94; per-trade size: 5,000.00
 [2026-11-10 00:11:53 UTC] PEPEUSDT: BinanceError: HTTP 400 code -2010: Order book liquidity is less than LOT_SIZE filter minimum quantity.
 audit passed: binance_state is consistent
+[2026-11-11 00:10:28 UTC] run: daily
+[2026-11-11 00:11:30 UTC] connected to https://testnet.binance.vision (clock offset -146 ms)
+[2026-11-11 00:11:30 UTC] free USDT: 9,225.94; per-trade size: 5,000.00
+[2026-11-11 00:11:59 UTC] SELL ZECUSDT 0.205 @ 1042.95 fee 0.0000 (stop_loss) -53.1770 order 6837823
+AUDIT FAIL: ZECUSDT: trade log nets to 0.001 but the state holds 0

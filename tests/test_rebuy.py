@@ -87,3 +87,24 @@ class ReportSettingTests(unittest.TestCase):
                 redirect_stdout(out):
             cli.main()
         self.assertIn("need 6 of 8", out.getvalue())
+
+
+class RoundQtyTests(unittest.TestCase):
+    """2026-11-11: 0.206 ZEC was sold as 0.205 (float error), leaving dust and failing the audit."""
+
+    def check(self, client):
+        client.symbol_filters = lambda sym: {"step": 0.001, "min_qty": 0.001, "tick": 0.01, "min_notional": 5}
+        self.assertEqual(client.round_qty("ZECUSDT", 0.206), "0.206")
+        self.assertEqual(client.round_qty("ZECUSDT", 0.043), "0.043")
+        self.assertEqual(client.round_qty("ZECUSDT", 0.2059), "0.205")      # still rounds down
+        client.symbol_filters = lambda sym: {"step": 0.00001, "min_qty": 0.00001, "tick": 0.01, "min_notional": 5}
+        bad = [k for k in range(1, 5000) if client.round_qty("X", round(k * 0.00001, 8)) != f"{k * 0.00001:.5f}"]
+        self.assertEqual(bad, [])
+
+    def test_binance(self):
+        from tradebot.binance_client import BinanceClient
+        self.check(BinanceClient("k", "s"))
+
+    def test_okx(self):
+        from tradebot.okx_client import OKXClient
+        self.check(OKXClient(api_key="k", api_secret="s", passphrase="p"))

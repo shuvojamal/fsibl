@@ -51,6 +51,22 @@ class Audit(unittest.TestCase):
         write(self.d, {"PEPEUSDT": {"qty": 0.0, "entry": 0.0, "stop": 0.0}}, [pepe_buy, pepe_sell], realised=44.2665)
         self.assertEqual(audit(self.d), [])
 
+    def test_unsellable_leftover_on_a_closed_coin_is_not_a_problem(self):
+        # 2026-11-11 testnet: 0.206 ZEC bought, 0.205 sold (since fixed float rounding):
+        # 0.001 ZEC (~1 USDT) left, below the 5 USDT minimum order, so it can't be sold
+        zec = {"qty": 0.0, "entry": 0.0, "stop": 0.0}
+        trades = [["2026-11-05 00:12:03 UTC", "ZECUSDT", "BUY", 0.206, 1302.35, 0, "signal", "", 1],
+                  ["2026-11-11 00:11:59 UTC", "ZECUSDT", "SELL", 0.205, 1042.95, 0, "stop_loss", -53.177, 2]]
+        write(self.d, {"ZECUSDT": zec}, trades, realised=-53.177)
+        self.assertEqual(audit(self.d), [])
+
+    def test_sellable_leftover_on_a_closed_coin_is_still_flagged(self):
+        zec = {"qty": 0.0, "entry": 0.0, "stop": 0.0}
+        trades = [["2026-11-05 00:12:03 UTC", "ZECUSDT", "BUY", 0.206, 1302.35, 0, "signal", "", 1],
+                  ["2026-11-11 00:11:59 UTC", "ZECUSDT", "SELL", 0.100, 1042.95, 0, "stop_loss", -26.0, 2]]
+        write(self.d, {"ZECUSDT": zec}, trades, realised=-26.0)
+        self.assertTrue(any("ZECUSDT" in p for p in audit(self.d)))
+
     def test_stop_above_highest_price_is_flagged(self):
         write(self.d, {"BTCUSDT": {**BTC, "stop": 120.0}}, [BUY])
         self.assertTrue(any("stop 120" in p for p in audit(self.d)))

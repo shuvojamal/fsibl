@@ -1,0 +1,6 @@
+Losing trades (steady set-up, six close times pooled): 1504
+  median -0.85R; 10th percentile -1.31R; 1st percentile -2.16R; worst -2.75R
+  worse than -1.2R: 14.8%; worse than -1.5R: 5.7%; worse than -2R: 1.8%
+  (includes trades whose trail had risen: those lose less than 1R)
+
+verdict: NOT acceptable by the pre-set bar

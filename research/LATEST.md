@@ -1,21 +1,23 @@
 # Latest research report
 
-_Updated 2026-11-10 05:50 UTC by Claude (daily scheduled run)_
+_Updated 2026-11-11 05:50 UTC by Claude (daily scheduled run)_
 
-**OKX demo: still waiting for the VPS setup** (no run since Nov 4). PEPE
-and UNI are protected only by their OKX backstop orders until you run the
-one-line setup command and add the demo keys.
+**OKX demo: still waiting for the VPS setup** (no run since Nov 4).
 
-**VPS testnet:** daily run at 00:10 UTC, audit passed. A PEPE buy failed
-because the testnet's order book was too thin (not a bot problem; real
-Binance is fine). Holds UNI (−2.6%) and ZEC (−10.2%, about 9% above its
-stop). Open P&L −35.14; realised so far −205.61 USDT.
+**VPS testnet:** daily run at 00:10 UTC. ZEC hit its stop: −53.18 USDT
+(sold at 1042.95, stop 1062.46). Holds UNI (−7.0%). Realised so far
+−258.79 USDT (6 trades).
+
+**Bug fixed:** a rounding error made the bot sell 0.205 of its 0.206 ZEC,
+leaving 0.001 ZEC (about 1 USDT) behind, and the audit flagged it. Fixed
+for Binance and OKX (it can no longer drop a step), and the audit now
+accepts unsellable leftovers under 5 USDT. Both have tests.
 
 **Real account:** off.
 
-**Tested today (round 58): tighten the stop once a trade is well in
-profit?** It cut big winners short during normal pullbacks: the 2022–26
-return fell by 1–7 points a year. No change: the same wide trailing stop
-for the whole trade is best (letting winners run is what makes the money).
+**Tested today (round 59): how far past the stop do losing trades sell?**
+Usually less than planned (typical loser −0.85× the planned risk), but
+about 1 in 17 losers costs 1.5× or more, because stops act at the daily
+close and the price can gap before the next sale. A known cost; no change.
 
 **To do (you):** run the VPS setup command for the OKX demo.

@@ -16,6 +16,9 @@ def _read(path, rows=False):
         return list(csv.DictReader(f)) if rows else json.load(f)
 
 
+MIN_ORDER_USDT = 5.0   # Binance/OKX minimum order value on USDT pairs
+
+
 def audit(state_dir, max_open=0):
     """Return a list of problems found (empty list = all checks passed)."""
     problems = []
@@ -44,9 +47,10 @@ def audit(state_dir, max_open=0):
     tpath = os.path.join(state_dir, "live_trades.csv")
     if os.path.exists(tpath):
         trades = _read(tpath, rows=True)
-    net, bought, realised = {}, {}, 0.0
+    net, bought, realised, last_px = {}, {}, 0.0, {}
     for r in trades:
         q = float(r["qty"])
+        last_px[r["symbol"]] = float(r.get("price") or 0)
         net[r["symbol"]] = net.get(r["symbol"], 0.0) + (q if r["side"] == "BUY" else -q)
         if r["side"] == "BUY":
             bought[r["symbol"]] = bought.get(r["symbol"], 0.0) + q
@@ -57,6 +61,10 @@ def audit(state_dir, max_open=0):
         # Sells are rounded down to the exchange's lot size, which can leave a
         # crumb of the coin behind ("dust"). Up to 0.001% of what was bought is fine.
         dust = 1e-5 * bought.get(s, 0.0)
+        # A closed coin with a leftover worth less than the exchange's minimum
+        # order (5 USDT) can't be sold at all: that is dust, not a books error.
+        if tracked == 0 and 0 < logged and logged * last_px.get(s, 0.0) < MIN_ORDER_USDT:
+            continue
         if abs(logged - tracked) > max(1e-6 * max(abs(logged), abs(tracked)), dust) + 1e-12:
             problems.append(f"{s}: trade log nets to {logged:g} but the state holds {tracked:g}")
     if abs(realised - state.get("realised", 0.0)) > 0.01 + 1e-4 * len(trades):

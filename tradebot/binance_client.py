@@ -102,7 +102,9 @@ class BinanceClient:
         """Round a quantity *down* to the symbol's lot step, as a string Binance accepts."""
         step = self.symbol_filters(symbol)["step"]
         decimals = max(0, -int(round(math.log10(step)))) if step < 1 else 0
-        qty = math.floor(qty / step) * step
+        # the tiny tolerance stops float error (0.206 / 0.001 = 205.99999...) from
+        # dropping a whole step and leaving dust behind on a full sell
+        qty = math.floor(qty / step + 1e-9) * step
         return f"{qty:.{decimals}f}"
 
     # -- account ----------------------------------------------------------

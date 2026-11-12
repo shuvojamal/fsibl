@@ -3,8 +3,8 @@ free USDT: 9,439.75
 
 open positions: 1
   symbol               qty        entry          now         stop       P&L   P&L %  to stop
-  UNIUSDT        41.770000        7.186        6.682       6.0527    -21.05  -7.01%   -9.42%
-  unrealised total: -21.05 USDT
+  UNIUSDT        41.770000        7.186        6.206       6.0527    -40.93 -13.64%   -2.47%
+  unrealised total: -40.93 USDT
 
 closed trades: 5, realised P&L: -258.79 USDT
   2026-10-24 00:11:45 UTC BUY  BNBUSDT   1.227000 @ 738.74 trend_up+ema_aligned+rsi_zone+volume+volatility_ok+pullback 
@@ -23,19 +23,19 @@ execution quality (11 fills; the backtest assumes 0.05% slippage + 0.10% fee per
   SELL   5 fills  avg slippage +0.248%  worst +0.734%  avg fee 0.000%
 
 today's score (1d candles, need 6 of 8):
-     ADAUSDT   1/8  volume
+     ADAUSDT   0/8  
      AVAXUSDT  4/8  momentum, rsi_zone, volume, pullback
      BNBUSDT   2/8  trend_up, volatility_ok
      BTCUSDT   2/8  volume, volatility_ok
-     DOGEUSDT  1/8  volume
-     ETHUSDT   2/8  volume, volatility_ok
-     LINKUSDT  1/8  volume
+     DOGEUSDT  0/8  
+     ETHUSDT   1/8  volatility_ok
+     LINKUSDT  0/8  
      NEARUSDT  2/8  trend_up, volume
      PAXGUSDT  3/8  rsi_zone, volatility_ok, pullback
-     PEPEUSDT  5/8  trend_up, ema_aligned, momentum, rsi_zone, volume
+     PEPEUSDT  5/8  trend_up, ema_aligned, rsi_zone, volume, pullback
      SOLUSDT   1/8  volume
      SUIUSDT   0/8  
      TRXUSDT   3/8  rsi_zone, volatility_ok, pullback
-  IN UNIUSDT   4/8  trend_up, rsi_zone, volume, pullback
+  IN UNIUSDT   2/8  trend_up, volume
      XRPUSDT   1/8  volume
-     ZECUSDT   3/8  trend_up, ema_aligned, volume
+     ZECUSDT   2/8  trend_up, volume

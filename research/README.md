@@ -78,6 +78,7 @@ research/
 | 57 | `research57.py` | `research57.out` | `docs/research-round57-2026-11-09.md` | `36d37d5` | Fees 0.075/0.10/0.15% x slippage 0.02/0.05/0.15%: BNB fees +0.2 pts (steady) / +0.4 (growth); each +0.05%/side -0.4/-0.8 pts; costs a small factor |
 | 58 | `research58.py` | `research58.out` | `docs/research-round58-2026-11-10.md` | `311f3d9` | Tighter trail after +3R/+5R (2 or 2.5 x ATR): avg trade +0.65R -> +0.45R, 2022-26 return -1 to -7 pts; fails; keep 3 x ATR for the whole trade |
 | 59 | `research59.py` | `research59.out` | `docs/research-round59-2026-11-11.md` | `527fdb7` | Overshoot past daily-close stops: median loser -0.85R, 5.7% worse than -1.5R, 1.8% worse than -2R; fails the 5% bar narrowly; known cost of close stops (round 19); no change |
+| 60 | `research60.py` | `research60.out` | `docs/research-round60-2026-11-12.md` | `6784213` | Testnet first 20 days -6.0% (growth): 8th percentile of 2022-26 20-day windows (5th pct -7.0%); consistent with the backtest, an unlucky start; execution matches |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

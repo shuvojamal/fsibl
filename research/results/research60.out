@@ -1,0 +1,6 @@
+Live testnet (growth): 2026-10-23 -> 2026-11-12 (20 days): -6.0%
+
+all      18785 windows of 20 days: the live result is at the 6% percentile; 5th pct -6.6%, median +0.0%; chance of -6.0% or worse: 6%
+2022-26  10413 windows of 20 days: the live result is at the 8% percentile; 5th pct -7.0%, median -0.2%; chance of -6.0% or worse: 8%
+
+verdict: CONSISTENT with the backtest

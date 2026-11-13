@@ -1,0 +1,19 @@
+Pause new buys after a losing streak; 8 slots, 6 checks, top 15; medians over six close times
+
+steady 8 x 0.5%
+  rule                    2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26 trades 22-26  wins vs live pass?
+  no pause (live)          +29.5% / 1.57   +15.7% / 1.03    -16.4%          253               
+  3 losses -> 7 days       +28.3% / 1.56   +11.7% / 0.81    -16.8%          246       3 of 12 no
+  3 losses -> 14 days      +25.1% / 1.46   +10.1% / 0.73    -15.7%          236       1 of 12 no
+  5 losses -> 7 days       +28.2% / 1.55   +15.7% / 1.04    -16.2%          250       6 of 12 no
+  5 losses -> 14 days      +25.4% / 1.46   +16.3% / 1.05    -15.0%          246       4 of 12 no
+
+growth 8 x 1%
+  rule                    2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26 trades 22-26  wins vs live pass?
+  no pause (live)          +61.7% / 1.66   +25.9% / 0.97    -28.3%          249               
+  3 losses -> 7 days       +59.0% / 1.64   +22.0% / 0.87    -26.9%          241       3 of 12 no
+  3 losses -> 14 days      +52.1% / 1.54   +19.9% / 0.82    -27.3%          233       2 of 12 no
+  5 losses -> 7 days       +59.7% / 1.64   +26.4% / 0.98    -27.8%          247       6 of 12 no
+  5 losses -> 14 days      +52.7% / 1.54   +24.3% / 0.93    -26.9%          242       4 of 12 no
+
+verdict: FAIL: no pause after losing streaks

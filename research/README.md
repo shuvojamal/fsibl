@@ -79,6 +79,7 @@ research/
 | 58 | `research58.py` | `research58.out` | `docs/research-round58-2026-11-10.md` | `311f3d9` | Tighter trail after +3R/+5R (2 or 2.5 x ATR): avg trade +0.65R -> +0.45R, 2022-26 return -1 to -7 pts; fails; keep 3 x ATR for the whole trade |
 | 59 | `research59.py` | `research59.out` | `docs/research-round59-2026-11-11.md` | `527fdb7` | Overshoot past daily-close stops: median loser -0.85R, 5.7% worse than -1.5R, 1.8% worse than -2R; fails the 5% bar narrowly; known cost of close stops (round 19); no change |
 | 60 | `research60.py` | `research60.out` | `docs/research-round60-2026-11-12.md` | `6784213` | Testnet first 20 days -6.0% (growth): 8th percentile of 2022-26 20-day windows (5th pct -7.0%); consistent with the backtest, an unlucky start; execution matches |
+| 61 | `research61.py` | `research61.out` | `docs/research-round61-2026-11-13.md` | `2177993` | Cool-off after K losses (K=3/5, 7/14 days): after-3 pauses cost 4-6 pts/yr (miss the next trend's start), after-5 neutral; fails; no pause |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

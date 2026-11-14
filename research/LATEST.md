@@ -1,24 +1,23 @@
 # Latest research report
 
-_Updated 2026-11-13 05:50 UTC by Claude (daily scheduled run)_
+_Updated 2026-11-14 05:50 UTC by Claude (daily scheduled run)_
 
-**OKX demo: still waiting for the VPS setup** (9 days without a run). Its
-UNI is likely below its stop now; with no bot running, only the OKX backstop
-order (at 4.84) would sell it.
+**OKX demo: still waiting for the VPS setup** (10 days without a run).
 
-**VPS testnet:** daily run at 00:10 UTC, audit passed. UNI hit its stop:
-−45.86 USDT. No positions now. Realised −304.65 USDT (−6.1%); trades still
-match the backtest.
+**VPS testnet:** daily run at 00:10 UTC, audit passed. No positions, no
+new signals. Realised −304.65 USDT; trades match the backtest.
 
 **Real account:** off.
 
-**Tested today (round 61): pause buying after a losing streak?** No:
-pausing after 3 losses cost 4–6 points a year because the bot sat out the
-start of the next trend, which is often the big winner. Pausing after 5
-losses made no real difference. Losing streaks are something to sit
-through, not a reason to stop.
+**Tested today (round 62): do meme coins (DOGE, SHIB, PEPE) help?** No:
+leaving them out of the coin list added about 1.5–2 points a year in
+2022–26 (steady +15.7% → +17.6%, growth +25.9% → +27.4%) with no cost in
+earlier years, and it held on a second set of 55 coins. Their sharp
+reversals tend to stop the bot out.
 
-**What it means:** no change. An unlucky start, as round 60 showed, not a
-broken bot.
+**Caveat:** only three coins and a few years, so the evidence is thin.
+
+**Recommendation:** add an optional "skip meme coins" switch in the app
+(off by default) and try it on one demo account. Say yes and I'll build it.
 
 **To do (you):** run the VPS setup command for the OKX demo.

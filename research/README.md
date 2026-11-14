@@ -80,6 +80,7 @@ research/
 | 59 | `research59.py` | `research59.out` | `docs/research-round59-2026-11-11.md` | `527fdb7` | Overshoot past daily-close stops: median loser -0.85R, 5.7% worse than -1.5R, 1.8% worse than -2R; fails the 5% bar narrowly; known cost of close stops (round 19); no change |
 | 60 | `research60.py` | `research60.out` | `docs/research-round60-2026-11-12.md` | `6784213` | Testnet first 20 days -6.0% (growth): 8th percentile of 2022-26 20-day windows (5th pct -7.0%); consistent with the backtest, an unlucky start; execution matches |
 | 61 | `research61.py` | `research61.out` | `docs/research-round61-2026-11-13.md` | `2177993` | Cool-off after K losses (K=3/5, 7/14 days): after-3 pauses cost 4-6 pts/yr (miss the next trend's start), after-5 neutral; fails; no pause |
+| 62 | `research62.py` | `research62.out` | `docs/research-round62-2026-11-14.md` | `4fe6180` | Meme coins (DOGE/SHIB/PEPE) out: 2022-26 steady +15.7->+17.6%, growth +25.9->+27.4%, 10/12 cells each, confirmed on the 55-coin pool; passes; recommend an optional switch |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

@@ -1,0 +1,24 @@
+Meme coins in or out; 8 slots, 6 checks, top 15; medians over six close times
+
+steady 8 x 0.5%
+  universe                  2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26  wins vs live pass?
+  live (with meme coins)     +29.5% / 1.57   +15.7% / 1.03    -16.4%               
+  without DOGE/SHIB/PEPE     +29.9% / 1.59   +17.6% / 1.07    -16.2%      10 of 12 yes
+  live run 2018-21: meme coins were 2% of trades and +0% of total profit
+  live run 2022-26: meme coins were 8% of trades and +7% of total profit
+
+growth 8 x 1%
+  universe                  2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26  wins vs live pass?
+  live (with meme coins)     +61.7% / 1.66   +25.9% / 0.97    -28.3%               
+  without DOGE/SHIB/PEPE     +63.2% / 1.70   +27.4% / 1.00    -27.7%      10 of 12 yes
+  live run 2018-21: meme coins were 2% of trades and +0% of total profit
+  live run 2022-26: meme coins were 7% of trades and +9% of total profit
+
+verdict: PASS: exclude meme coins
+
+Part B - round 12's 55-coin pool (00:00 closes, 2018-03 .. 2026-10):
+  steady 8 x 0.5%  live       2018-21  +28.4% / 1.59 / -11.4%   2022-26   +9.5% / 0.69 / -16.4%
+  steady 8 x 0.5%  no meme    2018-21  +28.4% / 1.59 / -11.4%   2022-26  +10.5% / 0.75 / -16.0%
+  growth 8 x 1%    live       2018-21  +59.7% / 1.67 / -19.8%   2022-26  +14.8% / 0.65 / -30.0%
+  growth 8 x 1%    no meme    2018-21  +59.8% / 1.67 / -19.8%   2022-26  +16.8% / 0.72 / -29.3%
+Part B verdict: CONFIRMED on the 55-coin pool

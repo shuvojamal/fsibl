@@ -21,7 +21,7 @@ execution quality (12 fills; the backtest assumes 0.05% slippage + 0.10% fee per
 
 today's score (1d candles, need 6 of 8):
      ADAUSDT   1/8  volume
-     AVAXUSDT  3/8  rsi_zone, volume, pullback
+     AVAXUSDT  1/8  volume
      BNBUSDT   2/8  volume, volatility_ok
      BTCUSDT   2/8  volume, volatility_ok
      DOGEUSDT  1/8  volume
@@ -29,10 +29,10 @@ today's score (1d candles, need 6 of 8):
      LINKUSDT  1/8  volume
      NEARUSDT  2/8  trend_up, volume
      PAXGUSDT  2/8  volume, volatility_ok
-     PEPEUSDT  4/8  trend_up, ema_aligned, rsi_zone, pullback
+     PEPEUSDT  3/8  trend_up, ema_aligned, volume
      SOLUSDT   1/8  volume
      SUIUSDT   1/8  volume
      TRXUSDT   1/8  volatility_ok
-     UNIUSDT   2/8  trend_up, volume
+     UNIUSDT   1/8  volume
      XRPUSDT   1/8  volume
      ZECUSDT   2/8  trend_up, volume

@@ -83,6 +83,7 @@ research/
 | 62 | `research62.py` | `research62.out` | `docs/research-round62-2026-11-14.md` | `4fe6180` | Meme coins (DOGE/SHIB/PEPE) out: 2022-26 steady +15.7->+17.6%, growth +25.9->+27.4%, 10/12 cells each, confirmed on the 55-coin pool; passes; recommend an optional switch |
 | 63 | `research63.py` | `research63.out` | `docs/research-round63-2026-11-15.md` | `1b16a39` | Recent backtest months (to 2026-10-21): last 3 months top ~15% (steady +17%), 6 months 69-71st pct; normal; live started as a strong run ended |
 | 64 | `research64.py` | `research64.out` | `docs/research-round64-2026-11-16.md` | `fcf54c6` | Drop the 2-3 most volatile coins by rule: 2022-26 3-8 pts worse (better 2018-21); fails; round 62's meme gain is coin-specific, likely luck; lower confidence in it |
+| 65 | `research65.py` | `research65.out` | `docs/research-round65-2026-11-17.md` | `496c9cc` | Backtest over the live period (fresh data to 2026-11-16, cached `daily_live_period.pkl`): growth -5.9% vs testnet -6.1%, same trades; consistent; the bot does what the rules say |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

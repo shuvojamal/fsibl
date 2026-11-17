@@ -1,0 +1,21 @@
+30 coins; live period 2026-10-23 .. 2026-11-16 (last closed daily candle)
+
+steady 8 x 0.5%  backtest over the live period: -3.0%  (7 closed trades, 1 winners)
+    10-30 BNB   -1.05R
+    10-31 TRX   -0.79R
+    11-05 BTC   +0.03R
+    11-06 ETH   -1.05R
+    11-11 ZEC   -1.09R
+    11-13 UNI   -1.00R
+    11-15 PEPE  -0.98R
+growth 8 x 1%    backtest over the live period: -5.9%  (7 closed trades, 1 winners)
+    10-30 BNB   -1.05R
+    10-31 TRX   -0.79R
+    11-05 BTC   +0.03R
+    11-06 ETH   -1.05R
+    11-11 ZEC   -1.09R
+    11-13 UNI   -1.00R
+    11-15 PEPE  -0.98R
+
+live testnet (growth) over the same period: -6.1% (equity.csv, last row 2026-11-17)
+gap live - backtest: -0.2% -> CONSISTENT with the rules

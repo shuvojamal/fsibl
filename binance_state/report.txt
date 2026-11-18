@@ -24,15 +24,15 @@ today's score (1d candles, need 6 of 8):
      AVAXUSDT  0/8  
      BNBUSDT   1/8  volatility_ok
      BTCUSDT   2/8  volume, volatility_ok
-     DOGEUSDT  1/8  volume
+     DOGEUSDT  0/8  
      ETHUSDT   1/8  volume
      LINKUSDT  0/8  
-     NEARUSDT  1/8  trend_up
+     NEARUSDT  4/8  trend_up, rsi_zone, volume, pullback
      PAXGUSDT  1/8  volatility_ok
      PEPEUSDT  2/8  trend_up, ema_aligned
      SOLUSDT   1/8  volume
      SUIUSDT   0/8  
      TRXUSDT   1/8  volatility_ok
      UNIUSDT   0/8  
-     XRPUSDT   1/8  volume
-     ZECUSDT   1/8  trend_up
+     XRPUSDT   0/8  
+     ZECUSDT   3/8  trend_up, volume, pullback

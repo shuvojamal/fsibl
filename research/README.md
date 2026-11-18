@@ -84,6 +84,7 @@ research/
 | 63 | `research63.py` | `research63.out` | `docs/research-round63-2026-11-15.md` | `1b16a39` | Recent backtest months (to 2026-10-21): last 3 months top ~15% (steady +17%), 6 months 69-71st pct; normal; live started as a strong run ended |
 | 64 | `research64.py` | `research64.out` | `docs/research-round64-2026-11-16.md` | `fcf54c6` | Drop the 2-3 most volatile coins by rule: 2022-26 3-8 pts worse (better 2018-21); fails; round 62's meme gain is coin-specific, likely luck; lower confidence in it |
 | 65 | `research65.py` | `research65.out` | `docs/research-round65-2026-11-17.md` | `496c9cc` | Backtest over the live period (fresh data to 2026-11-16, cached `daily_live_period.pkl`): growth -5.9% vs testnet -6.1%, same trades; consistent; the bot does what the rules say |
+| 66 | `research66.py` | `research66.out` | `docs/research-round66-2026-11-18.md` | `503bc0e` | Flat spells: no positions on 35% of days, median flat spell 13 days, 1 in 10 lasts 49+; a 5-day flat spell is normal |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

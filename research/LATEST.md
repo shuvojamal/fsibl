@@ -1,22 +1,21 @@
 # Latest research report
 
-_Updated 2026-11-18 05:50 UTC by Claude (daily scheduled run)_
+_Updated 2026-11-19 05:50 UTC by Claude (daily scheduled run)_
 
-**OKX demo: still waiting for the VPS setup** (14 days without a run).
+**OKX demo: still waiting for the VPS setup** (15 days without a run).
 
 **VPS testnet:** daily run at 00:10 UTC, audit passed. No positions and no
-buy signals for 5 days. Realised −304.65 USDT.
+buy signals for 6 days (normal, round 66). Realised −304.65 USDT.
 
 **Real account:** off.
 
-**Tested today (round 66): how long does the bot normally sit with no
-positions?** A lot: in the backtest it holds nothing on 35% of days. A
-typical "nothing to buy" spell lasts about 2 weeks, 1 in 10 lasts over 7
-weeks, and the longest was about 6 months (a bear market).
+**Tested today (round 67): is there a better moment to start real money?**
+No. Starting after the strategy had a losing stretch helped in 2018–21 but
+did worse in 2022–25; starting after a winning stretch was about average.
+There's no reliable pattern.
 
-**What it means:** days or weeks with no buys are normal, not a fault. The
-bot only buys when 6 of 8 checks agree; staying in cash is also what
-protects it in falling markets. On the real account, auto savings would
-earn interest on that idle cash.
+**What it means:** don't try to time the start. Start real money when the
+demo period is done and the safety steps are in place (Binance backstop
+orders, a no-orders test), whatever the recent results look like.
 
 **To do (you):** run the VPS setup command for the OKX demo.

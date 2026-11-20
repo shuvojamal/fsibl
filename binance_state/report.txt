@@ -27,12 +27,12 @@ today's score (1d candles, need 6 of 8):
      DOGEUSDT  0/8  
      ETHUSDT   1/8  volume
      LINKUSDT  0/8  
-     NEARUSDT  2/8  trend_up, pullback
+     NEARUSDT  2/8  trend_up, volume
      PAXGUSDT  2/8  volume, volatility_ok
-     PEPEUSDT  1/8  ema_aligned
+     PEPEUSDT  0/8  
      SOLUSDT   0/8  
      SUIUSDT   0/8  
-     TRXUSDT   2/8  volatility_ok, pullback
+     TRXUSDT   3/8  rsi_zone, volatility_ok, pullback
      UNIUSDT   0/8  
-     XRPUSDT   0/8  
-     ZECUSDT   1/8  trend_up
+     XRPUSDT   1/8  volume
+     ZECUSDT   2/8  trend_up, volume

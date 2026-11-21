@@ -87,6 +87,7 @@ research/
 | 66 | `research66.py` | `research66.out` | `docs/research-round66-2026-11-18.md` | `503bc0e` | Flat spells: no positions on 35% of days, median flat spell 13 days, 1 in 10 lasts 49+; a 5-day flat spell is normal |
 | 67 | `research67.py` | `research67.out` | `docs/research-round67-2026-11-19.md` | `d684118` | Start timing: 1-year return by drawdown at start; after-drawdown starts better in 2018-21, worse in 2022-25; no useful pattern; start when ready |
 | 68 | `research68.py` | `research68.out` | `docs/research-round68-2026-11-20.md` | `763b5be` | No entries from weekend closes: -5 to -8 pts/yr in 2022-26 (and 2018-21), 1-3 of 12 cells; fails; weekend signals are fine |
+| 69 | `research69.py` | `research69.out` | `docs/research-round69-2026-11-21.md` | `71b092f` | Coin list top 2 / top 5 vs top 15: 2022-26 steady +2.1% / +9.3% vs +15.7%; both fail; the strategy needs a wide list |
 | R3 | (reading only) | — | `docs/review-batch-2026-10-23.md` | `3194d01` | martex-quant (honest crypto ledger), Forex HEX (ad), Krexibd/quant-trading (MALWARE), ai4trade skill |
 
 Earlier experiments:

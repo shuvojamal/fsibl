@@ -1,0 +1,15 @@
+Coin list size; 8 slots, 6 checks; medians over six close times
+
+steady 8 x 0.5%
+  list            2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26 trades 22-26  Sharpe >= live pass?
+  top 15 (live)    +29.5% / 1.57   +15.7% / 1.03    -16.4%          253                 
+  top 5            +13.3% / 1.32    +9.3% / 0.96    -14.6%          135         3 of 12 no
+  top 2             +7.1% / 1.31    +2.1% / 0.49     -6.0%           64         0 of 12 no
+
+growth 8 x 1%
+  list            2018-21 ret / Sh  2022-26 ret / Sh  DD 22-26 trades 22-26  Sharpe >= live pass?
+  top 15 (live)    +61.7% / 1.66   +25.9% / 0.97    -28.3%          249                 
+  top 5            +26.5% / 1.37   +17.1% / 0.96    -26.3%          135         4 of 12 no
+  top 2            +14.2% / 1.34    +4.0% / 0.50    -11.6%           64         0 of 12 no
+
+verdict: top 5: fail; top 2: fail
